@@ -59,12 +59,6 @@ export const CreateWallet = (): JSX.Element => {
       return;
     }
 
-    localStorage.setItem("uuid", uuid);
-    localStorage.setItem("now", now.toString());
-    localStorage.setItem("name", name);
-    localStorage.setItem("addresses", JSON.stringify([data.address]));
-    localStorage.setItem("address", data.address);
-
     navigate(RoutePath.Mnemonic, { state: { mnemonic: data.mnemonic } });
   };
 

@@ -13,14 +13,9 @@ export const App = () => {
   const restoreWallet = () => navigate(RoutePath.RestoreWallet);
 
   useEffect(() => {
-    console.log("bitcoin", bitcoin.networks.testnet)
-
-    /*const uuid = localStorage.getItem("uuid");
-    const now = localStorage.getItem("now");
-
-    if (uuid && now) {
-      navigate(RoutePath.Password);
-    }*/
+    const wallet = localStorage.getItem("wallet");
+    if (!wallet) return;
+    navigate(RoutePath.Balances);
   }, [navigate]);
 
   return (

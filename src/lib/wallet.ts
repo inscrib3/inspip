@@ -29,7 +29,7 @@ interface UtxoDb {
 
 console.log('bitcoin', bitcoin.networks);
 
-const network = bitcoin.networks.testnet;
+const network = bitcoin.networks.bitcoin;
 const path = (network === bitcoin.networks.bitcoin) ? `m/86'/0'/0'` : `m/49'/1'/0'/0`;
 
 export function generateWallet() {

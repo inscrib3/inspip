@@ -45,31 +45,17 @@ export const RestoreWallet = (): JSX.Element => {
       return;
     }
 
-    const { uuid, now, name } = await generateName(password);
-
-    localStorage.setItem("uuid", uuid);
-    localStorage.setItem("now", now.toString());
-    localStorage.setItem("name", name);
-
-    let data: {
-      address: string;
-      mnemonic: string;
-    };
+    const { name } = await generateName(password);
 
     try {
-      data = await restoreWallet.dispatch(name, seedPhrase);
+      await restoreWallet.dispatch(name, seedPhrase);
     } catch (e) {
-      localStorage.removeItem("uuid");
-      localStorage.removeItem("now");
-      localStorage.removeItem("name");
       setErrors({
         error: (e as Error).message,
       });
       return;
     }
 
-    localStorage.setItem("addresses", JSON.stringify([data.address]));
-    localStorage.setItem("address", data.address);
     navigate(RoutePath.Balances);
   };
 
