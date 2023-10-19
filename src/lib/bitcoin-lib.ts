@@ -1,4 +1,6 @@
-import * as _bitcoin from './bitcoinjs-lib-standalone';
+const _bitcoin = (window as any).bitcoin;
+
+console.log('bitcoin-lib.ts: bitcoin-lib loaded', _bitcoin);
 
 interface Bitcoin {
     address: any;

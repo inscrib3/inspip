@@ -4,6 +4,7 @@ import { RoutePath } from "../router";
 import { useEffect } from "react";
 import { Layout } from "../components";
 import { generateWallet } from "../lib/wallet";
+import { bitcoin } from "../lib/bitcoin-lib";
 
 export const App = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ export const App = () => {
   const restoreWallet = () => navigate(RoutePath.RestoreWallet);
 
   useEffect(() => {
-    console.log("bitcoin", window.bitcoin)
+    console.log("bitcoin", bitcoin.networks.testnet)
 
     const uuid = localStorage.getItem("uuid");
     const now = localStorage.getItem("now");
