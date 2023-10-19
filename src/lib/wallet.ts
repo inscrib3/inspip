@@ -24,7 +24,7 @@ interface UtxoDb {
     key: string;
     tick?: string;
     id?: number;
-    amt?: BigInt;
+    amt?: bigint;
 }
 
 console.log('bitcoin', bitcoin.networks);
@@ -66,10 +66,10 @@ export const newSendTokens = async (account: any, utxos: Utxo[], to: string, _ti
     const amount = BigInt(resolveNumberString(_amount, deployment.dec));
     const rate = BigInt(_rate);
 
-    let vin = [];
+    const vin = [];
     let found = 0n;
     let sats_found = 0n;
-    let sats_amount = 1092n;
+    const sats_amount = 1092n;
 
     for (let i = 0; i < utxos.length; i++) {
         if (found >= amount) {
@@ -136,7 +136,7 @@ export const newSendTokens = async (account: any, utxos: Utxo[], to: string, _ti
         throw new Error('Insufficient token funds');
     }
 
-    let vout: {
+    const vout: {
         value?: ValueData | undefined;
         scriptPubKey?: ScriptData | undefined;
     }[] | undefined = [];
@@ -147,7 +147,7 @@ export const newSendTokens = async (account: any, utxos: Utxo[], to: string, _ti
     });
 
     const ec = new TextEncoder();
-    let conv_amount = cleanFloat(formatNumberString(amount.toString(), deployment.dec));
+    const conv_amount = cleanFloat(formatNumberString(amount.toString(), deployment.dec));
     const token_change = found - amount;
 
     if (token_change <= 0n) {
@@ -157,7 +157,7 @@ export const newSendTokens = async (account: any, utxos: Utxo[], to: string, _ti
             ]
         })
     } else {
-        let conv_change = cleanFloat(formatNumberString(token_change.toString(), deployment.dec));
+        const conv_change = cleanFloat(formatNumberString(token_change.toString(), deployment.dec));
 
         vout.push({
             value: 546n,
@@ -194,7 +194,7 @@ export const newSendTokens = async (account: any, utxos: Utxo[], to: string, _ti
 };
 
 export function sendSats(account: any, utxos: Utxo[], rate: bigint, fromAddress: string, toAddress: string, amount: bigint): string {
-    let vin = [];
+    const vin = [];
     let found = 0n;
 
     if(utxos.length === 0) throw new Error("No UTXOs available")
@@ -220,7 +220,7 @@ export function sendSats(account: any, utxos: Utxo[], rate: bigint, fromAddress:
 
     if(found < amount * rate * 2n) throw new Error("Insufficient funds")
 
-    let vout = [];
+    const vout = [];
     vout.push({
         value: amount,
         scriptPubKey: addressToScriptPubKey(toAddress, network)
@@ -252,7 +252,7 @@ export function sendTokens(privKey: string, fromAddress: string, toAddress: stri
 
     const { vin, found } = selectUtxos(fromAddress, rate, utxos, utxos_db, amount, ticker, id)
 
-    let vout = [];
+    const vout = [];
     vout.push({
         value: 546n,
         scriptPubKey: addressToScriptPubKey(toAddress, network)
@@ -270,7 +270,7 @@ export function sendTokens(privKey: string, fromAddress: string, toAddress: stri
             ]
         });
     } else {
-        let conv_change = cleanFloat(formatNumberString(token_change.toString(), token_decimals));
+        const conv_change = cleanFloat(formatNumberString(token_change.toString(), token_decimals));
 
         vout.push({
             value: 546n,
@@ -358,8 +358,8 @@ export function selectUtxos(fromAddress: string, rate: bigint, utxos: Utxo[], ut
         }
 
         const utxoKey = 'utxo_' + utxos[i].txid + '_' + utxos[i].vout;
-        let _utxo = utxos_db.find(utxo => utxo.key === utxoKey);
-        let token_utxo_exists = _utxo === undefined ? false : true;
+        const _utxo = utxos_db.find(utxo => utxo.key === utxoKey);
+        const token_utxo_exists = _utxo === undefined ? false : true;
         if (
             !token_utxo_exists &&
             utxos[i].status.confirmed

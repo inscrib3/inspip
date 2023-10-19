@@ -45,29 +45,26 @@ export const CreateWallet = (): JSX.Element => {
 
     const { uuid, now, name } = await generateName(password);
 
-    localStorage.setItem("uuid", uuid);
-    localStorage.setItem("now", now.toString());
-    localStorage.setItem("name", name);
-
     let data: {
       address: string;
       mnemonic: string;
     };
 
     try {
-      data = await createWallet.dispatch(name); 
+      data = await createWallet.dispatch(name);
     } catch (e) {
-      localStorage.removeItem("uuid");
-      localStorage.removeItem("now");
-      localStorage.removeItem("name");
       setErrors({
         error: (e as Error).message,
       });
       return;
     }
 
+    localStorage.setItem("uuid", uuid);
+    localStorage.setItem("now", now.toString());
+    localStorage.setItem("name", name);
     localStorage.setItem("addresses", JSON.stringify([data.address]));
     localStorage.setItem("address", data.address);
+
     navigate(RoutePath.Mnemonic, { state: { mnemonic: data.mnemonic } });
   };
 

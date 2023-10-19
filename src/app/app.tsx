@@ -15,12 +15,12 @@ export const App = () => {
   useEffect(() => {
     console.log("bitcoin", bitcoin.networks.testnet)
 
-    const uuid = localStorage.getItem("uuid");
+    /*const uuid = localStorage.getItem("uuid");
     const now = localStorage.getItem("now");
 
     if (uuid && now) {
       navigate(RoutePath.Password);
-    }
+    }*/
   }, [navigate]);
 
   return (
