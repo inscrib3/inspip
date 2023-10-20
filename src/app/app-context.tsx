@@ -1,6 +1,9 @@
 import { createContext, useState } from 'react';
+import { bitcoin } from "../lib/bitcoin-lib";
 
 export const AppContext = createContext<{
+  network: any,
+  setNetwork: (network: any) => void,
   name: string,
   setName: (name: string) => void,
   address: string,
@@ -10,6 +13,8 @@ export const AppContext = createContext<{
   feerate: number,
   setFeerate: (feerate: number) => void,
 }>({
+  network: bitcoin.networks.bitcoin,
+  setNetwork: () => undefined,
   name: '',
   setName: () => undefined,
   address: '',
@@ -25,6 +30,7 @@ export interface AppProviderProps {
 }
 
 export const AppProvider = (props: AppProviderProps) => {
+  const [network, setNetwork] = useState(bitcoin.networks.bitcoin);
   const [name, setName] = useState('');
   const [addresses, _setAddresses] = useState<string[]>([]);
   const [address, _setAddress] = useState('');
@@ -43,6 +49,8 @@ export const AppProvider = (props: AppProviderProps) => {
   return (
     <AppContext.Provider
       value={{
+        network,
+        setNetwork,
         name,
         setName,
         address,

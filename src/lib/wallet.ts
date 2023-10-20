@@ -1,11 +1,11 @@
 import { bitcoin } from './bitcoin-lib';
 import BIP32Factory from 'bip32';
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
-import { Buffer } from 'buffer';
 import * as bip39 from "bip39";
 import { ScriptData, Signer, Tap, Tx, ValueData, Word } from '@cmdcode/tapscript';
 import { addressToScriptPubKey, cleanFloat, formatNumberString, resolveNumberString, textToHex, toBytes, toInt26, toXOnly } from './utils';
 import { fetchUtxo, getDeployment } from './node';
+import { decrypt, encrypt } from './crypto';
 
 interface Utxo {
     txid: string;
@@ -20,40 +20,47 @@ interface Utxo {
     status: any;
 }
 
-interface UtxoDb {
-    key: string;
-    tick?: string;
-    id?: number;
-    amt?: bigint;
+export function saveWallet(mnemonic: string, addressesIndex: number, network: any, password: string) {
+    const wallet = {
+        mnemonic,
+        addressesIndex,
+        network
+    }
+    return encrypt(JSON.stringify(wallet), password);
 }
 
-console.log('bitcoin', bitcoin.networks);
+export function loadWallet(text: string, password: string) {
+    return JSON.parse(decrypt(text, password));
+}
 
-const network = bitcoin.networks.bitcoin;
-const path = (network === bitcoin.networks.bitcoin) ? `m/86'/0'/0'` : `m/49'/1'/0'/0`;
-
-export function generateWallet() {
+export function generateWallet(network: any) {
     bip39.setDefaultWordlist('english');
     const mnemonic = bip39.generateMnemonic();
 
-    return importWallet(mnemonic);
+    return importWallet(mnemonic, network);
 }
 
-export function importWallet(mnemonic: string) {
+export function importWallet(mnemonic: string, network: any) {
     bitcoin.initEccLib(ecc);
     const bip32 = BIP32Factory(ecc);
+    const seed = bip39.mnemonicToSeedSync(mnemonic);
+    const rootKey = bip32.fromSeed(seed, network);
 
-    const seed = bip39.mnemonicToSeedSync(mnemonic)
-    const rootKey = bip32.fromSeed(seed, network)
+    const data = generateNewAddress(rootKey, network);
   
+    return { ...data, mnemonic };
+}
+
+export function generateNewAddress(rootKey: any, network: any, index: number = 0) {
+    const path = (network === bitcoin.networks.bitcoin) ? `m/86'/0'/${index}'` : `m/49'/1'/0'/${index}`;
     const account: any = rootKey.derivePath(path)
     const internalPubkey: any = toXOnly(account.publicKey)
     const { address, output } = bitcoin.payments.p2tr({ internalPubkey: internalPubkey, network })
   
-    return { network, rootKey, mnemonic, account, internalPubkey, address, output }
+    return { rootKey, account, internalPubkey, address, output }
 }
 
-export const newSendTokens = async (account: any, utxos: Utxo[], to: string, _ticker: string, _id: string, _amount: string, _rate: string) => {
+export const sendTokens = async (account: any, utxos: Utxo[], to: string, _ticker: string, _id: string, _amount: string, _rate: string, network: any) => {
     const ticker = _ticker.trim().toLowerCase();
     const id = parseInt(_id.trim());
 
@@ -95,7 +102,7 @@ export const newSendTokens = async (account: any, utxos: Utxo[], to: string, _ti
                     found += BigInt(_utxo.amt);
                 }
             } catch (e) {
-                console.log(e);
+                console.error(e);
             }
         }
     }
@@ -112,7 +119,7 @@ export const newSendTokens = async (account: any, utxos: Utxo[], to: string, _ti
             await fetchUtxo(utxo);
             token_utxo_exists = true;
         } catch(e){
-            console.log(e);
+            console.error(e);
         }
 
         if (
@@ -124,7 +131,7 @@ export const newSendTokens = async (account: any, utxos: Utxo[], to: string, _ti
                 vout: utxos[i].vout,
                 prevout: {
                     value: BigInt(utxos[i].value),
-                    scriptPubKey: await addressToScriptPubKey(account.address, network)
+                    scriptPubKey: addressToScriptPubKey(account.address, network)
                 }
             });
 
@@ -173,7 +180,7 @@ export const newSendTokens = async (account: any, utxos: Utxo[], to: string, _ti
     }
 
     vout.push({
-        value: found - amount - 143n * rate, // @todo check 143n default
+        value: sats_found - 143n * rate, // @todo check 143n default
         scriptPubKey: addressToScriptPubKey(account.address, network)
     })
 
@@ -193,7 +200,7 @@ export const newSendTokens = async (account: any, utxos: Utxo[], to: string, _ti
     return Tx.encode(txdata).hex;
 };
 
-export function sendSats(account: any, utxos: Utxo[], rate: bigint, fromAddress: string, toAddress: string, amount: bigint): string {
+export function sendSats(account: any, utxos: Utxo[], toAddress: string, amount: bigint, rate: bigint, network: any): string {
     const vin = [];
     let found = 0n;
 
@@ -202,7 +209,6 @@ export function sendSats(account: any, utxos: Utxo[], rate: bigint, fromAddress:
     for(let i = 0; i < utxos.length; i++)
     {
         if(found >= amount * rate * 2n) break;
-        console.log(utxos[i]);
 
         if(utxos[i].status.confirmed) {
             vin.push({
@@ -210,7 +216,7 @@ export function sendSats(account: any, utxos: Utxo[], rate: bigint, fromAddress:
                 vout: utxos[i].vout,
                 prevout: {
                     value: BigInt(utxos[i].value),
-                    scriptPubKey: addressToScriptPubKey(fromAddress, network)
+                    scriptPubKey: addressToScriptPubKey(account.address, network)
                 }
             });
             
@@ -227,7 +233,7 @@ export function sendSats(account: any, utxos: Utxo[], rate: bigint, fromAddress:
     });
     vout.push({
         value: found - amount - 143n * rate, // @todo check 143n default
-        scriptPubKey: addressToScriptPubKey(fromAddress, network)
+        scriptPubKey: addressToScriptPubKey(account.address, network)
     })
 
     const txdata = Tx.create({
@@ -235,7 +241,7 @@ export function sendSats(account: any, utxos: Utxo[], rate: bigint, fromAddress:
         vout: vout
     });
 
-    const [tseckey] = Tap.getSecKey(account.privateKey)
+    const [tseckey] = Tap.getSecKey(account.account.privateKey)
 
     for (let i = 0; i < vin.length; i++) {
         const sig = Signer.taproot.sign(tseckey, txdata, i)
@@ -246,77 +252,7 @@ export function sendSats(account: any, utxos: Utxo[], rate: bigint, fromAddress:
     return Tx.encode(txdata).hex;
 }
 
-export function sendTokens(privKey: string, fromAddress: string, toAddress: string, rate: bigint, utxos: Utxo[], utxos_db: UtxoDb[], amount: bigint, ticker: string, id: number, token_decimals: number): string {
-    const keyPair = bitcoin.ECPair.fromWIF(privKey, network);
-    const psbt = new bitcoin.Psbt({ network });
-
-    const { vin, found } = selectUtxos(fromAddress, rate, utxos, utxos_db, amount, ticker, id)
-
-    const vout = [];
-    vout.push({
-        value: 546n,
-        scriptPubKey: addressToScriptPubKey(toAddress, network)
-    });
-
-    const ec = new TextEncoder();
-    // amount *= 10n ** BigInt(token_decimals);
-    const conv_amount = cleanFloat(formatNumberString(amount.toString(), token_decimals));
-    const token_change = found - amount;
-    if(token_change <= 0n)
-    {
-        vout.push({
-            scriptPubKey: [ 'OP_RETURN', ec.encode('P'), ec.encode('T'),
-                toBytes(toInt26(ticker)), toBytes(BigInt(id)), toBytes(0n), textToHex(conv_amount)
-            ]
-        });
-    } else {
-        const conv_change = cleanFloat(formatNumberString(token_change.toString(), token_decimals));
-
-        vout.push({
-            value: 546n,
-            scriptPubKey: addressToScriptPubKey(fromAddress, network)
-        });
-
-        vout.push({
-            scriptPubKey: [ 'OP_RETURN', ec.encode('P'), ec.encode('T'),
-                toBytes(toInt26(ticker)), toBytes(BigInt(id)), toBytes(0n), textToHex(conv_amount),
-                toBytes(toInt26(ticker)), toBytes(BigInt(id)), toBytes(1n), textToHex(conv_change)
-            ]
-        });
-    }
-
-    // Add inputs to the PSBT
-    for (const input of vin) {
-        psbt.addInput({
-            hash: input.txid,
-            index: input.vout,
-            nonWitnessUtxo: Buffer.from(input.prevout.value.toString(16), 'hex')
-        });
-    }
-
-    // Add outputs to the PSBT
-    for (const output of vout) {
-        if(output?.value !== undefined)
-            psbt.addOutput({
-                value: parseInt(output.value.toString()),
-                script: bitcoin.script.fromASM(output.scriptPubKey.join(' '))
-            });
-        else
-            throw new Error('Output value is undefined');
-    }
-
-    // Sign all inputs in the PSBT
-    for (let i = 0; i < vin.length; i++) {
-        psbt.signInput(i, keyPair);
-    }
-
-    psbt.validateSignaturesOfAllInputs();
-    psbt.finalizeAllInputs();
-
-    return psbt.extractTransaction().toHex();
-}
-
-export function selectUtxos(fromAddress: string, rate: bigint, utxos: Utxo[], utxos_db: any[], amount: bigint, ticker: string, id: number) {
+export function selectUtxos(fromAddress: string, rate: bigint, utxos: Utxo[], utxos_db: any[], amount: bigint, ticker: string, id: number, network: any) {
     const vin = [];
     let found = 0n;
     let sats_found = 0n;

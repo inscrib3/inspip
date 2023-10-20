@@ -1,5 +1,3 @@
-const QUICKNODE_URL = "";
-
 export const getDeployment = async (ticker: string, id: number) => {
     return {
         ticker,

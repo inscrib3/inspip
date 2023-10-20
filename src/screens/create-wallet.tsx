@@ -5,7 +5,6 @@ import { Layout } from "../components";
 import { useCreateWallet } from "../hooks";
 import { useNavigate } from "react-router-dom";
 import { RoutePath } from "../router";
-import { generateName } from "../utils/generate-name";
 
 export const CreateWallet = (): JSX.Element => {
   const createWallet = useCreateWallet();
@@ -43,15 +42,12 @@ export const CreateWallet = (): JSX.Element => {
       return;
     }
 
-    const { uuid, now, name } = await generateName(password);
+    //await generateName(password);
 
-    let data: {
-      address: string;
-      mnemonic: string;
-    };
+    let data: any;
 
     try {
-      data = await createWallet.dispatch(name);
+      data = await createWallet.dispatch();
     } catch (e) {
       setErrors({
         error: (e as Error).message,

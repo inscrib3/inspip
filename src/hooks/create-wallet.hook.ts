@@ -1,9 +1,10 @@
 import { useState, useCallback } from "react";
 import { generateWallet } from "../lib/wallet";
 import { BIP32Interface } from "bip32";
+import { useApp } from "../app";
 
 export type CreateWallet = {
-  dispatch: (name: string) => Promise<{ network: any; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; } | undefined>
+  dispatch: () => Promise<any>; //{ network: any; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; } | undefined>
   loading: boolean;
   data?: { network: any; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; } | undefined;
 };
@@ -11,14 +12,15 @@ export type CreateWallet = {
 export const useCreateWallet = (): CreateWallet => {
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<{ network: any; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; } | undefined>();
+  const app = useApp();
 
   const dispatch = useCallback(
-    async (name: string) => {
+    async () => {
       if (loading) return;
       setLoading(true);
-      const wallet = generateWallet();
+      const wallet = generateWallet(app.network);
       localStorage.setItem('wallet', JSON.stringify(wallet));
-      setData(wallet);
+      setData({...wallet, network: app.network});
       setLoading(false);
       return wallet;
     },
