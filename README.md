@@ -17,6 +17,10 @@ Make sure to use Chrome, Brave or Chromium browser. Firefox and Safari are not s
 ## Support
 For support or any inquiries, please visit our [Discord](https://discord.gg/gpFGS4UJ5f).
 
+## How to Contribute
+Any PR is welcome. You can also tip us some spare sats if you like the project.
+Your donations will contribute to the ongoing development, maintenance, and customer support. Find more [here](SUPPORT.md).
+
 ## PIPE Protocol Overview
 PIPE is a Bitcoin-native token protocol with three main functions: **Deploy**, **Mint**, and **Transfer** (DMT):
 
