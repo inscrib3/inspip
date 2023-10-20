@@ -19,7 +19,7 @@ export const App = () => {
       console.log("loading wallet")
       const wallet = loadWallet("password"); // @todo use password
       app.setNetwork(wallet.network);
-      app.setCurrentAddress(wallet.address)
+      app.setCurrentAddress(wallet.currentAddress)
       app.setAddresses(wallet.addresses);
     } catch(e) {
       return;

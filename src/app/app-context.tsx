@@ -4,6 +4,8 @@ import { editWallet } from '../lib/wallet';
 
 export const AppContext = createContext<{
   network: any,
+  account: any,
+  setAccount: (account: any) => void,
   setNetwork: (network: any) => void,
   currentAddress: string,
   setCurrentAddress: (address: string) => void,
@@ -14,6 +16,8 @@ export const AppContext = createContext<{
   transactions: any[],
   setTransactions: (transactions: any) => void,
 }>({
+  account: {},
+  setAccount: () => undefined,
   network: bitcoin.networks.bitcoin,
   setNetwork: () => undefined,
   currentAddress: '',
@@ -31,6 +35,7 @@ export interface AppProviderProps {
 }
 
 export const AppProvider = (props: AppProviderProps) => {
+  const [account, setAccount] = useState<any>({});
   const [network, setNetwork] = useState(bitcoin.networks.bitcoin);
   const [addresses, _setAddresses] = useState<number[]>([]);
   const [currentAddress, _setCurrentAddress] = useState('');
@@ -50,6 +55,8 @@ export const AppProvider = (props: AppProviderProps) => {
   return (
     <AppContext.Provider
       value={{
+        account,
+        setAccount,
         network,
         setNetwork,
         currentAddress,
