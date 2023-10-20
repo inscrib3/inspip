@@ -39,8 +39,11 @@ jobs:
       with:
         artifacts: dist.zip
         tag: "test"
+        allowUpdates: true
+        artifactContentType: application/zip
 
     - name: Upload Release Asset
       uses: softprops/action-gh-release@v1
       with:
         files: dist.zip
+        tag_name: "test"
