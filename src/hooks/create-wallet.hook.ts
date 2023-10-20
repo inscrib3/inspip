@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { generateWallet } from "../lib/wallet";
+import { generateNewAddress, generateWallet, saveWallet } from "../lib/wallet";
 import { BIP32Interface } from "bip32";
 import { useApp } from "../app";
 
@@ -17,11 +17,18 @@ export const useCreateWallet = (): CreateWallet => {
   const dispatch = useCallback(
     async () => {
       if (loading) return;
+
       setLoading(true);
+
       const wallet = generateWallet(app.network);
-      localStorage.setItem('wallet', JSON.stringify(wallet));
+      const address = generateNewAddress(wallet.rootKey, app.network, 0);
+      saveWallet(wallet.mnemonic, app.network, address.address, [0], "password") // @todo grab password
       setData({...wallet, network: app.network});
+      app.setAddresses([0]);
+      app.setCurrentAddress(address.address);
+
       setLoading(false);
+
       return wallet;
     },
     [loading]

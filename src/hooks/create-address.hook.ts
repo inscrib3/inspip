@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useApp } from "../app";
+import { generateNewAddress } from "../lib/wallet";
 
 export type CreateAddress = {
   dispatch: () => Promise<{ address: string }>;
@@ -19,6 +20,7 @@ export const useCreateAddress = (): CreateAddress => {
       if (loading || !app.name) return;
       setError(undefined);
       setLoading(true);
+      //generateNewAddress()
       const res = await fetch(
         `${import.meta.env.VITE_APP_API}/wallet/create-address`,
         {

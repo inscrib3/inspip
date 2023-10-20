@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { Text, Image, Box, TextInput, Button, Spinner } from "grommet";
-
 import { Layout } from "../components";
 import { useRestoreWallet } from "../hooks";
 import { useNavigate } from "react-router-dom";
 import { RoutePath } from "../router";
-import { generateName } from "../utils/generate-name";
 
 export const RestoreWallet = (): JSX.Element => {
   const restoreWallet = useRestoreWallet();
@@ -45,10 +43,8 @@ export const RestoreWallet = (): JSX.Element => {
       return;
     }
 
-    const { name } = await generateName(password);
-
     try {
-      await restoreWallet.dispatch(name, seedPhrase);
+      await restoreWallet.dispatch(seedPhrase);
     } catch (e) {
       setErrors({
         error: (e as Error).message,

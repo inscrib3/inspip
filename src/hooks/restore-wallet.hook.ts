@@ -1,10 +1,10 @@
 import { useState, useCallback } from "react";
-import { importWallet } from "../lib/wallet";
+import { generateNewAddress, importWallet, saveWallet } from "../lib/wallet";
 import { BIP32Interface } from "bip32";
 import { useApp } from "../app";
 
 export type RestoreWallet = {
-  dispatch: (name: string, phrase: string) => Promise<any>; //{ network: any; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; } | undefined>;
+  dispatch: (phrase: string) => Promise<any>; //{ network: any; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; } | undefined>;
   loading: boolean;
   data?: { network: any; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; };
 };
@@ -17,11 +17,18 @@ export const useRestoreWallet = (): RestoreWallet => {
   const dispatch = useCallback(
     async (mnemonic: string) => {
       if (loading) return;
+
       setLoading(true);
+
       const wallet = importWallet(mnemonic, app.network);
-      localStorage.setItem('wallet', JSON.stringify(wallet));
+      const address = generateNewAddress(wallet.rootKey, app.network, 0);
+      saveWallet(wallet.mnemonic, app.network, address.address, [0], "password") // @todo grab password
       setData({...wallet, network: app.network});
+      app.setAddresses([0]);
+      app.setCurrentAddress(address.address);
+
       setLoading(false);
+
       return wallet;
     },
     [loading]

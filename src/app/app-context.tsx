@@ -1,28 +1,29 @@
 import { createContext, useState } from 'react';
 import { bitcoin } from "../lib/bitcoin-lib";
+import { editWallet } from '../lib/wallet';
 
 export const AppContext = createContext<{
   network: any,
   setNetwork: (network: any) => void,
-  name: string,
-  setName: (name: string) => void,
-  address: string,
-  setAddress: (address: string) => void,
-  addresses: string[],
-  setAddresses: (addresses: string[]) => void,
+  currentAddress: string,
+  setCurrentAddress: (address: string) => void,
+  addresses: number[],
+  setAddresses: (addresses: number[]) => void,
   feerate: number,
   setFeerate: (feerate: number) => void,
+  transactions: any[],
+  setTransactions: (transactions: any) => void,
 }>({
   network: bitcoin.networks.bitcoin,
   setNetwork: () => undefined,
-  name: '',
-  setName: () => undefined,
-  address: '',
-  setAddress: () => undefined,
+  currentAddress: '',
+  setCurrentAddress: () => undefined,
   addresses: [],
   setAddresses: () => undefined,
   feerate: 0,
   setFeerate: () => undefined,
+  transactions: [],
+  setTransactions: () => undefined,
 });
 
 export interface AppProviderProps {
@@ -31,19 +32,19 @@ export interface AppProviderProps {
 
 export const AppProvider = (props: AppProviderProps) => {
   const [network, setNetwork] = useState(bitcoin.networks.bitcoin);
-  const [name, setName] = useState('');
-  const [addresses, _setAddresses] = useState<string[]>([]);
-  const [address, _setAddress] = useState('');
+  const [addresses, _setAddresses] = useState<number[]>([]);
+  const [currentAddress, _setCurrentAddress] = useState('');
   const [feerate, setFeerate] = useState(0);
+  const [transactions, setTransactions] = useState<any[]>([]);
 
-  const setAddresses = (addresses: string[]) => {
+  const setAddresses = (addresses: number[]) => {
     _setAddresses(addresses);
-    localStorage.setItem("addresses", JSON.stringify(addresses));
+    editWallet('', addresses);
   };
 
-  const setAddress = (address: string) => {
-    _setAddress(address);
-    localStorage.setItem("address", address);
+  const setCurrentAddress = (address: string) => {
+    _setCurrentAddress(address);
+    editWallet(address);
   };
 
   return (
@@ -51,14 +52,14 @@ export const AppProvider = (props: AppProviderProps) => {
       value={{
         network,
         setNetwork,
-        name,
-        setName,
-        address,
-        setAddress,
+        currentAddress,
+        setCurrentAddress,
         addresses,
         setAddresses,
         feerate,
         setFeerate,
+        transactions,
+        setTransactions,
       }}
     >
       {props.children}

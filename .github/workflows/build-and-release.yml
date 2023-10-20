@@ -6,7 +6,7 @@ on:
 #      - 'v*'
   push:
     branches:
-      - "dev"
+      - "main"
 
 jobs:
   build:

@@ -76,7 +76,7 @@ export const SetFees = (): JSX.Element => {
         />
         <Button
           primary={selectedFee === "custom"}
-          label={`Custom: ${customFee} sats/vB`}
+          label={`Custom`}
           onClick={() => setSelectedFee("custom")}
         />
       </Box>

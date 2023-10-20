@@ -42,8 +42,6 @@ export const CreateWallet = (): JSX.Element => {
       return;
     }
 
-    //await generateName(password);
-
     let data: any;
 
     try {

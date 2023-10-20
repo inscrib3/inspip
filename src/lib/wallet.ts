@@ -20,17 +20,41 @@ interface Utxo {
     status: any;
 }
 
-export function saveWallet(mnemonic: string, addressesIndex: number, network: any, password: string) {
-    const wallet = {
-        mnemonic,
-        addressesIndex,
-        network
-    }
-    return encrypt(JSON.stringify(wallet), password);
+export function editWallet(currentAddress: string = '', addresses: number[] = []) {
+    const data = localStorage.getItem('wallet');
+    if (!data) throw new Error('Wallet not found');
+
+    const parsedData = JSON.parse(data);
+    if (!parsedData?.mnemonic) throw new Error('Wallet corrupted');
+
+    if (currentAddress !== '') parsedData.currentAddress = currentAddress;
+    if (addresses.length > 0) parsedData.addresses = addresses;
+
+    localStorage.setItem('wallet', JSON.stringify(parsedData));
+
+    return parsedData;
 }
 
-export function loadWallet(text: string, password: string) {
-    return JSON.parse(decrypt(text, password));
+export function saveWallet(mnemonic: string, network: any, currentAddress: string, addresses: number[], password: string) {
+    const wallet = {
+        mnemonic: encrypt(mnemonic, password),
+        network,
+        currentAddress,
+        addresses,
+    }
+    localStorage.setItem('wallet', JSON.stringify(wallet));
+}
+
+export function loadWallet(password: string) {
+    const data = localStorage.getItem('wallet');
+    if (!data) throw new Error('Wallet not found');
+
+    const parsedData = JSON.parse(data);
+    if (!parsedData?.mnemonic) throw new Error('Wallet corrupted');
+
+    parsedData.mnemonic = decrypt(parsedData.mnemonic, password);
+    
+    return parsedData;
 }
 
 export function generateWallet(network: any) {

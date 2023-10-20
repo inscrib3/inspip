@@ -3,7 +3,6 @@ import * as Icons from "grommet-icons";
 import { useNavigate } from "react-router-dom";
 import { useSendSats, useSendTokens, useGetBalances } from "../hooks";
 import { useEffect, useMemo, useState } from "react";
-import { useApp } from "../app";
 import { SetFees } from "../components";
 
 export const Send = () => {
@@ -11,7 +10,6 @@ export const Send = () => {
   const sendSats = useSendSats();
   const sendTokens = useSendTokens();
   const balances = useGetBalances();
-  const app = useApp();
   const [ticker, setTicker] = useState<string>('');
   const [address, setAddress] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
@@ -35,12 +33,11 @@ export const Send = () => {
   const send = async () => {
     if (!address || !amount || !ticker) return;
     if (ticker.toLowerCase() == "btc" || ticker.toLowerCase() == "sats") {
-      await sendSats.dispatch(app.name, address, amount, fee);
+      await sendSats.dispatch(address, amount, fee);
       return;
     }
     const tickerSplit = ticker.split(":");
     await sendTokens.dispatch(
-      app.name,
       address,
       tickerSplit[0],
       tickerSplit[1],
