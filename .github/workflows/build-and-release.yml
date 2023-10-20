@@ -11,24 +11,23 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Setup Node.js
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
-        node-version: '19'
-
-    - name: Install Yarn
-      run: npm install -g yarn
+        node-version: 'lts'
 
     - name: Install dependencies
-      run: yarn install
+      run: npm install
 
     - name: Build project
-      run: yarn build
+      run: npm run build
       env:
         SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
@@ -36,23 +35,11 @@ jobs:
       run: zip -r dist.zip dist/
 
     - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: ncipollo/release-action@v1
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
+        artifacts: dist.zip
 
     - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v1
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./dist.zip
-        asset_name: dist.zip
-        asset_content_type: application/zip
+        files: dist.zip
