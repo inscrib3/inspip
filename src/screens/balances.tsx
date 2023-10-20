@@ -1,9 +1,10 @@
-import { Box, Text, Button, InfiniteScroll } from "grommet";
+import { Box, Text, Button, InfiniteScroll, Header, Tag, Tabs, Tab, Avatar, Menu } from "grommet";
 import { useGetBalances } from "../hooks";
 import { useApp } from "../app";
 import { useNavigate } from "react-router-dom";
 import { RoutePath } from "../router";
 import { Layout } from "../components";
+import { Clock, MoreVertical } from "grommet-icons";
 /*
 import { useEffect, useState } from "react";
 import { utxos } from "../mempool/utxos";
@@ -35,10 +36,20 @@ export const Balances = () => {
   };
 
   return (
-    <Layout
-      showLogo
-    >
+    <Layout>
       <Box height="full">
+        <Header background="brand" pad="medium">
+          <Text weight="bold">Inscrib3 Wallet</Text>
+          <Menu
+            label=""
+            icon={<MoreVertical />}
+            items={[
+              { label: 'Options', onClick: () => {} },
+              { label: 'Help', onClick: () => {} },
+            ]}
+          />
+        </Header>
+
         <Box
           width="100%"
           style={{ overflow: "scroll" }}
@@ -46,18 +57,41 @@ export const Balances = () => {
           margin={{ bottom: "medium" }}
           pad={{ horizontal: "large", vertical: "small" }}
         >
+          <Tag name="aaa" value="" />
           <Text size="32px" weight="bold">
             {balances.data.btc} BTC
           </Text>
+          <Text weight="lighter">$145.21</Text>
         </Box>
         <Box pad={{ horizontal: "large", vertical: "small" }} style={{ overflow: "scroll" }}>
           <Text>{app.address}</Text>
         </Box>
         <Box margin={{ vertical: "large" }} gap="medium" direction="row" justify="center">
-          <Button label="RECEIVE" onClick={receive} />
-          <Button label="SEND" onClick={send} />
+          <Button label="Receive" onClick={receive} />
+          <Button label="Send" onClick={send} />
+          <Button label="Portfolio" />
         </Box>
         <Box flex overflow="auto" margin="large">
+          <Tabs>
+            <Tab title="Tokens">
+              <Box direction="row" gap="small" align="center">
+                <Avatar src="//s.gravatar.com/avatar/b7fb138d53ba0f573212ccce38a7c43b?s=80" />
+                <Box direction="column">
+                  <Text>Ticker</Text>
+                  <Text>ID</Text>
+                </Box>
+                <Text weight="bold" margin={{ left: 'auto' }}>Balance</Text>
+              </Box>
+            </Tab>
+            <Tab title="Activity">
+              <Box direction="row" gap="small" align="center">
+                <Avatar background="brand">
+                  <Clock color="text-strong" />
+                </Avatar>
+                <Text margin={{ left: 'auto' }}>atum.balance</Text>
+              </Box>
+            </Tab>
+          </Tabs>
           <InfiniteScroll items={balancesWithoutBTC}>
             {(balance: string) => (
               <Box
@@ -80,7 +114,7 @@ export const Balances = () => {
             )}
           </InfiniteScroll>
         </Box>
-        </Box>
+      </Box>
     </Layout>
   );
 };

@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { RoutePath } from "../router";
 import { useEffect } from "react";
 import { Layout } from "../components";
-import { generateWallet } from "../lib/wallet";
-import { bitcoin } from "../lib/bitcoin-lib";
 
 export const App = () => {
   const navigate = useNavigate();

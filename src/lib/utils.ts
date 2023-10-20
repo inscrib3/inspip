@@ -1,11 +1,12 @@
+import { Buffer } from 'buffer';
 import { bitcoin } from './bitcoin-lib';
-import { Address, Script, Signer, Tap, Tx } from '@cmdcode/tapscript';
+import { Address } from '@cmdcode/tapscript';
 
 export const toXOnly = (pubKey: Buffer) => (pubKey.length === 32 ? pubKey : pubKey.slice(1, 33));
 
 export function isValidNumber(strNum: string)
 {
-    let validNumber = new RegExp(/^\d*\.?\d*$/);
+    const validNumber = new RegExp(/^\d*\.?\d*$/);
     return validNumber.test(''+strNum);
 }
 
@@ -82,7 +83,7 @@ export function cleanFloat(input: string) {
 
 export function formatNumberString(str: string, decimals: number) {
 
-    let pos = str.length - decimals;
+    const pos = str.length - decimals;
 
     if(decimals == 0) {
         // nothing
@@ -97,11 +98,11 @@ export function formatNumberString(str: string, decimals: number) {
 }
 
 function charRange(start: string, stop: string) {
-    var result = [];
+    const result = [];
 
     // get all chars from starting char
     // to ending char
-    var i = start.charCodeAt(0),
+    let i = start.charCodeAt(0),
         last = stop.charCodeAt(0) + 1;
     for (i; i < last; i++) {
         result.push(String.fromCharCode(i));
@@ -110,28 +111,23 @@ function charRange(start: string, stop: string) {
     return result;
 }
 
-function countDecimals(value: string){
-    const num = value.split('.');
-    return num[1] ? num[1].length : 0;
-}
-
 export function toInt26(str: string) {
-    var alpha = charRange('a', 'z');
-    var result = 0n;
+    const alpha = charRange('a', 'z');
+    let result = 0n;
 
     // make sure we have a usable string
     str = str.toLowerCase();
     str = str.replace(/[^a-z]/g, '');
 
     // we're incrementing j and decrementing i
-    var j = 0n;
-    for (var i = str.length - 1; i > -1; i--) {
+    let j = 0n;
+    for (let i = str.length - 1; i > -1; i--) {
         // get letters in reverse
-        var char = str[i];
+        const char = str[i];
 
         // get index in alpha and compensate for
         // 0 based array
-        var position = BigInt(''+alpha.indexOf(char));
+        let position = BigInt(''+alpha.indexOf(char));
         position++;
 
         // the power kinda like the 10's or 100's
@@ -141,7 +137,7 @@ export function toInt26(str: string) {
         // etc...
         const pow = (base: bigint, exponent: bigint) => base ** exponent;
 
-        var power = pow(26n, j)
+        const power = pow(26n, j)
 
         // add the power and index to result
         result += power * position;
@@ -163,17 +159,6 @@ function byteLength(number: bigint) {
         throw new Error("Input must be a BigInt");
     }
     return Math.ceil(bitLength(number) / 8);
-}
-
-function fromBytes(buffer: any) {
-    const bytes = new Uint8Array(buffer);
-    const size = bytes.byteLength;
-    let x = 0n;
-    for (let i = 0; i < size; i++) {
-        const byte = BigInt(bytes[i]);
-        x = (x << 8n) | byte;
-    }
-    return x;
 }
 
 export function toBytes(number: bigint) {
@@ -201,7 +186,7 @@ export function toBytes(number: bigint) {
 }
 
 export function textToHex(text: string) {
-    var encoder = new TextEncoder().encode(text);
+    const encoder = new TextEncoder().encode(text);
     return [...new Uint8Array(encoder)]
         .map(x => x.toString(16).padStart(2, "0"))
         .join("");
