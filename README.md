@@ -1,27 +1,28 @@
-# React + TypeScript + Vite
+# Inscrib3 | Pipe Wallet Extension
+Easily manage and interact with PIPE tokens on the Bitcoin network right from your browser. The Pipe Wallet extension provides a simple interface to *Deploy*, *Mint*, and *Transfer* tokens adhering to the PIPE protocol specifications.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Features
+- Fully non-custodial: **you control your private keys** and they never leave your device. Don't screw up, we cannot recover lost keys!
+- Seamless token management: Deploy, Mint, Transfer.
+- Securely sign transactions.
+- View transaction history and token balances.
 
-Currently, two official plugins are available:
+## Installation
+Make sure to use Chrome, Brave or Chromium browser. Firefox and Safari are not supported at this time.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Download the extension from the *Release* page
+2. Go to `chrome://extensions/` or `brave://extensions/`
+3. Click *Load unpacked* and select the downloaded folder
 
-## Expanding the ESLint configuration
+## Support
+For support or any inquiries, please visit our [Discord](https://discord.gg/gpFGS4UJ5f).
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## PIPE Protocol Overview
+PIPE is a Bitcoin-native token protocol with three main functions: **Deploy**, **Mint**, and **Transfer** (DMT):
 
-- Configure the top-level `parserOptions` property like this:
+- **Deploy**: Initiates a new token with defined attributes like ticker name, maximum supply, and minting limits.
+- **Mint**: Allows the creation of new tokens within the defined limits set during deployment.
+- **Transfer**: Facilitates the sending of tokens to selected recipients.
 
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
-```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+The PIPE protocol, by introducing a structured way to deploy, mint, and transfer tokens on the Bitcoin network, provides a framework for tokenized assets and applications which isn't natively supported by Bitcoin. This potentially allows for a variety of decentralized applications (dApps), tokenized assets, and smart contract-like behaviors on Bitcoin, which are features more commonly associated with platforms like Ethereum.
+In essence, it can bring a new level of functionality to Bitcoin while still utilizing Bitcoin's robust and secure blockchain.

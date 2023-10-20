@@ -36,10 +36,9 @@ export const Balances = () => {
   };
 
   return (
-    <Layout>
-      <Box height="full">
-        <Header background="brand" pad="medium">
-          <Text weight="bold">Inscrib3 Wallet</Text>
+    <Layout showLogo actions={[
+      {
+        render: () => (
           <Menu
             label=""
             icon={<MoreVertical />}
@@ -48,11 +47,12 @@ export const Balances = () => {
               { label: 'Help', onClick: () => {} },
             ]}
           />
-        </Header>
-
+        ),
+      },
+    ]}>
+      <Box height="full">
         <Box
           width="100%"
-          style={{ overflow: "scroll" }}
           align="center"
           margin={{ bottom: "medium" }}
           pad={{ horizontal: "large", vertical: "small" }}
@@ -74,25 +74,7 @@ export const Balances = () => {
         <Box flex overflow="auto" margin="large">
           <Tabs>
             <Tab title="Tokens">
-              <Box direction="row" gap="small" align="center">
-                <Avatar src="//s.gravatar.com/avatar/b7fb138d53ba0f573212ccce38a7c43b?s=80" />
-                <Box direction="column">
-                  <Text>Ticker</Text>
-                  <Text>ID</Text>
-                </Box>
-                <Text weight="bold" margin={{ left: 'auto' }}>Balance</Text>
-              </Box>
-            </Tab>
-            <Tab title="Activity">
-              <Box direction="row" gap="small" align="center">
-                <Avatar background="brand">
-                  <Clock color="text-strong" />
-                </Avatar>
-                <Text margin={{ left: 'auto' }}>atum.balance</Text>
-              </Box>
-            </Tab>
-          </Tabs>
-          <InfiniteScroll items={balancesWithoutBTC}>
+            <InfiniteScroll items={balancesWithoutBTC}>
             {(balance: string) => (
               <Box
                 key={balance}
@@ -104,15 +86,27 @@ export const Balances = () => {
                 margin={{ bottom: "medium" }}
                 style={{ borderRadius: "5px" }}
               >
-                <Box width="small">
-                  <Text weight="bold">{balance.toUpperCase()}</Text>
-                </Box>
-                <Box width="small" align="end">
-                  <Text>{balances.data[balance]}</Text>
+                <Box direction="row" gap="small" align="center">
+                  <Avatar src="//s.gravatar.com/avatar/b7fb138d53ba0f573212ccce38a7c43b?s=80" />
+                  <Box direction="column">
+                    <Text>{balance.toUpperCase()}</Text>
+                    <Text>ID</Text>
+                  </Box>
+                  <Text weight="bold" margin={{ left: 'auto' }}>{balances.data[balance]}</Text>
                 </Box>
               </Box>
             )}
           </InfiniteScroll>
+            </Tab>
+            <Tab title="Activity">
+              <Box direction="row" gap="small" align="center">
+                <Avatar background="brand">
+                  <Clock color="text-strong" />
+                </Avatar>
+                <Text margin={{ left: 'auto' }}>atum.balance</Text>
+              </Box>
+            </Tab>
+          </Tabs>
         </Box>
       </Box>
     </Layout>
