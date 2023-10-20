@@ -23,4 +23,4 @@ export function ShowMnemonicModal({ mnemonic, onClose}: { mnemonic: string, onCl
           </Box>
         </Layer>
   );
-};
+}
