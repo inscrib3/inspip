@@ -6,8 +6,10 @@ import { RoutePath } from "../router";
 import { Layout } from "../components";
 import { Clock, MoreVertical, Ticket } from "grommet-icons";
 import { truncateInMiddle } from "../utils/truncate-in-middle";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ShowAddressModal } from "./modals/show-address";
+import { satsToDollars } from "../utils/sats-to-dollars";
+import { getBitcoinPrice } from "../utils/bitcoin-price";
 /*
 import { useEffect, useState } from "react";
 import { utxos } from "../mempool/utxos";
@@ -17,9 +19,22 @@ export const Balances = () => {
   const app = useApp();
   const balances = useGetBalances();
   const navigate = useNavigate();
+  const [bitcoinPrice, setBitcoinPrice] = useState<number>(0);
+
   const balancesWithoutBTC = Object.keys(balances.data).filter(
     (balance) => balance !== "btc" && balance !== "sats"
   );
+
+  useEffect(() => {
+    getBitcoinPrice().then((price) => {
+      setBitcoinPrice(price);
+    });
+  }, []);
+
+  const dollars = useMemo(() => {
+    if (bitcoinPrice === 0 || balances.data.btc === "0") return "";
+    return '$ ' + satsToDollars(parseFloat(balances.data.btc) * 100000000, bitcoinPrice);
+  }, [balances.data.btc, bitcoinPrice]);
 
   const [isModalOpen, setModalOpen] = useState(false);
 
@@ -70,7 +85,7 @@ export const Balances = () => {
           <Text size="32px" weight="bold">
             {balances.data.btc}&nbsp;BTC
           </Text>
-          <Text weight="lighter">$145.21</Text>
+          <Text weight="lighter">{dollars}</Text>
         </Box>
         <Box margin={{ vertical: "large" }} gap="medium" direction="row" justify="center">
           <Button label="Receive" onClick={handleToggleModal} />

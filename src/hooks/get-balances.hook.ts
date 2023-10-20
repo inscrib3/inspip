@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useApp } from "../app";
 import { fetchUtxos } from "../lib/node";
+import { satsToBtc } from "../utils/sats-to-btc";
 
 export type GetBalances = {
   dispatch: () => Promise<{ [key: string]: string } | undefined>;
@@ -46,8 +47,9 @@ export const useGetBalances = (): GetBalances => {
       return acc;
     }, 0);
 
-    nextData["sats"] = sumOfSats.toString();
+    nextData["btc"] = satsToBtc(sumOfSats).toString();
 
+    setData(nextData);
     setLoading(false);
     return nextData;
   }, [app.currentAddress, app.tokens, loading]);
