@@ -17,7 +17,7 @@ export const useSendTokens = (): SendTokens => {
   const app = useApp();
 
   const dispatch = useCallback(
-    async (address: string, ticker: string, id: string, amount: string, fee_rate: bigint) => {
+    async (address: string, ticker: string, id: string, amount: string, fee_rate: string) => {
       if (loading) return;
       setLoading(true);
 

@@ -17,12 +17,12 @@ export const useSendSats = (): SendSats => {
   const app = useApp();
 
   const dispatch = useCallback(
-    async (address: string, amount: bigint, fee_rate: bigint) => {
+    async (address: string, amount: string, fee_rate: string) => {
       if (loading) return;
       setLoading(true);
 
       const utxos = await fetchUtxos(app.currentAddress)
-      const data = sendSats(app.account, utxos, address, amount, fee_rate, app.network)
+      const data = sendSats(app.account, utxos, address, BigInt(amount), BigInt(fee_rate), app.network)
       setData(data);
   
       setLoading(false);
