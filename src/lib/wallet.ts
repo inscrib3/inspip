@@ -72,11 +72,11 @@ export function importWallet(mnemonic: string, network: any) {
 
     const data = generateNewAddress(rootKey, network);
   
-    return { ...data, mnemonic };
+    return { ...data, mnemonic, rootKey };
 }
 
 export function generateNewAddress(rootKey: any, network: any, index: number = 0) {
-    const path = (network === bitcoin.networks.bitcoin) ? `m/86'/0'/${index}'` : `m/49'/1'/0'/${index}`;
+    const path = (network === bitcoin.networks.bitcoin) ? `m/86'/0'/0'/0/${index}` : `m/49'/1'/0'/0/${index}`;
     const account: any = rootKey.derivePath(path)
     const internalPubkey: any = toXOnly(account.publicKey)
     const { address, output } = bitcoin.payments.p2tr({ internalPubkey: internalPubkey, network })
