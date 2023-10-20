@@ -29,6 +29,8 @@ jobs:
 
     - name: Build project
       run: yarn build
+      env:
+        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
     - name: Package /dist directory
       run: zip -r dist.zip dist/

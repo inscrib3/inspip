@@ -1,4 +1,4 @@
-import { Box, Text, Button, InfiniteScroll, Header, Tag, Tabs, Tab, Avatar, Menu, Anchor } from "grommet";
+import { Box, Text, Button, InfiniteScroll, Tabs, Tab, Avatar, Menu } from "grommet";
 import { useGetBalances } from "../hooks";
 import { useApp } from "../app";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +8,7 @@ import { Clock, MoreVertical, Ticket } from "grommet-icons";
 import { truncateInMiddle } from "../utils/truncate-in-middle";
 import { useState } from "react";
 import { ShowAddressModal } from "./modals/show-address";
+import { ShowMnemonicModal } from "./modals/show-mnemonic";
 /*
 import { useEffect, useState } from "react";
 import { utxos } from "../mempool/utxos";
@@ -21,11 +22,16 @@ export const Balances = () => {
     (balance) => balance !== "btc" && balance !== "sats"
   );
 
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [isAddressModalOpen, setAddressModalOpen] = useState(false);
+  const [isMnemonicModalOpen, setMnemonicModalOpen] = useState(false);
 
-  const handleToggleModal = () => {
-    setModalOpen(prevState => !prevState);
+  const handleToggleAddressModal = () => {
+    setAddressModalOpen(prevState => !prevState);
   };
+
+  const handleToggleMnemonicModal = () => {
+    setMnemonicModalOpen(prevState => !prevState);
+  }
 
   /*const [btcBalance, setBtcBalance] = useState<string>("0");
 
@@ -51,8 +57,9 @@ export const Balances = () => {
             label=""
             icon={<MoreVertical />}
             items={[
-              { label: 'Export', onClick: () => {} },
+              { label: 'Export', onClick: () => {() => handleToggleMnemonicModal()} },
               { label: 'Help', onClick: () => {} },
+              { label: 'Exit', onClick: () => { localStorage.clear() }}
             ]}
           />
         ),
@@ -73,11 +80,12 @@ export const Balances = () => {
           <Text weight="lighter">$145.21</Text>
         </Box>
         <Box margin={{ vertical: "large" }} gap="medium" direction="row" justify="center">
-          <Button label="Receive" onClick={handleToggleModal} />
+          <Button label="Receive" onClick={handleToggleAddressModal} />
           <Button label="Send" onClick={send} />
           <Button label="Swap" />
         </Box>
-        {isModalOpen && <ShowAddressModal onClose={handleToggleModal} />}
+        {isMnemonicModalOpen && <ShowMnemonicModal mnemonic={"hello world"} onClose={handleToggleMnemonicModal} />}
+        {isAddressModalOpen && <ShowAddressModal onClose={handleToggleAddressModal} />}
         <Box flex overflow="auto" margin="large">
           <Tabs>
             <Tab title="Tokens">
