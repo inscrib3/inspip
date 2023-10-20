@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { RoutePath } from "../router";
 import { useEffect } from "react";
 import { Layout } from "../components";
-import { loadWallet } from "../lib/wallet";
+import { importWallet, loadWallet } from "../lib/wallet";
 import { useApp } from ".";
 
 export const App = () => {
@@ -18,6 +18,7 @@ export const App = () => {
     try {
       console.log("loading wallet")
       const wallet = loadWallet("password"); // @todo use password
+      app.setAccount(importWallet(wallet.mnemonic, wallet.network));
       app.setNetwork(wallet.network);
       app.setCurrentAddress(wallet.currentAddress)
       app.setAddresses(wallet.addresses);

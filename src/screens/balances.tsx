@@ -1,4 +1,4 @@
-import { Box, Text, Button, InfiniteScroll, Header, Tag, Tabs, Tab, Avatar, Menu } from "grommet";
+import { Box, Text, Button, InfiniteScroll, Header, Tag, Tabs, Tab, Avatar, Menu, Anchor } from "grommet";
 import { useGetBalances } from "../hooks";
 import { useApp } from "../app";
 import { useNavigate } from "react-router-dom";
@@ -64,8 +64,9 @@ export const Balances = () => {
           align="center"
           margin={{ bottom: "medium" }}
           pad={{ horizontal: "large", vertical: "small" }}
+          gap="medium"
         >
-          <Tag name={truncateInMiddle(app.currentAddress, 10)} value="" />
+          <Button secondary onClick={() => navigate(RoutePath.Addresses)} style={{ borderColor: "grey" }} label={truncateInMiddle(app.currentAddress, 20)}></Button>
           <Text size="32px" weight="bold">
             {balances.data.btc}&nbsp;BTC
           </Text>

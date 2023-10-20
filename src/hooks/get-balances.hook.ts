@@ -1,41 +1,56 @@
 import { useState, useCallback, useEffect } from "react";
 import { useApp } from "../app";
+import { fetchUtxos } from "../lib/node";
 
 export type GetBalances = {
-  dispatch: (
-    name: string
-  ) => Promise<{ sats: string; btc: string; [key: string]: string }>;
+  dispatch: () => Promise<{ [key: string]: string } | undefined>;
   loading: boolean;
-  data: { sats: string; btc: string; [key: string]: string };
+  data: { [key: string]: string };
 };
 
 export const useGetBalances = (): GetBalances => {
   const app = useApp();
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<{
-    sats: string;
-    btc: string;
     [key: string]: string;
-  }>({ sats: "0", btc: "0" });
+  }>({ btc: "0" });
 
   const dispatch = useCallback(async () => {
-    if (loading || !app.name) return;
+    if (loading) return;
     setLoading(true);
-    const res = await fetch(
-      `${import.meta.env.VITE_APP_API}/wallet/balance/${app.name}`
-    );
-    const data = await res.json();
 
-    if (data.error) {
-      setData({ sats: "", btc: "" });
-      setLoading(false);
-      return data;
-    }
+    const nextData: {
+      [key: string]: string;
+    } = {};
 
-    setData(data);
+    app.tokens.forEach(async (token) => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_APP_API}/getbalance?address=${
+            app.currentAddress
+          }&ticker=${token.ticker}&id=${token.id}`
+        );
+        const { data } = await res.json();
+        nextData[`${data.ticker}:${data.id}`] = data.amt;
+      } catch (e) {
+        setData({ sats: "", btc: "" });
+        setLoading(false);
+        return nextData;
+      }
+    });
+
+    const utxos = await fetchUtxos(app.currentAddress);
+
+    const sumOfSats = utxos.reduce((acc: number, utxo: { value: number; }) => {
+      return acc + utxo.value;
+      return acc;
+    }, 0);
+
+    nextData["sats"] = sumOfSats.toString();
+
     setLoading(false);
-    return data;
-  }, [loading, app.name]);
+    return nextData;
+  }, [app.currentAddress, app.tokens, loading]);
 
   useEffect(() => {
     dispatch();

@@ -1,35 +1,40 @@
+import { useMemo } from "react";
 import { useCreateAddress } from ".";
 import { useApp } from "../app";
+import { generateNewAddress } from "../lib/wallet";
 
 export type Address = {
   data: string[];
   address: string;
-  createAddress: () => Promise<{ address: string }>;
+  createAddress: () => void;
   switchAddress: (address: string) => void;
   setAddress: (address: string) => void;
 }
 
 export const useAddress = (): Address => {
   const app = useApp();
-  const _createAddress = useCreateAddress();
+
+  const data = useMemo(() => {
+    return app.addresses.map((_index) => {
+      return generateNewAddress(app.account.rootKey, app.network, _index).address;
+    });
+  }, [app.account.rootKey, app.addresses, app.network]);
 
   const createAddress = async () => {
-    const { address } = await _createAddress.dispatch();
-    app.setAddresses([...app.addresses, address]);
-    return { address };
+    app.setAddresses(app.addresses.concat([app.addresses.length]));
   };
 
   const switchAddress = (address: string) => {
-    app.setAddress(address);
+    app.setCurrentAddress(address);
   };
 
   const setAddress = (address: string) => {
-    app.setAddress(address);
+    app.setCurrentAddress(address);
   };
 
   return {
-    address: app.address,
-    data: app.addresses,
+    address: app.currentAddress,
+    data,
     createAddress,
     switchAddress,
     setAddress,
