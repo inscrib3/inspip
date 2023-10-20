@@ -22,7 +22,7 @@ export const fetchUtxo = async (utxo: string) => {
 };
 
 export async function fetchUtxos(address: string) {
-    const response = await fetch(`https://mempool.space/testnet/api/address/${address}/utxo`);
+    const response = await fetch(`https://mempool.space/api/address/${address}/utxo`);
     let utxos = await response.json()
 
     utxos = await Promise.all(utxos.map(async (utxo: { txid: any; hex: string; }) => {
@@ -36,7 +36,7 @@ export async function fetchUtxos(address: string) {
 }
 
 export async function fetchHex(txid: any) {
-    const response = await fetch(`https://mempool.space/testnet/api/tx/${txid}/hex`);
+    const response = await fetch(`https://mempool.space/api/tx/${txid}/hex`);
     return await response.text()
 }
 
