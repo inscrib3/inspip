@@ -54,26 +54,11 @@ export async function fetchHex(txid: any) {
 }
 
 export async function sendTransaction(hexstring: any, maxfeerate: any) {
-  const url =
-    "https://methodical-multi-gadget.btc-testnet.quiknode.pro/c8dfdddbdf9678b10dd05a623bfbe42c3f7808b2";
-  const headers = new Headers({
-    "Content-Type": "application/json",
-  });
-
-  const body = JSON.stringify({
-    method: "sendrawtransaction",
-    params: [hexstring, maxfeerate],
-  });
-
-  const requestOptions: RequestInit = {
-    method: "POST",
-    headers: headers,
-    body: body,
-    redirect: "follow",
-  };
-
   try {
-    const response = await fetch(url, requestOptions);
+    const response = await fetch("https://mempool.space/api/tx", {
+      method: "POST",
+      body: hexstring,
+    });
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
