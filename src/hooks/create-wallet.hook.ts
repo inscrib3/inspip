@@ -16,6 +16,7 @@ export const useCreateWallet = (): CreateWallet => {
 
   const dispatch = useCallback(
     async (password: string) => {
+      console.log(password);
       if (loading) return;
 
       setLoading(true);

@@ -16,6 +16,7 @@ export const useRestoreWallet = (): RestoreWallet => {
 
   const dispatch = useCallback(
     async (mnemonic: string, password: string) => {
+      console.log(password);
       if (loading) return;
 
       setLoading(true);

@@ -4,7 +4,7 @@ import { sendSats } from "../lib/wallet";
 import { fetchUtxos } from "../lib/node";
 
 export type SendSats = {
-  dispatch: (address: string, amount: string, fee_rate: string) => Promise<string>;
+  dispatch: (address: string, amount: string, fee_rate: string) => Promise<string | undefined>;
   loading: boolean;
   data?: any;
 };

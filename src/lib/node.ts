@@ -54,6 +54,7 @@ export async function fetchHex(txid: any) {
 }
 
 export async function sendTransaction(hexstring: any, maxfeerate: any) {
+  console.log(maxfeerate);
   try {
     const response = await fetch("https://mempool.space/api/tx", {
       method: "POST",
