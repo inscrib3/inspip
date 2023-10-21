@@ -6,6 +6,16 @@ export function ShowMnemonicModal({ onClose}: { onClose: any }) {
   const [mnemonic, setMnemonic] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
+  const mnemonicGrid = () => {
+    return mnemonic.split(" ").reduce((acc, word, index) => {
+      if (index % 3 === 0) {
+        acc.push([]);
+      }
+      acc[acc.length - 1].push(word);
+      return acc;
+    }, [] as string[][]);
+  }
+
   const load = () => {
     try {
       const wallet = loadWallet(password);
@@ -31,9 +41,28 @@ export function ShowMnemonicModal({ onClose}: { onClose: any }) {
             background="white"
           >
             {mnemonic !== "" ? (
-            <Text textAlign="center" style={{wordBreak: 'break-all'}}>
-              {mnemonic}
-            </Text>
+              <>
+            {mnemonicGrid().map((row: any, rowIndex: number) => (
+              <Box direction="row" gap="small">
+                {row.map((word: string, wordIndex: number) => (
+                  <Box
+                    border={{ color: "brand" }}
+                    flex
+                    margin="small"
+                    pad="small"
+                  >
+                    <Text
+                      weight="bold"
+                      size="small"
+                      style={{ wordBreak: "break-all" }}
+                    >
+                      {rowIndex * 3 + wordIndex + 1}. {word}
+                    </Text>
+                  </Box>
+                ))}
+              </Box>
+            ))}
+            </>
             ) : (
               <>
               <TextInput

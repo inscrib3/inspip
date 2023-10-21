@@ -112,7 +112,7 @@ export const Balances = () => {
           <Button label="Receive" onClick={handleToggleAddressModal} />
           <Button label="Send" onClick={send} />
         </Box>
-        {isMnemonicModalOpen && <ShowMnemonicModal mnemonic={"hello world some lorem ipsum dolor sit amet illicitur sit hec fit optimus facet"} onClose={handleToggleMnemonicModal} />}
+        {isMnemonicModalOpen && <ShowMnemonicModal onClose={handleToggleMnemonicModal} />}
         {isAddressModalOpen && <ShowAddressModal onClose={handleToggleAddressModal} />}
         <Box flex overflow="auto" margin="large">
           <Tabs>

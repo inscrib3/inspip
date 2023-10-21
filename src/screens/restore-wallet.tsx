@@ -44,7 +44,7 @@ export const RestoreWallet = (): JSX.Element => {
     }
 
     try {
-      await restoreWallet.dispatch(seedPhrase);
+      await restoreWallet.dispatch(seedPhrase, password);
     } catch (e) {
       setErrors({
         error: (e as Error).message,

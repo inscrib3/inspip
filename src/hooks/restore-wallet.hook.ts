@@ -4,7 +4,7 @@ import { BIP32Interface } from "bip32";
 import { useApp } from "../app";
 
 export type RestoreWallet = {
-  dispatch: (phrase: string) => Promise<any>; //{ network: any; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; } | undefined>;
+  dispatch: (mnemonic: string, password: string) => Promise<any>; //{ network: any; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; } | undefined>;
   loading: boolean;
   data?: { network: any; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; };
 };
@@ -15,14 +15,14 @@ export const useRestoreWallet = (): RestoreWallet => {
   const app = useApp();
 
   const dispatch = useCallback(
-    async (mnemonic: string) => {
+    async (mnemonic: string, password: string) => {
       if (loading) return;
 
       setLoading(true);
 
       const wallet = importWallet(mnemonic, app.network);
       const address = generateNewAddress(wallet.rootKey, app.network, 0);
-      saveWallet(wallet.mnemonic, app.network, address.address, [0], "password") // @todo grab password
+      saveWallet(wallet.mnemonic, app.network, address.address, [0], password);
       setData({...wallet, network: app.network});
       app.setAddresses([0]);
       app.setCurrentAddress(address.address);

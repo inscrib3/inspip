@@ -45,7 +45,7 @@ export const CreateWallet = (): JSX.Element => {
     let data: any;
 
     try {
-      data = await createWallet.dispatch();
+      data = await createWallet.dispatch(password);
     } catch (e) {
       setErrors({
         error: (e as Error).message,
