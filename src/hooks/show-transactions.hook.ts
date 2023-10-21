@@ -1,34 +1,23 @@
-import { useState, useCallback } from "react";
-
-export type ShowTransactions = {
-  dispatch: () => Promise<any>;
-  loading: boolean;
-  data?: any;
+export type Transaction = {
+  txid: string;
+  hex: string;
+  date: Date;
+  value?: bigint;
+  address: string;
+  description: string;
+  confirmed: boolean;
 };
 
-export const useShowTransactions = (): ShowTransactions => {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [data, setData] = useState<any>();
+export const save = (transaction: Transaction) => {
+  const transactionsJSON = localStorage.getItem("transactions");
+  const transactions: Transaction[] = transactionsJSON ? JSON.parse(transactionsJSON) : [];
+  transactions.push(transaction);
+  localStorage.setItem("transactions", JSON.stringify(transactions));
+}
 
-  const dispatch = useCallback(
-    async () => {
-      if (loading) return;
+export const load = () => {
+  const transactionsJSON = localStorage.getItem("transactions");
+  const transactions: Transaction[] = transactionsJSON ? JSON.parse(transactionsJSON) : [];
 
-      setLoading(true);
-
-      const transactions = localStorage.getItem("transactions");
-      setData(transactions);
-
-      setLoading(false);
-
-      return transactions;
-    },
-    [loading]
-  );
-
-  return {
-    dispatch,
-    loading,
-    data,
-  };
-};
+  return transactions;
+}
