@@ -1,13 +1,4 @@
-import {
-  Box,
-  Text,
-  Button,
-  InfiniteScroll,
-  Tabs,
-  Tab,
-  Avatar,
-  Menu,
-} from "grommet";
+import { Box, Text, Button, InfiniteScroll, Tabs, Tab, Avatar, Menu, Anchor } from "grommet";
 import { useGetBalances } from "../hooks";
 import { useApp } from "../app";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +11,7 @@ import { ShowAddressModal } from "./modals/show-address";
 import { satsToDollars } from "../utils/sats-to-dollars";
 import { getBitcoinPrice } from "../utils/bitcoin-price";
 import { ShowMnemonicModal } from "./modals/show-mnemonic";
+import { Transaction, load } from "../hooks/show-transactions.hook";
 
 /*
 import { useEffect, useState } from "react";
@@ -33,7 +25,7 @@ export const Balances = () => {
   const [bitcoinPrice, setBitcoinPrice] = useState<number>(0);
   const [isAddressModalOpen, setAddressModalOpen] = useState(false);
   const [isMnemonicModalOpen, setMnemonicModalOpen] = useState(false);
-
+  const [transactions, setTransactions] = useState<Transaction[]>([])
   const balancesWithoutBTC = Object.keys(balances.data).filter(
     (balance) => balance !== "btc" && balance !== "sats"
   );
@@ -42,6 +34,8 @@ export const Balances = () => {
     getBitcoinPrice().then((price) => {
       setBitcoinPrice(price);
     });
+
+    setTransactions(load());
   }, []);
 
   const dollars = useMemo(() => {
@@ -158,18 +152,18 @@ export const Balances = () => {
               </InfiniteScroll>
             </Tab>
             <Tab title="TRANSACTIONS">
-              <InfiniteScroll items={app.transactions}>
-                {(transaction: any) => (
+              <InfiniteScroll items={transactions}>
+                {(transaction: Transaction) => (
                   <Box direction="row" gap="small" align="center">
                     <Avatar background="brand">
-                      {transaction.status === "confirmed" ? (
+                      {transaction.confirmed ? (
                         <Ticket color="text-strong" />
                       ) : (
                         <Clock color="text-strong" />
                       )}
                     </Avatar>
                     <Text margin={{ left: "auto" }}>
-                      {transaction.description}
+                      <Anchor href={`https://mempool.space/tx/${transaction.txid}`}>{transaction.description}</Anchor>
                     </Text>
                   </Box>
                 )}

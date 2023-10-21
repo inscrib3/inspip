@@ -13,8 +13,6 @@ export const AppContext = createContext<{
   setAddresses: (addresses: number[]) => void,
   feerate: number,
   setFeerate: (feerate: number) => void,
-  transactions: any[],
-  setTransactions: (transactions: any) => void,
   tokens: { ticker: string, id: string, decimals: string }[],
   setTokens: (tokens: { ticker: string, id: string, decimals: string }[]) => void,
 }>({
@@ -28,8 +26,6 @@ export const AppContext = createContext<{
   setAddresses: () => undefined,
   feerate: 0,
   setFeerate: () => undefined,
-  transactions: [],
-  setTransactions: () => undefined,
   tokens: [],
   setTokens: () => undefined,
 });
@@ -44,7 +40,6 @@ export const AppProvider = (props: AppProviderProps) => {
   const [addresses, _setAddresses] = useState<number[]>([]);
   const [currentAddress, _setCurrentAddress] = useState('');
   const [feerate, setFeerate] = useState(0);
-  const [transactions, setTransactions] = useState<any[]>([]);
   const [tokens, setTokens] = useState<{ ticker: string, id: string, decimals: string }[]>([]);
 
   const setAddresses = (addresses: number[]) => {
@@ -70,8 +65,6 @@ export const AppProvider = (props: AppProviderProps) => {
         setAddresses,
         feerate,
         setFeerate,
-        transactions,
-        setTransactions,
         tokens,
         setTokens,
       }}
