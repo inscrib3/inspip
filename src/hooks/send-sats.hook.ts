@@ -4,7 +4,7 @@ import { sendSats } from "../lib/wallet";
 import { fetchUtxos } from "../lib/node";
 
 export type SendSats = {
-  dispatch: (address: string, amount: string, fee_rate: string) => Promise<any>
+  dispatch: (address: string, amount: string, fee_rate: string) => Promise<string>;
   loading: boolean;
   data?: any;
 };
@@ -19,10 +19,34 @@ export const useSendSats = (): SendSats => {
       if (loading) return;
       setLoading(true);
 
-      const utxos = await fetchUtxos(app.currentAddress)
-      const data = sendSats(app.account, utxos, address, BigInt(amount), BigInt(fee_rate), app.network)
+      const fetchedUtxos = await fetchUtxos(app.currentAddress);
+      const utxos = [];
+
+      for (const utxo of fetchedUtxos) {
+        try {
+          const token = await fetch(
+            `${import.meta.env.VITE_APP_API}/utxo/${utxo.txid}/${utxo.vout}`
+          );
+
+          if (!token.ok) {
+            utxos.push(utxo);
+          }
+        } catch (e) {
+          console.error(e);
+          utxos.push(utxo);
+        }
+      }
+
+      const data = sendSats(
+        app.account,
+        utxos,
+        address,
+        BigInt(amount),
+        BigInt(fee_rate),
+        app.network
+      );
+
       setData(data);
-  
       setLoading(false);
       return data;
     },

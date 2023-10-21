@@ -26,18 +26,40 @@ export const useGetBalances = (): GetBalances => {
 
     const utxos = await fetchUtxos(app.currentAddress);
 
-    const sumOfSats = utxos.reduce((acc: number, utxo: { txid: string, vout: number; value: number; }) => {
-      return acc + utxo.value;
-      return acc;
-    }, 0);
+    const sumOfSats = utxos.reduce(
+      (acc: number, utxo: { txid: string; vout: number; value: number }) => {
+        return acc + utxo.value;
+        return acc;
+      },
+      0
+    );
 
     for (const utxo of utxos) {
       try {
-        console.log(import.meta.env.VITE_APP_API);
-        const token = await fetch(`${import.meta.env.VITE_APP_API}/utxo/${utxo.txid}/${utxo.vout}`);
-        console.log(token);
+        const token = await fetch(
+          `${import.meta.env.VITE_APP_API}/utxo/${utxo.txid}/${utxo.vout}`
+        );
+
+        if (!token.ok) continue;
+
+        const data = await token.json();
+
+        const deployment = await fetch(
+          `${import.meta.env.VITE_APP_API}/getdeployment?ticker=${data.tick}&id=${data.id}`
+        );
+
+        if (!deployment.ok) continue;
+
+        const deploymentData = await deployment.json();
+
+        if (typeof nextData[data.tick + ":" + data.id] === "undefined") {
+          nextData[data.tick + ":" + data.id] = "0";
+        }
+
+        nextData[data.tick + ":" + data.id] =
+          (parseInt(nextData[data.tick + ":" + data.id]) + (parseInt(data.amt) / Math.pow(10, deploymentData.data.dec))).toString();
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     }
 

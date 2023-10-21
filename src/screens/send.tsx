@@ -6,6 +6,7 @@ import { validateAddress } from "../lib/utils";
 import { SetFees } from "../components";
 import { useSendSats, useSendTokens, useGetBalances } from "../hooks";
 import { useApp } from "../app";
+import { sendTransaction } from "../lib/node";
 
 export const Send = () => {
   const navigate = useNavigate();
@@ -36,31 +37,41 @@ export const Send = () => {
 
   const send = async () => {
     setError("");
-    if(BigInt(amount) <= 0) {
-      setError("Amount must be greater than zero");
-      return;
-    } else if(BigInt(fee) <= 0) {
-        setError("Fee must be greater than zero");
-      return;
-    } else if(!validateAddress(address, app.network)) {
+    if(!validateAddress(address, app.network)) {
       console.log("Invalid address")
       setError("Invalid address");
       return;
     }
-    setError("all good")
-    return;
-    if (ticker.toLowerCase() != "btc" || ticker.toLowerCase() == "sats") {
-      await sendSats.dispatch(address, amount, fee);
+
+    if (ticker.toLowerCase() === "btc") {
+      const hex = await sendSats.dispatch(address, `${Math.floor(parseFloat(amount) * Math.pow(10, 8))}`, fee);
+      try {
+        await sendTransaction(hex, "0.1");
+        navigate(-1);
+      } catch (e) {
+        setError((e as Error).message);
+      }
       return;
     }
+
     const tickerSplit = ticker.split(":");
-    await sendTokens.dispatch(
+
+    const hex = await sendTokens.dispatch(
       address,
       tickerSplit[0],
       tickerSplit[1],
       amount,
       fee
     );
+
+    try {
+      await sendTransaction(hex, "0.1");
+    } catch (e) {
+      setError((e as Error).message);
+      return;
+    }
+
+    navigate(-1);
   };
 
   return (
@@ -69,6 +80,7 @@ export const Send = () => {
         <Button icon={<Icons.LinkPrevious />} onClick={goBack} />
       </Header>
       <Box flex="grow" pad={{ horizontal: "large", vertical: "small" }}>
+        {!!error && (<Text color="red" margin={{ bottom: "small" }}>{error}</Text>)}
         {ticker && balances.data[ticker.toLowerCase()] && (
           <Box justify="end" margin={{ bottom: "medium" }} direction="row" gap="small">
             <Text>{balances.data[ticker.toLowerCase()]}</Text>
@@ -103,7 +115,6 @@ export const Send = () => {
           </Box>
         </Box>
         <SetFees />
-        <Text color="red">{error}</Text>
         <Button
           primary
           onClick={send}

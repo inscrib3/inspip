@@ -1,4 +1,13 @@
-import { Box, Text, Button, InfiniteScroll, Tabs, Tab, Avatar, Menu } from "grommet";
+import {
+  Box,
+  Text,
+  Button,
+  InfiniteScroll,
+  Tabs,
+  Tab,
+  Avatar,
+  Menu,
+} from "grommet";
 import { useGetBalances } from "../hooks";
 import { useApp } from "../app";
 import { useNavigate } from "react-router-dom";
@@ -44,24 +53,12 @@ export const Balances = () => {
   }, [balances.data.btc, bitcoinPrice]);
 
   const handleToggleAddressModal = () => {
-    setAddressModalOpen(prevState => !prevState);
+    setAddressModalOpen((prevState) => !prevState);
   };
 
   const handleToggleMnemonicModal = () => {
-    setMnemonicModalOpen(prevState => !prevState);
-  }
-
-  /*const [btcBalance, setBtcBalance] = useState<string>("0");
-
-  useEffect(() => {
-    (async () => {
-      const _utxos = await utxos();
-      console.log(_utxos);
-      _btcBalance = _utxos.reduce((acc, utxo) => acc + utxo.value, 0);
-      console.log(_btcBalance);
-      setBtcBalance(_btcBalance.toString());
-    })();
-  }, []);*/
+    setMnemonicModalOpen((prevState) => !prevState);
+  };
 
   const send = () => {
     navigate(RoutePath.Send);
@@ -71,50 +68,73 @@ export const Balances = () => {
     // @todo add confirmation
     localStorage.clear();
     navigate(RoutePath.Root);
-  }
+  };
 
   return (
-    <Layout showLogo actions={[
-      {
-        render: () => (
-          <Menu
-            label=""
-            icon={<MoreVertical />}
-            items={[
-              { label: 'Export', onClick: () => { handleToggleMnemonicModal() } },
-              { label: 'Help', onClick: () => {} },
-              { label: 'Exit', onClick: () => { exit() } }
-            ]}
-          />
-        ),
-      },
-    ]}>
+    <Layout
+      showLogo
+      actions={[
+        {
+          render: () => (
+            <Menu
+              label=""
+              icon={<MoreVertical />}
+              items={[
+                {
+                  label: "Export",
+                  onClick: () => {
+                    handleToggleMnemonicModal();
+                  },
+                },
+                { label: "Help", onClick: () => {} },
+                {
+                  label: "Exit",
+                  onClick: () => {
+                    exit();
+                  },
+                },
+              ]}
+            />
+          ),
+        },
+      ]}
+    >
       <Box height="full">
         <Box
           width="100%"
           align="center"
           margin={{ bottom: "medium" }}
           pad={{ horizontal: "large", top: "small" }}
-          gap="medium"
         >
           <Button
             secondary
             onClick={() => navigate(RoutePath.Addresses)}
             style={{ borderColor: "grey" }}
             label={truncateInMiddle(app.currentAddress, 20)}
+            size="small"
           ></Button>
-          <Text size="32px" weight="bold">
+          <Text size="large" weight="bold" margin={{ top: "small" }}>
             {balances.data.btc}&nbsp;BTC
           </Text>
-          <Text weight="lighter">{dollars}</Text>
+          <Text weight="lighter" size="small">
+            {dollars}
+          </Text>
         </Box>
-        <Box margin={{ vertical: "large" }} gap="medium" direction="row" justify="center">
-          <Button label="Receive" onClick={handleToggleAddressModal} />
-          <Button label="Send" onClick={send} />
+        <Box gap="medium" direction="row" justify="center">
+          <Button
+            size="small"
+            label="Receive"
+            onClick={handleToggleAddressModal}
+          />
+          <Button size="small" label="Send" onClick={send} />
         </Box>
-        {isMnemonicModalOpen && <ShowMnemonicModal onClose={handleToggleMnemonicModal} />}
-        {isAddressModalOpen && <ShowAddressModal onClose={handleToggleAddressModal} />}
-        <Box flex overflow="auto" margin="large">
+        {isMnemonicModalOpen && (
+          <ShowMnemonicModal onClose={handleToggleMnemonicModal} />
+        )}
+        {isAddressModalOpen && (
+          <ShowAddressModal onClose={handleToggleAddressModal} />
+        )}
+        <Box flex overflow="auto" margin={{ top: "medium" }}>
           <Tabs>
             <Tab title="TOKENS">
               <InfiniteScroll items={balancesWithoutBTC}>
@@ -125,20 +145,14 @@ export const Balances = () => {
                     gap="small"
                     align="center"
                     border={{ color: "brand" }}
-                    pad="large"
-                    margin={{ bottom: "medium" }}
+                    pad="medium"
+                    margin={{ top: "medium" }}
                     style={{ borderRadius: "5px" }}
                   >
-                    <Box direction="row" gap="small" align="center">
-                      <Avatar src="//s.gravatar.com/avatar/b7fb138d53ba0f573212ccce38a7c43b?s=80" />
-                      <Box direction="column">
-                        <Text>{balance.toUpperCase()}</Text>
-                        <Text>ID</Text>
-                      </Box>
-                      <Text weight="bold" margin={{ left: "auto" }}>
-                        {balances.data[balance]}
-                      </Text>
+                    <Box flex>
+                      <Text>{balance.toUpperCase()}</Text>
                     </Box>
+                    <Text weight="bold">{balances.data[balance]}</Text>
                   </Box>
                 )}
               </InfiniteScroll>

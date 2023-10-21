@@ -108,10 +108,8 @@ export const sendTokens = async (account: any, utxos: Utxo[], to: string, _ticke
         }
 
         if (utxos[i].status.confirmed) {
-            const utxo = 'utxo_' + utxos[i].txid + '_' + utxos[i].vout;
-
             try {
-                const _utxo = await fetchUtxo(utxo);
+                const _utxo = await fetchUtxo(utxos[i].txid, utxos[i].vout);
 
                 if (_utxo.tick === ticker && _utxo.id === id) {
                     vin.push({
@@ -227,10 +225,6 @@ export const sendTokens = async (account: any, utxos: Utxo[], to: string, _ticke
 export function sendSats(account: any, utxos: Utxo[], toAddress: string, amount: bigint, rate: bigint, network: any): string {
     const vin = [];
     let found = 0n;
-
-    console.log("utxos", utxos)
-    console.log("account", account)
-    console.log("toAddress", toAddress)
 
     if(utxos.length === 0) throw new Error("No UTXOs available")
     utxos = utxos.sort((a, b) => b.value - a.value);
