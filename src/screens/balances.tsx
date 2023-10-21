@@ -64,6 +64,12 @@ export const Balances = () => {
     navigate(RoutePath.Send);
   };
 
+  const exit = () => {
+    // @todo add confirmation
+    localStorage.clear();
+    navigate(RoutePath.Root);
+  }
+
   return (
     <Layout showLogo actions={[
       {
@@ -72,9 +78,9 @@ export const Balances = () => {
             label=""
             icon={<MoreVertical />}
             items={[
-              { label: 'Export', onClick: () => {() => handleToggleMnemonicModal()} },
+              { label: 'Export', onClick: () => { handleToggleMnemonicModal() } },
               { label: 'Help', onClick: () => {} },
-              { label: 'Exit', onClick: () => { localStorage.clear() }}
+              { label: 'Exit', onClick: () => { exit() } }
             ]}
           />
         ),
@@ -99,7 +105,7 @@ export const Balances = () => {
           <Button label="Send" onClick={send} />
           <Button label="Swap" />
         </Box>
-        {isMnemonicModalOpen && <ShowMnemonicModal mnemonic={"hello world"} onClose={handleToggleMnemonicModal} />}
+        {isMnemonicModalOpen && <ShowMnemonicModal mnemonic={"hello world some lorem ipsum dolor sit amet illicitur sit hec fit optimus facet"} onClose={handleToggleMnemonicModal} />}
         {isAddressModalOpen && <ShowAddressModal onClose={handleToggleAddressModal} />}
         <Box flex overflow="auto" margin="large">
           <Tabs>

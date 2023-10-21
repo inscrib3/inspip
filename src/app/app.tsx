@@ -16,7 +16,6 @@ export const App = () => {
 
   useEffect(() => {
     try {
-      console.log("loading wallet")
       const wallet = loadWallet("password"); // @todo use password
       app.setAccount(importWallet(wallet.mnemonic, wallet.network));
       app.setNetwork(wallet.network);

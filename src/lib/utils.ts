@@ -44,6 +44,15 @@ export function addressToScriptPubKey(to: string, network: string) {
     return _script;
 }
 
+export function validateAddress(address: string, network: any): boolean {
+    try {
+        console.log(bitcoin.address.toOutputScript(address, network)) 
+        return true;
+    } catch(e) {
+        return false;
+    }
+}
+
 export function resolveNumberString(number: string, decimals: number) {
     if (!isValidNumber(number)) {
         throw new Error('Invalid op number');

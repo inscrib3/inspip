@@ -1,12 +1,15 @@
 import { Header, Box, Button, Select, TextInput, Text } from "grommet";
 import * as Icons from "grommet-icons";
 import { useNavigate } from "react-router-dom";
-import { useSendSats, useSendTokens, useGetBalances } from "../hooks";
 import { useEffect, useMemo, useState } from "react";
+import { validateAddress } from "../lib/utils";
 import { SetFees } from "../components";
+import { useSendSats, useSendTokens, useGetBalances } from "../hooks";
+import { useApp } from "../app";
 
 export const Send = () => {
   const navigate = useNavigate();
+  const app = useApp();
   const sendSats = useSendSats();
   const sendTokens = useSendTokens();
   const balances = useGetBalances();
@@ -14,6 +17,7 @@ export const Send = () => {
   const [address, setAddress] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
   const [fee] = useState<string>("10");
+  const [error, setError] = useState<string>("");
 
   const tickers = useMemo(
     () => Object.keys(balances.data).map((value) => value.toUpperCase()),
@@ -31,8 +35,22 @@ export const Send = () => {
   };
 
   const send = async () => {
-    if (!address || !amount || !ticker) return;
-    if (ticker.toLowerCase() == "btc" || ticker.toLowerCase() == "sats") {
+    setError("");
+    if (!address || !amount || !ticker || !fee) return;
+    if(BigInt(amount) <= 0) {
+      setError("Amount must be greater than zero");
+      return;
+    } else if(BigInt(fee) <= 0) {
+        setError("Fee must be greater than zero");
+      return;
+    } else if(!validateAddress(address, app.network)) {
+      console.log("Invalid address")
+      setError("Invalid address");
+      return;
+    }
+    setError("all good")
+    return;
+    if (ticker.toLowerCase() != "btc" || ticker.toLowerCase() == "sats") {
       await sendSats.dispatch(address, amount, fee);
       return;
     }
@@ -86,6 +104,7 @@ export const Send = () => {
           </Box>
         </Box>
         <SetFees />
+        <Text color="red">{error}</Text>
         <Button
           primary
           onClick={send}

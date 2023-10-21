@@ -1,5 +1,3 @@
-// name, address, ticker, id, amount, fee_rate
-
 import { useState, useCallback } from "react";
 import { useApp } from "../app";
 import { sendSats } from "../lib/wallet";

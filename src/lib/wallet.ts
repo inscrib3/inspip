@@ -228,6 +228,10 @@ export function sendSats(account: any, utxos: Utxo[], toAddress: string, amount:
     const vin = [];
     let found = 0n;
 
+    console.log("utxos", utxos)
+    console.log("account", account)
+    console.log("toAddress", toAddress)
+
     if(utxos.length === 0) throw new Error("No UTXOs available")
     utxos = utxos.sort((a, b) => b.value - a.value);
     for(let i = 0; i < utxos.length; i++)
