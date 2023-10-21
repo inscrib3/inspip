@@ -36,7 +36,6 @@ export const Send = () => {
 
   const send = async () => {
     setError("");
-    if (!address || !amount || !ticker || !fee) return;
     if(BigInt(amount) <= 0) {
       setError("Amount must be greater than zero");
       return;
