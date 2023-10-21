@@ -71,12 +71,11 @@ export function importWallet(mnemonic: string, network: any) {
     const rootKey = bip32.fromSeed(seed, network);
 
     const data = generateNewAddress(rootKey, network);
-  
     return { ...data, mnemonic, rootKey };
 }
 
 export function generateNewAddress(rootKey: any, network: any, index: number = 0) {
-    const path = (network === bitcoin.networks.bitcoin) ? `m/86'/0'/0'/0/${index}` : `m/49'/1'/0'/0/${index}`;
+    const path = `m/86'/0'/0'/0/${index}`;
     const account: any = rootKey.derivePath(path)
     const internalPubkey: any = toXOnly(account.publicKey)
     const { address, output } = bitcoin.payments.p2tr({ internalPubkey: internalPubkey, network })
@@ -137,8 +136,7 @@ export const sendTokens = async (account: any, utxos: Utxo[], to: string, _ticke
         let token_utxo_exists = false;
 
         try {
-            const utxo = 'utxo_' + utxos[i].txid + '_' + utxos[i].vout;
-            await fetchUtxo(utxo);
+            await fetchUtxo(utxos[i].txid, utxos[i].vout);
             token_utxo_exists = true;
         } catch(e){
             console.error(e);
