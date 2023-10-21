@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useApp } from "../app";
 import { sendSats } from "../lib/wallet";
 import { fetchUtxos } from "../lib/node";
+import { save } from "./show-transactions.hook";
 
 export type SendSats = {
   dispatch: (address: string, amount: string, fee_rate: string) => Promise<string | undefined>;
@@ -45,8 +46,9 @@ export const useSendSats = (): SendSats => {
         BigInt(fee_rate),
         app.network
       );
-
+      save({txid: data, address: app.currentAddress, description: `Sent ${amount} sats to ${address}`, timestamp: Date.now().toLocaleString()});
       setData(data);
+
       setLoading(false);
       return data;
     },

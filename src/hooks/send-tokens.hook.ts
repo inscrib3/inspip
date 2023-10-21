@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useApp } from "../app";
 import { sendTokens } from "../lib/wallet";
 import { fetchUtxos } from "../lib/node";
+import { save } from "./show-transactions.hook";
 
 export type SendTokens = {
   dispatch: (address: string, ticker: string, id: string, amount: string, fee_rate: string) => Promise<any>
@@ -21,6 +22,7 @@ export const useSendTokens = (): SendTokens => {
 
       const utxos = await fetchUtxos(app.currentAddress)
       const data = await sendTokens(app.account, utxos, address, ticker, id, amount, fee_rate, app.network)
+      save({txid: data, address: app.currentAddress, description: `Sent ${amount} ${ticker}:${id} to ${address}`, timestamp: Date.now().toLocaleString()});
       setData(data);
 
       setLoading(false);
