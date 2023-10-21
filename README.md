@@ -1,4 +1,4 @@
-# Inscrib3 | Pipe Wallet Extension
+# Inspip | Pipe Wallet Extension
 Easily manage and interact with PIPE tokens on the Bitcoin network right from your browser. The Pipe Wallet extension provides a simple interface to *Deploy*, *Mint*, and *Transfer* tokens adhering to the PIPE protocol specifications.
 
 ## Features

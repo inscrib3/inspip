@@ -24,35 +24,29 @@ export const useGetBalances = (): GetBalances => {
       [key: string]: string;
     } = {};
 
-    app.tokens.forEach(async (token) => {
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_APP_API}/getbalance?address=${
-            app.currentAddress
-          }&ticker=${token.ticker}&id=${token.id}`
-        );
-        const { data } = await res.json();
-        nextData[`${data.ticker}:${data.id}`] = data.amt;
-      } catch (e) {
-        setData({ sats: "", btc: "" });
-        setLoading(false);
-        return nextData;
-      }
-    });
-
     const utxos = await fetchUtxos(app.currentAddress);
 
-    const sumOfSats = utxos.reduce((acc: number, utxo: { value: number; }) => {
+    const sumOfSats = utxos.reduce((acc: number, utxo: { txid: string, vout: number; value: number; }) => {
       return acc + utxo.value;
       return acc;
     }, 0);
+
+    for (const utxo of utxos) {
+      try {
+        console.log(import.meta.env.VITE_APP_API);
+        const token = await fetch(`${import.meta.env.VITE_APP_API}/utxo/${utxo.txid}/${utxo.vout}`);
+        console.log(token);
+      } catch (e) {
+        console.log(e);
+      }
+    }
 
     nextData["btc"] = satsToBtc(sumOfSats).toString();
 
     setData(nextData);
     setLoading(false);
     return nextData;
-  }, [app.currentAddress, app.tokens, loading]);
+  }, [app.currentAddress, loading]);
 
   useEffect(() => {
     dispatch();
