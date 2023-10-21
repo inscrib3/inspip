@@ -26,6 +26,9 @@ export const themeConstants: ThemeType = {
           radius: "3px",
         },
       }
-    }
+    },
+    border: {
+      radius: "3px",
+    },
   },
 };
