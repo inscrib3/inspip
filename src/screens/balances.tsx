@@ -80,7 +80,6 @@ export const Balances = () => {
                     handleToggleMnemonicModal();
                   },
                 },
-                { label: "Help", onClick: () => {} },
                 {
                   label: "Exit",
                   onClick: () => {

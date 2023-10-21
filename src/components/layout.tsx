@@ -20,7 +20,7 @@ export const Layout = (props: LayoutProps): JSX.Element => {
 
   return (
     <Box height="full" pad={{ horizontal: "large", vertical: "large" }}>
-      <Header pad="medium">
+      <Header>
         {!!props.showBack && (
           <Box flex="grow">
             <Button icon={<LinkPrevious />} onClick={goBack} />

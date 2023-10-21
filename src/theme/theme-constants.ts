@@ -10,8 +10,22 @@ export const themeConstants: ThemeType = {
     },
   },
   button: {
-    border: {
-      radius: "3px",
-    },
+    size: {
+      small: {
+        border: {
+          radius: "3px",
+        },
+      },
+      medium: {
+        border: {
+          radius: "3px",
+        },
+      },
+      large: {
+        border: {
+          radius: "3px",
+        },
+      }
+    }
   },
 };

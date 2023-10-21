@@ -68,16 +68,19 @@ export const SetFees = (): JSX.Element => {
           primary={selectedFee === "economyFee"}
           label={`Economy: ${fees.economyFee} sats/vB`}
           onClick={() => setSelectedFee("economyFee")}
+          size="small"
         />
         <Button
           primary={selectedFee === "halfHourFee"}
           label={`Normal: ${fees.halfHourFee} sats/vB`}
           onClick={() => setSelectedFee("halfHourFee")}
+          size="small"
         />
         <Button
           primary={selectedFee === "custom"}
           label={`Custom`}
           onClick={() => setSelectedFee("custom")}
+          size="small"
         />
       </Box>
       {selectedFee === "custom" && (
