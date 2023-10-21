@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { useCreateAddress } from ".";
 import { useApp } from "../app";
 import { generateNewAddress } from "../lib/wallet";
 

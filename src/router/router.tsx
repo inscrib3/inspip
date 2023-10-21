@@ -1,7 +1,7 @@
 import { createHashRouter } from "react-router-dom";
 import { RoutePath } from "./route-path";
 import { App } from "../app";
-import { CreateWallet, RestoreWallet, Mnemonic, Password, Balances, Send } from "../screens";
+import { CreateWallet, RestoreWallet, Mnemonic, Balances, Send } from "../screens";
 import { Addresses } from "../screens/addresses";
 
 export const router = createHashRouter([
@@ -24,10 +24,6 @@ export const router = createHashRouter([
   {
     path: RoutePath.Balances,
     element: <Balances />,
-  },
-  {
-    path: RoutePath.Password,
-    element: <Password />,
   },
   {
     path: RoutePath.Send,

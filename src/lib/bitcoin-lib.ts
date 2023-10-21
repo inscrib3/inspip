@@ -1,4 +1,5 @@
-const _bitcoin = (window as any).bitcoin;
+//const _bitcoin = (window as any).bitcoin;
+import * as _bitcoin from 'bitcoinjs-lib';
 
 interface Bitcoin {
     address: any;

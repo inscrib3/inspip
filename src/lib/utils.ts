@@ -102,8 +102,8 @@ function charRange(start: string, stop: string) {
 
     // get all chars from starting char
     // to ending char
-    let i = start.charCodeAt(0),
-        last = stop.charCodeAt(0) + 1;
+    let i = start.charCodeAt(0);
+    const last = stop.charCodeAt(0) + 1;
     for (i; i < last; i++) {
         result.push(String.fromCharCode(i));
     }

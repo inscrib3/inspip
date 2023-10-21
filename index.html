@@ -9,9 +9,7 @@
       content="Official wallet for Bitcoin Pipe protocol"
     />
     <meta name="robots" content="noindex, nofollow" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="-1" />
-    <title>Inspip | Pipe Wallet Extension</title>
+    <title>Inscrib3 | Pipe Wallet Extension</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
@@ -31,7 +29,10 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/bitcoin.js"></script>
     <script type="module" src="/src/main.tsx"></script>
+    <script type="module">
+      import { Buffer } from "buffer";
+      window.Buffer = Buffer;
+    </script>  
   </body>
 </html>

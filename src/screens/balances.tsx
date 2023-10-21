@@ -1,14 +1,4 @@
-import {
-  Box,
-  Text,
-  Button,
-  InfiniteScroll,
-  Tabs,
-  Tab,
-  Avatar,
-  Menu,
-  Footer,
-} from "grommet";
+import { Box, Text, Button, InfiniteScroll, Tabs, Tab, Avatar, Menu } from "grommet";
 import { useGetBalances } from "../hooks";
 import { useApp } from "../app";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +10,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ShowAddressModal } from "./modals/show-address";
 import { satsToDollars } from "../utils/sats-to-dollars";
 import { getBitcoinPrice } from "../utils/bitcoin-price";
+import { ShowMnemonicModal } from "./modals/show-mnemonic";
+
 /*
 import { useEffect, useState } from "react";
 import { utxos } from "../mempool/utxos";
@@ -30,6 +22,8 @@ export const Balances = () => {
   const balances = useGetBalances();
   const navigate = useNavigate();
   const [bitcoinPrice, setBitcoinPrice] = useState<number>(0);
+  const [isAddressModalOpen, setAddressModalOpen] = useState(false);
+  const [isMnemonicModalOpen, setMnemonicModalOpen] = useState(false);
 
   const balancesWithoutBTC = Object.keys(balances.data).filter(
     (balance) => balance !== "btc" && balance !== "sats"
@@ -49,34 +43,46 @@ export const Balances = () => {
     );
   }, [balances.data.btc, bitcoinPrice]);
 
-  const [isModalOpen, setModalOpen] = useState(false);
-
-  const handleToggleModal = () => {
-    setModalOpen((prevState) => !prevState);
+  const handleToggleAddressModal = () => {
+    setAddressModalOpen(prevState => !prevState);
   };
+
+  const handleToggleMnemonicModal = () => {
+    setMnemonicModalOpen(prevState => !prevState);
+  }
+
+  /*const [btcBalance, setBtcBalance] = useState<string>("0");
+
+  useEffect(() => {
+    (async () => {
+      const _utxos = await utxos();
+      console.log(_utxos);
+      _btcBalance = _utxos.reduce((acc, utxo) => acc + utxo.value, 0);
+      console.log(_btcBalance);
+      setBtcBalance(_btcBalance.toString());
+    })();
+  }, []);*/
 
   const send = () => {
     navigate(RoutePath.Send);
   };
 
   return (
-    <Layout
-      showLogo
-      actions={[
-        {
-          render: () => (
-            <Menu
-              label=""
-              icon={<MoreVertical />}
-              items={[
-                { label: "Export", onClick: () => {} },
-                { label: "Help", onClick: () => {} },
-              ]}
-            />
-          ),
-        },
-      ]}
-    >
+    <Layout showLogo actions={[
+      {
+        render: () => (
+          <Menu
+            label=""
+            icon={<MoreVertical />}
+            items={[
+              { label: 'Export', onClick: () => {() => handleToggleMnemonicModal()} },
+              { label: 'Help', onClick: () => {} },
+              { label: 'Exit', onClick: () => { localStorage.clear() }}
+            ]}
+          />
+        ),
+      },
+    ]}>
       <Box height="full">
         <Box
           width="100%"
@@ -96,16 +102,12 @@ export const Balances = () => {
           </Text>
           <Text weight="lighter">{dollars}</Text>
         </Box>
-        <Box
-          margin={{ vertical: "medium" }}
-          gap="medium"
-          direction="row"
-          justify="center"
-        >
-          <Button label="Receive" onClick={handleToggleModal} />
+        <Box margin={{ vertical: "large" }} gap="medium" direction="row" justify="center">
+          <Button label="Receive" onClick={handleToggleAddressModal} />
           <Button label="Send" onClick={send} />
         </Box>
-        {isModalOpen && <ShowAddressModal onClose={handleToggleModal} />}
+        {isMnemonicModalOpen && <ShowMnemonicModal mnemonic={"hello world"} onClose={handleToggleMnemonicModal} />}
+        {isAddressModalOpen && <ShowAddressModal onClose={handleToggleAddressModal} />}
         <Box flex overflow="auto" margin="large">
           <Tabs>
             <Tab title="TOKENS">

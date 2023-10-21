@@ -12,6 +12,8 @@
   "dependencies": {
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
     "@cmdcode/tapscript": "^1.4.1",
+    "@sentry/react": "^7.74.1",
+    "@sentry/vite-plugin": "^2.8.0",
     "bip32": "^4.0.0",
     "bip39": "^3.1.0",
     "bitcoinjs-lib": "^6.1.5",
