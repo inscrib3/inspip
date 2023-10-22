@@ -39,6 +39,7 @@ export const useSendSats = (): SendSats => {
 
       const data = sendSats(
         app.account,
+        app.currentAddress,
         utxos,
         address,
         BigInt(amount),

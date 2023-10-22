@@ -18,7 +18,6 @@ export const Send = () => {
   const [ticker, setTicker] = useState<string>('');
   const [address, setAddress] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
-  const [fee] = useState<string>("10");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -49,7 +48,7 @@ export const Send = () => {
 
     if (ticker.toLowerCase() === "btc") {
       try {
-        const hex = await sendSats.dispatch(address, `${Math.floor(parseFloat(amount) * Math.pow(10, 8))}`, fee);
+        const hex = await sendSats.dispatch(address, `${Math.floor(parseFloat(amount) * Math.pow(10, 8))}`, `${app.feerate}`);
         const txid = await sendTransaction(hex);
         save({txid, from: app.currentAddress, to: address, amount, timestamp: Date.now(), confirmed: false });
         navigate(-1);
@@ -68,7 +67,7 @@ export const Send = () => {
         tickerSplit[0],
         tickerSplit[1],
         amount,
-        fee
+        `${app.feerate}`
       );
       const txid = await sendTransaction(hex);
       save({txid, from: app.currentAddress, to: address, amount, token: ticker, timestamp: Date.now(), confirmed: false });
@@ -91,7 +90,10 @@ export const Send = () => {
         {!!error && (<Text color="red" margin={{ bottom: "small" }}>{error}</Text>)}
         {ticker && balances.data[ticker.toLowerCase()] && (
           <Box justify="end" margin={{ bottom: "medium" }} direction="row" gap="small">
-            <Anchor onClick={() => {setAmount(balances.data[ticker.toLowerCase()])}}><Text>{balances.data[ticker.toLowerCase()]}</Text></Anchor>
+            <Anchor onClick={() => {
+              console.log(balances.data[ticker.toLowerCase()]);
+              setAmount(balances.data[ticker.toLowerCase()])
+            }}><Text>{balances.data[ticker.toLowerCase()]}</Text></Anchor>
             <Text>{ticker}</Text>
           </Box>
         )}

@@ -25,7 +25,7 @@ export const useCreateWallet = (): CreateWallet => {
       saveWallet(wallet.mnemonic, app.network, address.address, [0], password);
       setData({...wallet, network: app.network});
       app.setAddresses([0]);
-      app.setCurrentAddress(address.address);
+      app.setCurrentAddress(address.address, 0);
 
       setLoading(false);
 

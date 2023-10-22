@@ -24,7 +24,7 @@ export const Addresses = (): JSX.Element => {
                 pad="medium"
                 key={item}
                 background={address.address === item ? "brand" : undefined}
-                onClick={() => address.setAddress(item)}
+                onClick={() => address.switchAddress(item, index)}
               >
                 <Text size="small" weight="bold">
                   Account {index + 1}

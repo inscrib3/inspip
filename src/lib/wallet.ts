@@ -20,7 +20,7 @@ interface Utxo {
     status: any;
 }
 
-export function editWallet(currentAddress: string = '', addresses: number[] = []) {
+export function editWallet(currentAddress: string = '', addresses: number[] = [], addressIndex: number = 0) {
     const data = localStorage.getItem('wallet');
     if (!data) throw new Error('Wallet not found');
 
@@ -29,6 +29,7 @@ export function editWallet(currentAddress: string = '', addresses: number[] = []
 
     if (currentAddress !== '') parsedData.currentAddress = currentAddress;
     if (addresses.length > 0) parsedData.addresses = addresses;
+    if (parsedData.addressIndex !== addressIndex) parsedData.addressIndex = addressIndex;
 
     localStorage.setItem('wallet', JSON.stringify(parsedData));
 
@@ -68,13 +69,13 @@ export function generateWallet(network: any) {
     return importWallet(mnemonic, network);
 }
 
-export function importWallet(mnemonic: string, network: any) {
+export function importWallet(mnemonic: string, network: any, index: number = 0) {
     bitcoin.initEccLib(ecc);
     const bip32 = BIP32Factory(ecc);
     const seed = bip39.mnemonicToSeedSync(mnemonic);
     const rootKey = bip32.fromSeed(seed, network);
 
-    const data = generateNewAddress(rootKey, network);
+    const data = generateNewAddress(rootKey, network, index);
     return { ...data, mnemonic, rootKey };
 }
 
@@ -87,7 +88,7 @@ export function generateNewAddress(rootKey: any, network: any, index: number = 0
     return { rootKey, account, internalPubkey, address, output }
 }
 
-export const sendTokens = async (account: any, utxos: Utxo[], to: string, _ticker: string, _id: string, _amount: string, _rate: string, network: any) => {
+export const sendTokens = async (account: any, currentAddress: string, utxos: Utxo[], to: string, _ticker: string, _id: string, _amount: string, _rate: string, network: any) => {
     const ticker = _ticker.trim().toLowerCase();
     const id = parseInt(_id.trim());
 
@@ -126,7 +127,7 @@ export const sendTokens = async (account: any, utxos: Utxo[], to: string, _ticke
                         vout: utxos[i].vout,
                         prevout: {
                             value: BigInt(utxos[i].value),
-                            scriptPubKey: addressToScriptPubKey(account.address, network)
+                            scriptPubKey: addressToScriptPubKey(currentAddress, network)
                         }
                     });
     
@@ -161,7 +162,7 @@ export const sendTokens = async (account: any, utxos: Utxo[], to: string, _ticke
                 vout: utxos[i].vout,
                 prevout: {
                     value: BigInt(utxos[i].value),
-                    scriptPubKey: addressToScriptPubKey(account.address, network)
+                    scriptPubKey: addressToScriptPubKey(currentAddress, network)
                 }
             });
 
@@ -198,7 +199,7 @@ export const sendTokens = async (account: any, utxos: Utxo[], to: string, _ticke
 
         vout.push({
             value: 546n,
-            scriptPubKey: await addressToScriptPubKey(account.address, network)
+            scriptPubKey: await addressToScriptPubKey(currentAddress, network)
         });
 
         vout.push({
@@ -211,7 +212,7 @@ export const sendTokens = async (account: any, utxos: Utxo[], to: string, _ticke
 
     vout.push({
         value: sats_found - (143n * rate), // @todo check 143n default
-        scriptPubKey: addressToScriptPubKey(account.address, network)
+        scriptPubKey: addressToScriptPubKey(currentAddress, network)
     })
 
     const txdata = Tx.create({
@@ -230,7 +231,7 @@ export const sendTokens = async (account: any, utxos: Utxo[], to: string, _ticke
     return Tx.encode(txdata).hex;
 };
 
-export const sendSats = async (account: any, utxos: Utxo[], toAddress: string, amount: bigint, rate: bigint, network: any): Promise<string> => {
+export const sendSats = async (account: any, currentAddress: string, utxos: Utxo[], toAddress: string, amount: bigint, rate: bigint, network: any): Promise<string> => {
     const vin = [];
     let found = 0n;
 
@@ -256,7 +257,7 @@ export const sendSats = async (account: any, utxos: Utxo[], toAddress: string, a
                 vout: utxos[i].vout,
                 prevout: {
                     value: BigInt(utxos[i].value),
-                    scriptPubKey: addressToScriptPubKey(account.address, network)
+                    scriptPubKey: addressToScriptPubKey(currentAddress, network)
                 }
             });
             
@@ -273,7 +274,7 @@ export const sendSats = async (account: any, utxos: Utxo[], toAddress: string, a
     });
     vout.push({
         value: found - amount - 143n * rate, // @todo check 143n default
-        scriptPubKey: addressToScriptPubKey(account.address, network)
+        scriptPubKey: addressToScriptPubKey(currentAddress, network)
     })
 
     const txdata = Tx.create({
