@@ -20,13 +20,13 @@ export const fetchUtxo = async (txid: string, vout: number) => {
       `${import.meta.env.VITE_APP_API}/utxo/${txid}/${vout}`
     );
 
-    if (!utxo.ok) throw new Error("Deployment not found");
+    if (!utxo.ok) throw new Error("Utxo not found");
 
     const data = await utxo.json();
 
     return data;
   } catch (e) {
-    throw new Error("Deployment not found");
+    throw new Error("Utxo not found");
   }
 };
 

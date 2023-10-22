@@ -91,7 +91,13 @@ export const sendTokens = async (account: any, utxos: Utxo[], to: string, _ticke
     const ticker = _ticker.trim().toLowerCase();
     const id = parseInt(_id.trim());
 
-    const deployment = await getDeployment(ticker, id);
+    let deployment = null;
+
+    try {
+        deployment = await getDeployment(ticker, id);
+    } catch (e) {
+        throw new Error('Deployment not found');   
+    }
 
     if (deployment === null) {
         throw new Error('Deployment not found');
@@ -133,7 +139,7 @@ export const sendTokens = async (account: any, utxos: Utxo[], to: string, _ticke
     }
 
     for (let i = 0; i < utxos.length; i++) {
-        if (sats_found >= sats_amount * rate) {
+        if (sats_found >= sats_amount + (rate * 2n)) {
             break;
         }
 
@@ -204,7 +210,7 @@ export const sendTokens = async (account: any, utxos: Utxo[], to: string, _ticke
     }
 
     vout.push({
-        value: sats_found - 143n * rate, // @todo check 143n default
+        value: sats_found - (143n * rate), // @todo check 143n default
         scriptPubKey: addressToScriptPubKey(account.address, network)
     })
 
@@ -224,7 +230,7 @@ export const sendTokens = async (account: any, utxos: Utxo[], to: string, _ticke
     return Tx.encode(txdata).hex;
 };
 
-export function sendSats(account: any, utxos: Utxo[], toAddress: string, amount: bigint, rate: bigint, network: any): string {
+export const sendSats = async (account: any, utxos: Utxo[], toAddress: string, amount: bigint, rate: bigint, network: any): Promise<string> => {
     const vin = [];
     let found = 0n;
 
@@ -232,9 +238,19 @@ export function sendSats(account: any, utxos: Utxo[], toAddress: string, amount:
     utxos = utxos.sort((a, b) => b.value - a.value);
     for(let i = 0; i < utxos.length; i++)
     {
-        if(found >= amount * rate * 2n) break;
+        if(found >= amount + (rate * 2n)) break;
 
-        if(utxos[i].status.confirmed) {
+        let token_utxo_exists = false;
+
+        try
+        {
+            await fetchUtxo(utxos[i].txid, utxos[i].vout);
+            token_utxo_exists = true;
+        } catch(e) {
+            console.error(e);
+        }
+
+        if(!token_utxo_exists && utxos[i].status.confirmed) {
             vin.push({
                 txid: utxos[i].txid,
                 vout: utxos[i].vout,
@@ -248,7 +264,7 @@ export function sendSats(account: any, utxos: Utxo[], toAddress: string, amount:
         }
     }
 
-    if(found < amount * rate * 2n) throw new Error("Insufficient token funds, or transaction still unconfirmed")
+    if(found < amount + (rate * 2n)) throw new Error("Insufficient token funds, or transaction still unconfirmed")
 
     const vout = [];
     vout.push({
@@ -314,7 +330,7 @@ export function selectUtxos(fromAddress: string, rate: bigint, utxos: Utxo[], ut
 
     // UTXO selection for satoshis
     for (let i = 0; i < utxos.length; i++) {
-        if (sats_found >= sats_amount * rate) {
+        if (sats_found >= sats_amount + (rate * 2n)) {
             break;
         }
 
