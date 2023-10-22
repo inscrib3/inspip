@@ -50,7 +50,7 @@ export const Send = () => {
     if (ticker.toLowerCase() === "btc") {
       try {
         const hex = await sendSats.dispatch(address, `${Math.floor(parseFloat(amount) * Math.pow(10, 8))}`, fee);
-        const txid = await sendTransaction(hex, "1");
+        const txid = await sendTransaction(hex);
         save({txid, from: app.currentAddress, to: address, amount, timestamp: Date.now(), confirmed: false });
         navigate(-1);
       } catch (e) {
@@ -70,7 +70,7 @@ export const Send = () => {
         amount,
         fee
       );
-      const txid = await sendTransaction(hex, "1");
+      const txid = await sendTransaction(hex);
       save({txid, from: app.currentAddress, to: address, amount, token: ticker, timestamp: Date.now(), confirmed: false });
     } catch (e) {
       setError((e as Error).message);
