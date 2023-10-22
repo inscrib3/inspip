@@ -38,7 +38,6 @@ export const SetFees = (): JSX.Element => {
     setInterval(() => {
       getFees().then((fees) => {
         setFees(fees);
-        setCustomFee(fees.fastestFee);
         if (selectedFee === "custom") return;
         app.setFeerate(fees[selectedFee]);
       });
