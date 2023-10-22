@@ -8,7 +8,7 @@ export const AppContext = createContext<{
   setAccount: (account: any) => void,
   setNetwork: (network: any) => void,
   currentAddress: string,
-  setCurrentAddress: (address: string) => void,
+  setCurrentAddress: (address: string, index: number) => void,
   addresses: number[],
   setAddresses: (addresses: number[]) => void,
   feerate: number,
@@ -47,9 +47,9 @@ export const AppProvider = (props: AppProviderProps) => {
     editWallet('', addresses);
   };
 
-  const setCurrentAddress = (address: string) => {
+  const setCurrentAddress = (address: string, index: number) => {
     _setCurrentAddress(address);
-    editWallet(address);
+    editWallet(address, [], index);
   };
 
   return (

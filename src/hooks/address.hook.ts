@@ -6,8 +6,7 @@ export type Address = {
   data: string[];
   address: string;
   createAddress: () => void;
-  switchAddress: (address: string) => void;
-  setAddress: (address: string) => void;
+  switchAddress: (address: string, index: number) => void;
 }
 
 export const useAddress = (): Address => {
@@ -15,7 +14,8 @@ export const useAddress = (): Address => {
 
   const data = useMemo(() => {
     return app.addresses.map((_index) => {
-      return generateNewAddress(app.account.rootKey, app.network, _index).address;
+      const account0 = generateNewAddress(app.account.rootKey, app.network, 0);
+      return generateNewAddress(account0.rootKey, app.network, _index).address;
     });
   }, [app.account.rootKey, app.addresses, app.network]);
 
@@ -23,19 +23,17 @@ export const useAddress = (): Address => {
     app.setAddresses(app.addresses.concat([app.addresses.length]));
   };
 
-  const switchAddress = (address: string) => {
-    app.setCurrentAddress(address);
+  const switchAddress = (address: string, index: number) => {
+    const account0 = generateNewAddress(app.account.rootKey, app.network, 0);
+    app.setAccount(generateNewAddress(account0.rootKey, app.network, index));
+    app.setCurrentAddress(address, index);
   };
 
-  const setAddress = (address: string) => {
-    app.setCurrentAddress(address);
-  };
 
   return {
     address: app.currentAddress,
     data,
     createAddress,
     switchAddress,
-    setAddress,
   };
 };

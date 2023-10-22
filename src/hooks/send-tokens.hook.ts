@@ -20,7 +20,7 @@ export const useSendTokens = (): SendTokens => {
       setLoading(true);
 
       const utxos = await fetchUtxos(app.currentAddress)
-      const data = await sendTokens(app.account, utxos, address, ticker, id, amount, fee_rate, app.network)
+      const data = await sendTokens(app.account, app.currentAddress, utxos, address, ticker, id, amount, fee_rate, app.network)
 
       setData(data);
 
