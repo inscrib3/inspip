@@ -53,8 +53,7 @@ export async function fetchHex(txid: any) {
   return await response.text();
 }
 
-export async function sendTransaction(hexstring: any, maxfeerate: any) {
-  console.log(maxfeerate);
+export async function sendTransaction(hexstring: any) {
   try {
     const response = await fetch("https://mempool.space/api/tx", {
       method: "POST",
@@ -66,7 +65,6 @@ export async function sendTransaction(hexstring: any, maxfeerate: any) {
       throw new Error(`Something went wrong: '${_error.message}'`);
     }
     const result = await response.text();
-    console.log(result);
     return result;
   } catch (error) {
     console.error("Error:", error);

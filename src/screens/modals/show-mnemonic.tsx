@@ -43,7 +43,7 @@ export function ShowMnemonicModal({ onClose}: { onClose: any }) {
             {mnemonic !== "" ? (
               <>
             {mnemonicGrid().map((row: any, rowIndex: number) => (
-              <Box direction="row" gap="small">
+              <Box direction="row" gap="small" key={rowIndex}>
                 {row.map((word: string, wordIndex: number) => (
                   <Box
                     border={{ color: "brand" }}

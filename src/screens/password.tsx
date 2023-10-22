@@ -4,12 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { RoutePath } from "../router";
 import { useApp } from "../app";
 import { importWallet, loadWallet } from "../lib/wallet";
+import { ResetStorageModal } from "./modals/reset-storage";
 
 export const Password = () => {
   const navigate = useNavigate();
   const app = useApp();
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isResetModalOpen, setResetModalOpen] = useState(false);
 
   const [errors, setErrors] = useState<{
     password?: string;
@@ -78,13 +80,23 @@ export const Password = () => {
               </Text>
             )}
           </Box>
+          {isResetModalOpen && (
+          <ResetStorageModal onClose={() => setResetModalOpen(false)} />
+          )}
           {loading && <Spinner />}
-          <Box>
+          <Box direction="row" gap="small">
             <Button
               primary
               label="Next"
               style={{ width: "100%" }}
               onClick={onNext}
+              disabled={loading}
+            />
+            <Button
+              secondary
+              label="Reset"
+              style={{ width: "100%" }}
+              onClick={() => setResetModalOpen(true)}
               disabled={loading}
             />
           </Box>

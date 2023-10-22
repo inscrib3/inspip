@@ -12,6 +12,7 @@ import { satsToDollars } from "../utils/sats-to-dollars";
 import { getBitcoinPrice } from "../utils/bitcoin-price";
 import { ShowMnemonicModal } from "./modals/show-mnemonic";
 import { Transaction, load } from "../hooks/show-transactions.hook";
+import { ResetStorageModal } from "./modals/reset-storage";
 
 export const Balances = () => {
   const app = useApp();
@@ -20,6 +21,7 @@ export const Balances = () => {
   const [bitcoinPrice, setBitcoinPrice] = useState<number>(0);
   const [isAddressModalOpen, setAddressModalOpen] = useState(false);
   const [isMnemonicModalOpen, setMnemonicModalOpen] = useState(false);
+  const [isResetModalOpen, setResetModalOpen] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const balancesWithoutBTC = Object.keys(balances.data).filter(
     (balance) => balance !== "btc" && balance !== "sats"
@@ -30,7 +32,7 @@ export const Balances = () => {
       setBitcoinPrice(price);
     });
 
-    setTransactions(load().reverse());
+    setTransactions(load().filter((t) => t.from === app.currentAddress).reverse());
   }, []);
 
   const dollars = useMemo(() => {
@@ -53,12 +55,6 @@ export const Balances = () => {
     navigate(RoutePath.Send);
   };
 
-  const exit = () => {
-    // @todo add confirmation
-    localStorage.clear();
-    navigate(RoutePath.Root);
-  };
-
   return (
     <Layout
       showLogo
@@ -66,6 +62,7 @@ export const Balances = () => {
         {
           render: () => (
             <Menu
+              key={0}
               label=""
               icon={<MoreVertical />}
               items={[
@@ -77,9 +74,7 @@ export const Balances = () => {
                 },
                 {
                   label: "Exit",
-                  onClick: () => {
-                    exit();
-                  },
+                  onClick: () => { setResetModalOpen(true) },
                 },
               ]}
             />
@@ -122,13 +117,16 @@ export const Balances = () => {
         {isAddressModalOpen && (
           <ShowAddressModal onClose={handleToggleAddressModal} />
         )}
+        {isResetModalOpen && (
+          <ResetStorageModal onClose={() => setResetModalOpen(false)} />
+        )}
         <Box flex overflow="auto" margin={{ top: "medium" }}>
           <Tabs>
             <Tab title="TOKENS">
               <InfiniteScroll items={balancesWithoutBTC}>
-                {(balance: string) => (
+                {(balance: string, index: number) => (
                   <Box
-                    key={balance}
+                    key={index}
                     direction="row"
                     gap="small"
                     align="center"
@@ -165,7 +163,17 @@ export const Balances = () => {
                         <Clock color="brand" />
                       )}
                     </Box>
-                    <Anchor color="white" target="_blank" href={`https://mempool.space/tx/${transaction.txid}`} style={{ wordBreak: "break-all" }}>{transaction.description}</Anchor>
+                    <Anchor color="white" target="_blank" href={`https://mempool.space/tx/${transaction.txid}`} style={{ wordBreak: "break-all" }}>
+                      {transaction.token ? (
+                        <>
+                          Sent {transaction.amount} {transaction.token} to {truncateInMiddle(transaction.to, 20)}
+                        </>
+                      ) : (
+                        <>
+                          Sent {transaction.amount} BTC to {truncateInMiddle(transaction.to, 20)}
+                        </>
+                      )}
+                    </Anchor>
                   </Box>
                 )}
               </InfiniteScroll>

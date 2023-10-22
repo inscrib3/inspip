@@ -1,4 +1,4 @@
-import { Header, Box, Button, Select, TextInput, Text, Spinner } from "grommet";
+import { Header, Box, Button, Select, TextInput, Text, Spinner, Anchor } from "grommet";
 import * as Icons from "grommet-icons";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
@@ -8,7 +8,6 @@ import { useSendSats, useSendTokens, useGetBalances } from "../hooks";
 import { useApp } from "../app";
 import { sendTransaction } from "../lib/node";
 import { save } from "../hooks/show-transactions.hook";
-import { truncateInMiddle } from "../utils/truncate-in-middle";
 
 export const Send = () => {
   const navigate = useNavigate();
@@ -42,7 +41,6 @@ export const Send = () => {
     setError("");
 
     if(!validateAddress(address, app.network)) {
-      console.log("Invalid address")
       setError("Invalid address");
       return;
     }
@@ -53,7 +51,7 @@ export const Send = () => {
       try {
         const hex = await sendSats.dispatch(address, `${Math.floor(parseFloat(amount) * Math.pow(10, 8))}`, fee);
         const txid = await sendTransaction(hex, "1");
-        save({txid, address: app.currentAddress, description: `Sent ${amount} btc to ${truncateInMiddle(address, 20)}`, timestamp: Date.now(), confirmed: false });
+        save({txid, from: app.currentAddress, to: address, amount, timestamp: Date.now(), confirmed: false });
         navigate(-1);
       } catch (e) {
         setError((e as Error).message);
@@ -73,7 +71,7 @@ export const Send = () => {
         fee
       );
       const txid = await sendTransaction(hex, "1");
-      save({txid, address: app.currentAddress, description: `Sent ${amount} ${ticker} to ${truncateInMiddle(address, 20)}`, timestamp: Date.now(), confirmed: false });
+      save({txid, from: app.currentAddress, to: address, amount, token: ticker, timestamp: Date.now(), confirmed: false });
     } catch (e) {
       setError((e as Error).message);
       setLoading(false);
@@ -93,7 +91,7 @@ export const Send = () => {
         {!!error && (<Text color="red" margin={{ bottom: "small" }}>{error}</Text>)}
         {ticker && balances.data[ticker.toLowerCase()] && (
           <Box justify="end" margin={{ bottom: "medium" }} direction="row" gap="small">
-            <Text>{balances.data[ticker.toLowerCase()]}</Text>
+            <Anchor onClick={() => {setAmount(balances.data[ticker.toLowerCase()])}}><Text>{balances.data[ticker.toLowerCase()]}</Text></Anchor>
             <Text>{ticker}</Text>
           </Box>
         )}
@@ -104,6 +102,7 @@ export const Send = () => {
               placeholder="Amount"
               onChange={(e) => setAmount(e.target.value)}
               max={balances.data[ticker?.toLowerCase() || ""]}
+              value={amount}
             />
           </Box>
           <Box>

@@ -270,8 +270,7 @@ export function sendSats(account: any, utxos: Utxo[], toAddress: string, amount:
     for (let i = 0; i < vin.length; i++) {
         const sig = Signer.taproot.sign(tseckey, txdata, i)
         txdata.vin[i].witness = [sig]
-        const verified = Signer.taproot.verify(txdata, i, { throws: true })
-        console.log('signer', { verified });
+        Signer.taproot.verify(txdata, i, { throws: true })
     }
       
     return Tx.encode(txdata).hex;

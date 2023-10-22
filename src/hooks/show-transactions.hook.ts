@@ -1,11 +1,11 @@
 export type Transaction = {
   txid: string;
-  hex?: string;
+  from: string;
+  to: string;
   timestamp: number;
-  value?: bigint;
-  address: string;
-  description: string;
   confirmed: boolean;
+  amount: string;
+  token?: string;
 };
 
 export const save = (transaction: Transaction) => {

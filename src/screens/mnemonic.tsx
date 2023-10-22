@@ -33,13 +33,14 @@ export const Mnemonic = () => {
         <Box>
           <Text margin={{ bottom: "small" }}>Save this seed phrase in a secure place</Text>
           {mnemonicGrid.map((row, rowIndex) => (
-            <Box direction="row" gap="small">
+            <Box direction="row" gap="small" key={rowIndex}>
               {row.map((word, wordIndex) => (
                 <Box
                   border={{ color: "brand" }}
                   flex
                   margin="small"
                   pad="small"
+                  key={wordIndex}
                 >
                   <Text
                     weight="bold"

@@ -46,8 +46,7 @@ export function addressToScriptPubKey(to: string, network: string) {
 
 export function validateAddress(address: string, network: any): boolean {
     try {
-        console.log(bitcoin.address.toOutputScript(address, network)) 
-        return true;
+        return bitcoin.address.toOutputScript(address, network);
     } catch(e) {
         return false;
     }
