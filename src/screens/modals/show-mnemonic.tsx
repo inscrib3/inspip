@@ -26,20 +26,22 @@ export function ShowMnemonicModal({ onClose}: { onClose: any }) {
   }
 
   return (
-        <Layer
-          onEsc={onClose}
-          onClickOutside={onClose}
-          responsive={false}
-          position="center"
-        >
-          <Box
-            pad="medium"
-            gap="small"
-            align="center"
-            elevation="medium"
-            round="small"
-            background="white"
-          >
+    <Layer
+      onEsc={onClose}
+      onClickOutside={onClose}
+      responsive={false}
+      position="center"
+      background={{ color: 'black', opacity: 'medium' }}
+    >
+      <Box 
+        pad="large" 
+        gap="medium" 
+        align="center" 
+        elevation="large"
+        round="small"
+        background="white"
+        width="medium"
+      >
             {mnemonic !== "" ? (
               <>
             {mnemonicGrid().map((row: any, rowIndex: number) => (
@@ -64,13 +66,13 @@ export function ShowMnemonicModal({ onClose}: { onClose: any }) {
             ))}
             </>
             ) : (
-              <>
+              <Box direction="row" gap="small">
               <TextInput
                 placeholder="Enter password"
                 type="password"
                 onChange={(event) => setPassword(event.target.value)} />
-              <Button label="Show" onClick={() => load()} />
-              </>
+              <Button primary label="Show" onClick={() => load()} />
+              </Box>
             )}
             <Button label="Close" onClick={onClose} />
           </Box>

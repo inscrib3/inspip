@@ -11,7 +11,7 @@ export function ShowAddressModal({ onClose }: { onClose: any }) {
       onClickOutside={onClose}
       responsive={false}
       position="center"
-      background={{ color: 'black', opacity: 'medium' }} // Translucent background
+      background={{ color: 'black', opacity: 'medium' }}
     >
       <Box 
         pad="large" 
