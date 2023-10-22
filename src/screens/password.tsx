@@ -85,7 +85,7 @@ export const Password = () => {
           <ResetStorageModal onClose={() => setResetModalOpen(false)} />
           )}
           {loading && <Spinner />}
-          <Box direction="row" gap="small">
+          <Box direction="column" gap="small">
             <Button
               primary
               label="Next"
