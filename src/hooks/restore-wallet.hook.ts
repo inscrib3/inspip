@@ -16,14 +16,13 @@ export const useRestoreWallet = (): RestoreWallet => {
 
   const dispatch = useCallback(
     async (mnemonic: string, password: string) => {
-      console.log(password);
       if (loading) return;
 
       setLoading(true);
 
       const wallet = importWallet(mnemonic, app.network);
       const address = generateNewAddress(wallet.rootKey, app.network, 0);
-      saveWallet(wallet.mnemonic, app.network, address.address, [0], "password");
+      saveWallet(wallet.mnemonic, app.network, address.address, [0], password);
       setData({...wallet, network: app.network});
       app.setAddresses([0]);
       app.setCurrentAddress(address.address);

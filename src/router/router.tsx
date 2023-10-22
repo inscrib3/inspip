@@ -3,6 +3,7 @@ import { RoutePath } from "./route-path";
 import { App } from "../app";
 import { CreateWallet, RestoreWallet, Mnemonic, Balances, Send } from "../screens";
 import { Addresses } from "../screens/addresses";
+import { Password } from "../screens/password";
 
 export const router = createHashRouter([
   {
@@ -20,6 +21,10 @@ export const router = createHashRouter([
   {
     path: RoutePath.RestoreWallet,
     element: <RestoreWallet />,
+  },
+  {
+    path: RoutePath.Password,
+    element: <Password />,
   },
   {
     path: RoutePath.Balances,

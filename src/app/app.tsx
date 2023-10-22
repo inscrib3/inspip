@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { RoutePath } from "../router";
 import { useEffect } from "react";
 import { Layout } from "../components";
-import { importWallet, loadWallet } from "../lib/wallet";
-import { useApp } from ".";
 
 export const App = () => {
   const navigate = useNavigate();
@@ -12,19 +10,10 @@ export const App = () => {
   const createWallet = () => navigate(RoutePath.CreateWallet);
   const restoreWallet = () => navigate(RoutePath.RestoreWallet);
 
-  const app = useApp();
-
   useEffect(() => {
-    try {
-      const wallet = loadWallet("password"); // @todo use password
-      app.setAccount(importWallet(wallet.mnemonic, wallet.network));
-      app.setNetwork(wallet.network);
-      app.setCurrentAddress(wallet.currentAddress)
-      app.setAddresses(wallet.addresses);
-    } catch(e) {
-      return;
+    if (localStorage.getItem("wallet")) {
+      navigate(RoutePath.Password);
     }
-    navigate(RoutePath.Balances);
   }, [navigate]);
 
   return (
