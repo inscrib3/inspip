@@ -29,7 +29,7 @@ export const Addresses = (): JSX.Element => {
                 <Text size="small" weight="bold">
                   Account {index + 1}
                 </Text>
-                <Text size="small">{truncateInMiddle(item, 30)}</Text>
+                <Text size="small">{truncateInMiddle(item, 20)}</Text>
               </Box>
             )}
           </InfiniteScroll>
