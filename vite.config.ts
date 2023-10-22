@@ -24,8 +24,7 @@ export default defineConfig({
   build: {
     sourcemap: true,
     rollupOptions: {
-			plugins: [inject({ Buffer: ['Buffer', 'Buffer'] })],
-      external: ['Buffer'],
+			plugins: [inject({ Buffer: ['buffer', 'Buffer'] })],
 		},
   }
 })
