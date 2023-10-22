@@ -1,4 +1,4 @@
-import { Header, Box, Button, Select, TextInput, Text } from "grommet";
+import { Header, Box, Button, Select, TextInput, Text, Spinner } from "grommet";
 import * as Icons from "grommet-icons";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
@@ -7,6 +7,8 @@ import { SetFees } from "../components";
 import { useSendSats, useSendTokens, useGetBalances } from "../hooks";
 import { useApp } from "../app";
 import { sendTransaction } from "../lib/node";
+import { save } from "../hooks/show-transactions.hook";
+import { truncateInMiddle } from "../utils/truncate-in-middle";
 
 export const Send = () => {
   const navigate = useNavigate();
@@ -19,6 +21,7 @@ export const Send = () => {
   const [amount, setAmount] = useState<string>('');
   const [fee] = useState<string>("10");
   const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   const tickers = useMemo(
     () => Object.keys(balances.data).map((value) => value.toUpperCase()),
@@ -37,40 +40,47 @@ export const Send = () => {
 
   const send = async () => {
     setError("");
+
     if(!validateAddress(address, app.network)) {
       console.log("Invalid address")
       setError("Invalid address");
       return;
     }
 
+    setLoading(true);
+
     if (ticker.toLowerCase() === "btc") {
-      const hex = await sendSats.dispatch(address, `${Math.floor(parseFloat(amount) * Math.pow(10, 8))}`, fee);
       try {
-        await sendTransaction(hex, "1");
+        const hex = await sendSats.dispatch(address, `${Math.floor(parseFloat(amount) * Math.pow(10, 8))}`, fee);
+        const txid = await sendTransaction(hex, "1");
+        save({txid, address: app.currentAddress, description: `Sent ${amount} btc to ${truncateInMiddle(address, 20)}`, timestamp: Date.now(), confirmed: false });
         navigate(-1);
       } catch (e) {
         setError((e as Error).message);
       }
+      setLoading(false);
       return;
     }
 
     const tickerSplit = ticker.split(":");
 
-    const hex = await sendTokens.dispatch(
-      address,
-      tickerSplit[0],
-      tickerSplit[1],
-      amount,
-      fee
-    );
-
     try {
-      await sendTransaction(hex, "1");
+      const hex = await sendTokens.dispatch(
+        address,
+        tickerSplit[0],
+        tickerSplit[1],
+        amount,
+        fee
+      );
+      const txid = await sendTransaction(hex, "1");
+      save({txid, address: app.currentAddress, description: `Sent ${amount} ${ticker} to ${truncateInMiddle(address, 20)}`, timestamp: Date.now(), confirmed: false });
     } catch (e) {
       setError((e as Error).message);
+      setLoading(false);
       return;
     }
 
+    setLoading(false);
     navigate(-1);
   };
 
@@ -115,11 +125,13 @@ export const Send = () => {
           </Box>
         </Box>
         <SetFees />
+        {loading && <Spinner margin={{ top: "large" }} />}
         <Button
           primary
           onClick={send}
           label="Send"
           margin={{ top: "medium" }}
+          disabled={loading}
         />
       </Box>
     </Box>

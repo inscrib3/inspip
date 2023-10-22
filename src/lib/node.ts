@@ -61,10 +61,13 @@ export async function sendTransaction(hexstring: any, maxfeerate: any) {
       body: hexstring,
     });
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      const error = await response.text();
+      const _error = new Error(error);
+      throw new Error(`Something went wrong: '${_error.message}'`);
     }
     const result = await response.text();
     console.log(result);
+    return result;
   } catch (error) {
     console.error("Error:", error);
     throw error;

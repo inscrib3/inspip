@@ -1,10 +1,10 @@
-import { Box, Text, Button, InfiniteScroll, Tabs, Tab, Avatar, Menu, Anchor } from "grommet";
+import { Box, Text, Button, InfiniteScroll, Tabs, Tab, Menu, Anchor } from "grommet";
 import { useGetBalances } from "../hooks";
 import { useApp } from "../app";
 import { useNavigate } from "react-router-dom";
 import { RoutePath } from "../router";
 import { Layout } from "../components";
-import { Clock, MoreVertical, Ticket } from "grommet-icons";
+import { Checkmark, Clock, MoreVertical } from "grommet-icons";
 import { truncateInMiddle } from "../utils/truncate-in-middle";
 import { useEffect, useMemo, useState } from "react";
 import { ShowAddressModal } from "./modals/show-address";
@@ -12,11 +12,6 @@ import { satsToDollars } from "../utils/sats-to-dollars";
 import { getBitcoinPrice } from "../utils/bitcoin-price";
 import { ShowMnemonicModal } from "./modals/show-mnemonic";
 import { Transaction, load } from "../hooks/show-transactions.hook";
-
-/*
-import { useEffect, useState } from "react";
-import { utxos } from "../mempool/utxos";
-*/
 
 export const Balances = () => {
   const app = useApp();
@@ -35,7 +30,7 @@ export const Balances = () => {
       setBitcoinPrice(price);
     });
 
-    setTransactions(load());
+    setTransactions(load().reverse());
   }, []);
 
   const dollars = useMemo(() => {
@@ -153,17 +148,24 @@ export const Balances = () => {
             <Tab title="TRANSACTIONS">
               <InfiniteScroll items={transactions}>
                 {(transaction: Transaction) => (
-                  <Box direction="row" gap="small" align="center">
-                    <Avatar background="brand">
+                  <Box
+                    key={transaction.txid}
+                    direction="row"
+                    gap="small"
+                    align="center"
+                    border={{ color: "brand" }}
+                    pad="medium"
+                    margin={{ top: "medium" }}
+                    style={{ borderRadius: "5px" }}
+                  >
+                    <Box margin={{ right: "medium" }}>
                       {transaction.confirmed ? (
-                        <Ticket color="text-strong" />
+                        <Checkmark color="brand" />
                       ) : (
-                        <Clock color="text-strong" />
+                        <Clock color="brand" />
                       )}
-                    </Avatar>
-                    <Text margin={{ left: "auto" }}>
-                      <Anchor href={`https://mempool.space/tx/${transaction.txid}`}>{transaction.description}</Anchor>
-                    </Text>
+                    </Box>
+                    <Anchor color="white" target="_blank" href={`https://mempool.space/tx/${transaction.txid}`} style={{ wordBreak: "break-all" }}>{transaction.description}</Anchor>
                   </Box>
                 )}
               </InfiniteScroll>

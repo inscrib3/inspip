@@ -52,7 +52,11 @@ export function loadWallet(password: string) {
     const parsedData = JSON.parse(data);
     if (!parsedData?.mnemonic) throw new Error('Wallet corrupted');
 
-    parsedData.mnemonic = decrypt(parsedData.mnemonic, password);
+    try {
+        parsedData.mnemonic = decrypt(parsedData.mnemonic, password);
+    } catch (e) {
+        throw new Error('Wrong password');
+    }
     
     return parsedData;
 }
@@ -160,7 +164,7 @@ export const sendTokens = async (account: any, utxos: Utxo[], to: string, _ticke
     }
 
     if(found < amount) {
-        throw new Error('Insufficient token funds');
+        throw new Error('Insufficient token funds, or transaction still unconfirmed');
     }
 
     const vout: {
@@ -244,7 +248,7 @@ export function sendSats(account: any, utxos: Utxo[], toAddress: string, amount:
         }
     }
 
-    if(found < amount * rate * 2n) throw new Error("Insufficient funds")
+    if(found < amount * rate * 2n) throw new Error("Insufficient token funds, or transaction still unconfirmed")
 
     const vout = [];
     vout.push({
@@ -335,7 +339,7 @@ export function selectUtxos(fromAddress: string, rate: bigint, utxos: Utxo[], ut
     }
 
     if (found < amount) {
-        throw new Error('Insufficient token funds');
+        throw new Error('Insufficient token funds, or transaction still unconfirmed');
     }
 
     return { vin, found };
