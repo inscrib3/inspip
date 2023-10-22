@@ -57,7 +57,7 @@ export const useGetBalances = (): GetBalances => {
         }
 
         nextData[data.tick + ":" + data.id] =
-          (parseInt(nextData[data.tick + ":" + data.id]) + (parseInt(data.amt) / Math.pow(10, deploymentData.data.dec))).toString();
+          (parseFloat(nextData[data.tick + ":" + data.id]) + (parseInt(data.amt) / Math.pow(10, deploymentData.data.dec))).toString();
       } catch (e) {
         console.error(e);
       }
