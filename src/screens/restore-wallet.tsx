@@ -26,14 +26,10 @@ export const RestoreWallet = (): JSX.Element => {
         password: "Password is required",
       });
       return;
-    } else if (
-      !password.match(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
-      )
-    ) {
+    } else if (password.length < 8) {
       setErrors({
         password:
-          "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number and one special character",
+          "Password must be at least 8 characters long",
       });
       return;
     } else if (password !== confirmPassword) {
