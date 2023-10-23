@@ -24,20 +24,20 @@ export function isSegwitAddress(to: string)
     return false;
 }
 
-export function addressToScriptPubKey(to: string, network: string) {
+export function addressToScriptPubKey(address: string, network: string) {
     let _toAddress, _script;
 
-    if (to.startsWith('tb1q') || to.startsWith('bc1q')) {
-        _toAddress = bitcoin.address.fromBech32(to);
-        _script = bitcoin.payments.p2wpkh({ address: to, network: network }).output;
-    } else if (to.startsWith('1') || to.startsWith('m') || to.startsWith('n')) {
-        _toAddress = bitcoin.address.fromBase58Check(to);
-        _script = bitcoin.payments.p2pkh({ address: to, network: network }).output;
-    } else if (to.startsWith('3') || to.startsWith('2')) {
-        _toAddress = bitcoin.address.fromBase58Check(to);
-        _script = bitcoin.payments.p2sh({ address: to, network: network }).output;
+    if (address.startsWith('tb1q') || address.startsWith('bc1q')) {
+        _toAddress = bitcoin.address.fromBech32(address);
+        _script = bitcoin.payments.p2wpkh({ address, network }).output;
+    } else if (address.startsWith('1') || address.startsWith('m') || address.startsWith('n')) {
+        _toAddress = bitcoin.address.fromBase58Check(address);
+        _script = bitcoin.payments.p2pkh({ address, network }).output;
+    } else if (address.startsWith('3') || address.startsWith('2')) {
+        _toAddress = bitcoin.address.fromBase58Check(address);
+        _script = bitcoin.payments.p2sh({ address, network }).output;
     } else {
-        _toAddress = Address.p2tr.decode(to).hex;
+        _toAddress = Address.p2tr.decode(address).hex;
         _script = [ 'OP_1', _toAddress ];
     }
 

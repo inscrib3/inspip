@@ -81,9 +81,9 @@ export function importWallet(mnemonic: string, network: any, index: number = 0) 
 
 export function generateNewAddress(rootKey: any, network: any, index: number = 0) {
     const path = `m/86'/0'/0'/0/${index}`;
-    const account: any = rootKey.derivePath(path)
-    const internalPubkey: any = toXOnly(account.publicKey)
-    const { address, output } = bitcoin.payments.p2tr({ internalPubkey: internalPubkey, network })
+    const account: any = rootKey.derivePath(path);
+    const internalPubkey: any = toXOnly(account.publicKey);
+    const { address, output } = bitcoin.payments.p2tr({ internalPubkey: internalPubkey, network });
   
     return { rootKey, account, internalPubkey, address, output }
 }
@@ -93,7 +93,6 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
     const id = parseInt(_id.trim());
 
     let deployment = null;
-
     try {
         deployment = await getDeployment(ticker, id);
     } catch (e) {
@@ -104,8 +103,14 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
         throw new Error('Deployment not found');
     }
 
-    const amount = BigInt(resolveNumberString(_amount, deployment.dec));
+    const mantissa = BigInt(10 ** deployment.dec)
+    if(mantissa <= 1n) throw new Error('Invalid mantissa'); // @todo do tokens with 0 decimals exist?
+
+    const amount = BigInt(_amount) * mantissa;
+    if(amount === 0n) throw new Error('Invalid rate');
+
     const rate = BigInt(_rate);
+    if(rate === 0n) throw new Error('Invalid rate');
 
     const vin = [];
     let found = 0n;
@@ -145,7 +150,6 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
         }
 
         let token_utxo_exists = false;
-
         try {
             await fetchUtxo(utxos[i].txid, utxos[i].vout);
             token_utxo_exists = true;
@@ -184,11 +188,11 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
 
     vout.push({
         value: 546n,
-        scriptPubKey: await addressToScriptPubKey(to, network)
+        scriptPubKey: addressToScriptPubKey(to, network)
     });
 
     const ec = new TextEncoder();
-    const conv_amount = cleanFloat(formatNumberString(amount.toString(), deployment.dec));
+    const conv_amount = amount.toString();
     const token_change = found - amount;
 
     if (token_change <= 0n) {
@@ -198,11 +202,11 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
             ]
         })
     } else {
-        const conv_change = cleanFloat(formatNumberString(token_change.toString(), deployment.dec));
+        const conv_change = token_change.toString();
 
         vout.push({
             value: 546n,
-            scriptPubKey: await addressToScriptPubKey(currentAddress, network)
+            scriptPubKey: addressToScriptPubKey(currentAddress, network)
         });
 
         vout.push({
