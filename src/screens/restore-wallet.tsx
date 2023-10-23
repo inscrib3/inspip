@@ -4,7 +4,7 @@ import { Layout } from "../components";
 import { useRestoreWallet } from "../hooks";
 import { useNavigate } from "react-router-dom";
 import { RoutePath } from "../router";
-import { create } from "../app/settings";
+import { savePasswordInSettings } from "../app/settings";
 
 export const RestoreWallet = (): JSX.Element => {
   const restoreWallet = useRestoreWallet();
@@ -49,7 +49,7 @@ export const RestoreWallet = (): JSX.Element => {
       return;
     }
 
-    await create(password);
+    savePasswordInSettings(password);
 
     navigate(RoutePath.Balances);
   };
