@@ -38,7 +38,7 @@ export const AppProvider = (props: AppProviderProps) => {
   const [account, setAccount] = useState<any>({});
   const [network, setNetwork] = useState(bitcoin.networks.bitcoin);
   const [addresses, _setAddresses] = useState<number[]>([]);
-  const [currentAddress, _setCurrentAddress] = useState('');
+  const [currentAddress, _setCurrentAddress] = useState<string>('');
   const [feerate, setFeerate] = useState(0);
   const [tokens, setTokens] = useState<{ ticker: string, id: string, decimals: string }[]>([]);
 

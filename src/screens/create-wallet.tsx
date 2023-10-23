@@ -5,6 +5,7 @@ import { Layout } from "../components";
 import { useCreateWallet } from "../hooks";
 import { useNavigate } from "react-router-dom";
 import { RoutePath } from "../router";
+import { create } from "../app/settings";
 
 export const CreateWallet = (): JSX.Element => {
   const createWallet = useCreateWallet();
@@ -48,6 +49,8 @@ export const CreateWallet = (): JSX.Element => {
       });
       return;
     }
+
+    await create(password);
 
     navigate(RoutePath.Mnemonic, { state: { mnemonic: data.mnemonic } });
   };

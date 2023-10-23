@@ -28,6 +28,12 @@ export const Balances = () => {
   );
 
   useEffect(() => {
+    if(!app.currentAddress) {
+      navigate(RoutePath.Root);
+    }
+  }, []);
+
+  useEffect(() => {
     getBitcoinPrice().then((price) => {
       setBitcoinPrice(price);
     });

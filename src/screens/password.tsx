@@ -1,41 +1,40 @@
 import { Box, Button, Image, TextInput, Text, Spinner } from "grommet";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RoutePath } from "../router";
 import { useApp } from "../app";
 import { importWallet, loadWallet } from "../lib/wallet";
 import { ResetStorageModal } from "./modals/reset-storage";
+import { create, get } from "../app/settings";
 
 export const Password = () => {
   const navigate = useNavigate();
   const app = useApp();
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [isResetModalOpen, setResetModalOpen] = useState(false);
-
   const [errors, setErrors] = useState<{
     password?: string;
     error?: string;
   }>({});
 
-  const onNext = async () => {
-    setErrors({});
-
-    if (!password) {
-      setErrors({
-        password: "Password is required",
-      });
-      return;
+  useEffect(() => {
+    const settings = get();
+    if(settings?.password) {
+      handleLoadWallet(settings.password);
     }
+  }, [])
 
+  const handleLoadWallet = (pass: string) => {
     setLoading(true);
 
     try {
-      const wallet = loadWallet(password);
+      const wallet = loadWallet(pass);
       
       if (wallet.mnemonic === "") {
         throw new Error("Invalid password");
       }
+
       app.setAccount(importWallet(wallet.mnemonic, wallet.network, wallet.addressIndex));
       app.setNetwork(wallet.network);
       app.setCurrentAddress(wallet.currentAddress, wallet.addressIndex)
@@ -51,6 +50,21 @@ export const Password = () => {
     setLoading(false);
 
     navigate(RoutePath.Balances);
+  }
+
+  const onNext = async () => {
+    setErrors({});
+
+    if (!password) {
+      setErrors({
+        password: "Password is required",
+      });
+      return;
+    }
+
+    await create(password);
+
+    handleLoadWallet(password);
   };
 
   return (

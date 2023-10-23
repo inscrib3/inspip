@@ -91,7 +91,6 @@ export const Send = () => {
         {ticker && balances.data[ticker.toLowerCase()] && (
           <Box justify="end" margin={{ bottom: "medium" }} direction="row" gap="small">
             <Anchor onClick={() => {
-              console.log(balances.data[ticker.toLowerCase()]);
               setAmount(balances.data[ticker.toLowerCase()])
             }}><Text>{balances.data[ticker.toLowerCase()]}</Text></Anchor>
             <Text>{ticker}</Text>
