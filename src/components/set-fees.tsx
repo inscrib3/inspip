@@ -34,14 +34,6 @@ export const SetFees = (): JSX.Element => {
       if (selectedFee === "custom") return;
       app.setFeerate(fees[selectedFee]);
     });
-
-    setInterval(() => {
-      getFees().then((fees) => {
-        setFees(fees);
-        if (selectedFee === "custom") return;
-        app.setFeerate(fees[selectedFee]);
-      });
-    }, 10000);
   }, []);
 
   const size = useContext(ResponsiveContext);
