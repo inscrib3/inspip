@@ -10,32 +10,28 @@ type Settings = {
 
 const save = (settings: Settings) => {
   const fingerprint = generateFingerprint();
-  console.log("save fingerprint", fingerprint)
-
-  settings.password = encrypt(settings.password, fingerprint);
+  if(settings.password.length > 0) settings.password = encrypt(settings.password, fingerprint);
   localStorage.setItem("settings", JSON.stringify(settings));
 };
 
-export const create = (password: string) => {
-  if(!password) throw new Error("Password is required");
-  
-  const settings: Settings = {
-    password: password,
-    ttl: -1,
+const create = (password: string) => {
+  const currentSettings: Settings = {
+    password,
+    ttl: 1000 * 60 * 60 * 3, // 3 hours
     language: navigator.language,
     lastUpdate: Date.now(),
   };
-  save(settings);
 
-  return settings;
-};
+  save(currentSettings);
+}
 
-export const get = () => {
-  let settings = JSON.parse(localStorage.getItem("settings") || "{}");
-  if(settings?.ttl > 0 && settings?.lastUpdate + settings?.ttl < Date.now()) {
-    settings.password = ''
-    edit(settings)
-  } else if(settings?.password) {
+const get = (): Settings | null => {
+  const settings = JSON.parse(localStorage.getItem("settings") || "null");
+  if (settings && settings.lastUpdate + settings.ttl < Date.now()) {
+    settings.password = '';
+    settings.lastUpdate = Date.now();
+    save(settings);
+  } else if (settings && settings.password) {
     const fingerprint = generateFingerprint();
     settings.password = decrypt(settings.password, fingerprint);
   }
@@ -43,17 +39,18 @@ export const get = () => {
   return settings;
 };
 
-export const edit = (settings: Settings) => {
-  const currentSettings = get();
-  if(!currentSettings) throw new Error("Settings not found");
-  
-  const updatedSettings = { ...currentSettings, ...settings };
-  Object.keys(updatedSettings).forEach(key => {
-    if (settings[key as keyof Settings] == null) {
-      delete updatedSettings[key as keyof Settings];
-    }
-  });
-  settings.lastUpdate = Date.now();
+export const getPasswordFromSettings = () => {
+  const settings = get();
+  if (!settings?.language) create('');
+  return settings?.password || '';
+}
 
-  save(updatedSettings);
-};
+export const savePasswordInSettings = (password: string) => {
+  const settings = get();
+  if (!settings?.language) {
+    create(password);
+  } else {
+    settings.password = password;
+    save(settings);
+  }
+}

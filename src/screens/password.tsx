@@ -5,7 +5,7 @@ import { RoutePath } from "../router";
 import { useApp } from "../app";
 import { importWallet, loadWallet } from "../lib/wallet";
 import { ResetStorageModal } from "./modals/reset-storage";
-import { create, get } from "../app/settings";
+import { getPasswordFromSettings, savePasswordInSettings } from "../app/settings";
 
 export const Password = () => {
   const navigate = useNavigate();
@@ -19,9 +19,9 @@ export const Password = () => {
   }>({});
 
   useEffect(() => {
-    const settings = get();
-    if(settings?.password) {
-      handleLoadWallet(settings.password);
+    const pass = getPasswordFromSettings();
+    if(pass) {
+      handleLoadWallet(pass);
     }
   }, [])
 
@@ -62,7 +62,7 @@ export const Password = () => {
       return;
     }
 
-    await create(password);
+    savePasswordInSettings(password);
 
     handleLoadWallet(password);
   };
