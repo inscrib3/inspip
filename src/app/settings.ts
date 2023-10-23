@@ -3,7 +3,7 @@ import { generateFingerprint } from "../utils/fingerprint";
 
 type Settings = {
   password: string;
-  passwordTTL: number;
+  ttl: number;
   language: string;
   lastUpdate: number;
 };
@@ -21,7 +21,7 @@ export const create = (password: string) => {
   
   const settings: Settings = {
     password: password,
-    passwordTTL: -1,
+    ttl: -1,
     language: navigator.language,
     lastUpdate: Date.now(),
   };
@@ -32,7 +32,10 @@ export const create = (password: string) => {
 
 export const get = () => {
   let settings = JSON.parse(localStorage.getItem("settings") || "{}");
-  if(settings?.password) {
+  if(settings?.ttl > 0 && settings?.lastUpdate + settings?.ttl < Date.now()) {
+    settings.password = ''
+    edit(settings)
+  } else if(settings?.password) {
     const fingerprint = generateFingerprint();
     settings.password = decrypt(settings.password, fingerprint);
   }
@@ -45,15 +48,12 @@ export const edit = (settings: Settings) => {
   if(!currentSettings) throw new Error("Settings not found");
   
   const updatedSettings = { ...currentSettings, ...settings };
-
-  // Ensure the password field is not updated
-  updatedSettings.password = currentSettings.password;
-
   Object.keys(updatedSettings).forEach(key => {
     if (settings[key as keyof Settings] == null) {
       delete updatedSettings[key as keyof Settings];
     }
   });
+  settings.lastUpdate = Date.now();
 
   save(updatedSettings);
 };
