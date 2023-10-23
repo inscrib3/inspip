@@ -140,7 +140,7 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
     }
 
     for (let i = 0; i < utxos.length; i++) {
-        if (sats_found >= sats_amount + (rate * 2n)) {
+        if (sats_found >= sats_amount + (163n * rate * 2n)) {
             break;
         }
 
@@ -172,7 +172,7 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
 
     if(
         found < amount ||
-        sats_found < sats_amount + (rate * 2n)
+        sats_found < sats_amount + (163n * rate * 2n)
     ) {
         throw new Error('Insufficient token funds, or transaction still unconfirmed');
     }
@@ -214,7 +214,7 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
     }
 
     vout.push({
-        value: sats_found - (160n * rate * 2n), // @todo check 160n default
+        value: sats_found - (163n * rate * 2n), // @todo check 163n default
         scriptPubKey: addressToScriptPubKey(currentAddress, network)
     })
 
@@ -242,7 +242,7 @@ export const sendSats = async (account: any, currentAddress: string, utxos: Utxo
     utxos = utxos.sort((a, b) => b.value - a.value);
     for(let i = 0; i < utxos.length; i++)
     {
-        if(found >= amount + (rate * 2n)) break;
+        if(found >= amount + (163n * rate * 2n)) break;
 
         let token_utxo_exists = false;
 
@@ -268,7 +268,7 @@ export const sendSats = async (account: any, currentAddress: string, utxos: Utxo
         }
     }
 
-    if(found < amount + (rate * 2n)) throw new Error("Insufficient token funds, or transaction still unconfirmed")
+    if(found < amount + (163n * rate * 2n)) throw new Error("Insufficient token funds, or transaction still unconfirmed")
 
     const vout = [];
     vout.push({
@@ -276,7 +276,7 @@ export const sendSats = async (account: any, currentAddress: string, utxos: Utxo
         scriptPubKey: addressToScriptPubKey(toAddress, network)
     });
     vout.push({
-        value: found - amount - (160n * rate * 2n), // @todo check 160n default
+        value: found - amount - (163n * rate * 2n), // @todo check 163n default
         scriptPubKey: addressToScriptPubKey(currentAddress, network)
     })
 
