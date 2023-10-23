@@ -170,7 +170,10 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
         }
     }
 
-    if(found < amount) {
+    if(
+        found < amount ||
+        sats_found < sats_amount + (rate * 2n)
+    ) {
         throw new Error('Insufficient token funds, or transaction still unconfirmed');
     }
 
