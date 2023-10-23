@@ -214,7 +214,7 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
     }
 
     vout.push({
-        value: sats_found - (143n * rate), // @todo check 143n default
+        value: sats_found - (143n * rate * 2n), // @todo check 143n default
         scriptPubKey: addressToScriptPubKey(currentAddress, network)
     })
 
@@ -276,7 +276,7 @@ export const sendSats = async (account: any, currentAddress: string, utxos: Utxo
         scriptPubKey: addressToScriptPubKey(toAddress, network)
     });
     vout.push({
-        value: found - amount - 143n * rate, // @todo check 143n default
+        value: found - amount - (143n * rate * 2n), // @todo check 143n default
         scriptPubKey: addressToScriptPubKey(currentAddress, network)
     })
 
