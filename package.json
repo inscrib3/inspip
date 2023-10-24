@@ -29,7 +29,6 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.16.0",
-    "rpc-bitcoin": "^2.0.0",
     "sort-by": "^1.2.0",
     "styled-components": "^5.1.0"
   },
