@@ -99,7 +99,6 @@ export const Send = () => {
         <Box direction="row" gap="medium">          
           <Box flex="grow">
             <TextInput
-              type="number"
               placeholder="Amount"
               onChange={(e) => setAmount(e.target.value)}
               max={balances.data[ticker?.toLowerCase() || ""]}
