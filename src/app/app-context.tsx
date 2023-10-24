@@ -1,24 +1,39 @@
-import { createContext, useState } from 'react';
-import { bitcoin } from "../lib/bitcoin-lib";
-import { editWallet } from '../lib/wallet';
+import { createContext, useCallback, useEffect, useRef, useState } from 'react';
+import { editWallet } from '../bitcoin/wallet-storage';
+
+export type Utxo = {
+  txid: string,
+  hex: string,
+  status: {
+    confirmed: boolean,
+  },
+  vout: number,
+  value: number,
+  tick?: string,
+  id?: number,
+  dec?: number,
+  amt?: string,
+};
 
 export const AppContext = createContext<{
-  network: any,
+  network: string,
+  setNetwork: (network: string) => void,
   account: any,
   setAccount: (account: any) => void,
-  setNetwork: (network: any) => void,
   currentAddress: string,
   setCurrentAddress: (address: string, index: number) => void,
   addresses: number[],
   setAddresses: (addresses: number[]) => void,
   feerate: number,
   setFeerate: (feerate: number) => void,
-  tokens: { ticker: string, id: string, decimals: string }[],
-  setTokens: (tokens: { ticker: string, id: string, decimals: string }[]) => void,
+  tokens: { tick: string, id: number, dec: number }[],
+  setTokens: (tokens: { tick: string, id: number, dec: number }[]) => void,
+  utxos: Utxo[],
+  fetchUtxos: () => Promise<Utxo[]>,
 }>({
   account: {},
   setAccount: () => undefined,
-  network: bitcoin.networks.bitcoin,
+  network: 'mainnet',
   setNetwork: () => undefined,
   currentAddress: '',
   setCurrentAddress: () => undefined,
@@ -28,6 +43,8 @@ export const AppContext = createContext<{
   setFeerate: () => undefined,
   tokens: [],
   setTokens: () => undefined,
+  utxos: [],
+  fetchUtxos: async () => [],
 });
 
 export interface AppProviderProps {
@@ -35,12 +52,109 @@ export interface AppProviderProps {
 }
 
 export const AppProvider = (props: AppProviderProps) => {
-  const [account, setAccount] = useState<any>({});
-  const [network, setNetwork] = useState(bitcoin.networks.bitcoin);
+  const [account, setAccount] = useState({});
+  const [network, setNetwork] = useState<string>('mainnet');
   const [addresses, _setAddresses] = useState<number[]>([]);
   const [currentAddress, _setCurrentAddress] = useState<string>('');
   const [feerate, setFeerate] = useState(0);
-  const [tokens, setTokens] = useState<{ ticker: string, id: string, decimals: string }[]>([]);
+  const [tokens, setTokens] = useState<{ tick: string, id: number, dec: number }[]>([]);
+
+  const [utxos, setUtxos] = useState<Utxo[]>([]);
+  const loading = useRef(false);
+
+  const fetchUtxos = useCallback(async (): Promise<Utxo[]> => {
+    if (loading.current || !currentAddress) return [];
+
+    loading.current = true;
+
+    try {
+      const utxoRes = await fetch(`https://mempool.space/${network === 'testnet' ? 'testnet/' : ''}api/address/${currentAddress}/utxo`);
+
+      if (!utxoRes.ok) {
+        throw new Error('Failed to fetch utxos');
+      }
+
+      let satsUtxo: Utxo[] = await utxoRes.json();
+      satsUtxo = satsUtxo.sort((a, b) => b.value - a.value);
+
+      const tokensUtxosRes = await fetch(`${import.meta.env.VITE_SERVER_HOST}/utxos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          utxos: satsUtxo,
+        }),
+      });
+
+      if (!tokensUtxosRes.ok) {
+        throw new Error('Failed to fetch tokens utxos');
+      }
+
+      const tokensUtxos: Utxo[] = await tokensUtxosRes.json();
+
+      const uniqueTickers: {
+        ticker?: string,
+        id?: number,
+      }[] = [];
+
+      tokensUtxos.forEach((utxo) => {
+        if (uniqueTickers.find((ticker) => ticker.ticker === utxo.tick && ticker.id === utxo.id)) return;
+        uniqueTickers.push({
+          ticker: utxo.tick,
+          id: utxo.id,
+        });
+      });
+
+      const deploymentRes = await fetch(`${import.meta.env.VITE_SERVER_HOST}/deployments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tickers: uniqueTickers,
+        }),
+      });
+
+      if (!deploymentRes.ok) {
+        throw new Error('Failed to fetch deployments');
+      }
+
+      const deployments: Utxo[] = await deploymentRes.json();
+
+      setTokens(deployments.map((d) => ({
+        tick: d.tick!,
+        id: d.id!,
+        dec: d.dec!,
+      })));
+
+      const nextUtxos: Utxo[] =  satsUtxo.map((utxo) => {
+        const tokenUtxo = tokensUtxos.find((tokenUtxo) => tokenUtxo.txid === utxo.txid && tokenUtxo.vout === utxo.vout);
+        const deployment = deployments.find((deployment) => deployment.id === tokenUtxo?.id && deployment.tick === tokenUtxo?.tick);
+
+        return {
+          ...utxo,
+          tick: tokenUtxo?.tick,
+          id: tokenUtxo?.id,
+          amt: tokenUtxo?.amt,
+          dec: deployment?.dec,
+        };
+      });
+
+      setUtxos(nextUtxos);
+      loading.current = false;
+      return nextUtxos;
+    } catch (e) {
+      console.error(e);
+      setUtxos([]);
+      loading.current = false;
+      return []; 
+    }
+  }, [currentAddress]);
+
+  useEffect(() => {
+    fetchUtxos();
+  }, [fetchUtxos]);
 
   const setAddresses = (addresses: number[]) => {
     _setAddresses(addresses);
@@ -67,6 +181,8 @@ export const AppProvider = (props: AppProviderProps) => {
         setFeerate,
         tokens,
         setTokens,
+        utxos,
+        fetchUtxos,
       }}
     >
       {props.children}

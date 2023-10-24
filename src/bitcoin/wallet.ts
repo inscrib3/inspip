@@ -1,66 +1,10 @@
-import { bitcoin } from './bitcoin-lib';
+import { bitcoin } from './lib/bitcoin-lib';
 import BIP32Factory from 'bip32';
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import * as bip39 from "bip39";
 import { ScriptData, Signer, Tap, Tx, ValueData, Word } from '@cmdcode/tapscript';
-import { addressToScriptPubKey, cleanFloat, formatNumberString, resolveNumberString, textToHex, toBytes, toInt26, toXOnly } from './utils';
-import { fetchUtxo, getDeployment } from './node';
-import { decrypt, encrypt } from './crypto';
-
-interface Utxo {
-    txid: string;
-    vout: number;
-    value: number;
-    confirmations: number;
-    spendable: boolean;
-    solvable: boolean;
-    safe: boolean;
-    address: string;
-    hex: string;
-    status: any;
-}
-
-export function editWallet(currentAddress: string = '', addresses: number[] = [], addressIndex: number = 0) {
-    const data = localStorage.getItem('wallet');
-    if (!data) throw new Error('Wallet not found');
-
-    const parsedData = JSON.parse(data);
-    if (!parsedData?.mnemonic) throw new Error('Wallet corrupted');
-
-    if (currentAddress !== '') parsedData.currentAddress = currentAddress;
-    if (addresses.length > 0) parsedData.addresses = addresses;
-    if (parsedData.addressIndex !== addressIndex) parsedData.addressIndex = addressIndex;
-
-    localStorage.setItem('wallet', JSON.stringify(parsedData));
-
-    return parsedData;
-}
-
-export function saveWallet(mnemonic: string, network: any, currentAddress: string, addresses: number[], password: string) {
-    const wallet = {
-        mnemonic: encrypt(mnemonic, password),
-        network,
-        currentAddress,
-        addresses,
-    }
-    localStorage.setItem('wallet', JSON.stringify(wallet));
-}
-
-export function loadWallet(password: string) {
-    const data = localStorage.getItem('wallet');
-    if (!data) throw new Error('Wallet not found');
-
-    const parsedData = JSON.parse(data);
-    if (!parsedData?.mnemonic) throw new Error('Wallet corrupted');
-
-    try {
-        parsedData.mnemonic = decrypt(parsedData.mnemonic, password);
-    } catch (e) {
-        throw new Error('Wrong password');
-    }
-    
-    return parsedData;
-}
+import { addressToScriptPubKey, bigIntToString, parseStringToBigInt, textToHex, toBytes, toInt26, toXOnly } from './helpers';
+import { Utxo } from '../app/app-context';
 
 export function generateWallet(network: any) {
     bip39.setDefaultWordlist('english');
@@ -75,39 +19,48 @@ export function importWallet(mnemonic: string, network: any, index: number = 0) 
     const seed = bip39.mnemonicToSeedSync(mnemonic);
     const rootKey = bip32.fromSeed(seed, network);
 
+    /*{
+    const network = bitcoin.networks.bitcoin;
+    const wif = ""
+    const ECPair: ECPairAPI = ECPairFactory(ecc);
+    console.log("ECPair", ECPair)
+    const keyPair: ECPairInterface = ECPair.fromWIF(wif, network);
+    console.log("keyPair", keyPair);
+    const privateKey = keyPair.privateKey?.toString('hex');
+    const hdMaster = bip32.fromSeed(Buffer.from(privateKey, 'hex'), network);
+    const chainCode = hdMaster.chainCode.toString('hex');
+    console.log('chainCode', chainCode);
+    }*/
+
     const data = generateNewAddress(rootKey, network, index);
     return { ...data, mnemonic, rootKey };
 }
 
 export function generateNewAddress(rootKey: any, network: any, index: number = 0) {
-    const path = `m/86'/0'/0'/0/${index}`;
-    const account: any = rootKey.derivePath(path)
-    const internalPubkey: any = toXOnly(account.publicKey)
-    const { address, output } = bitcoin.payments.p2tr({ internalPubkey: internalPubkey, network })
+    let path: string;
+    if(network === bitcoin.networks.testnet) {
+        path = `m/49'/1'/0'/0/${index}`;
+    } else {
+        path = `m/86'/0'/0'/0/${index}`;
+    }
+    const account: any = rootKey.derivePath(path);
+    const internalPubkey: any = toXOnly(account.publicKey);
+    const { address, output } = bitcoin.payments.p2tr({ internalPubkey: internalPubkey, network });
   
     return { rootKey, account, internalPubkey, address, output }
 }
 
-export const sendTokens = async (account: any, currentAddress: string, utxos: Utxo[], to: string, _ticker: string, _id: string, _amount: string, _rate: string, network: any) => {
+export const sendTokens = async (account: any, currentAddress: string, utxos: Utxo[], to: string, _ticker: string, _id: string, dec: number, _amount: string, _rate: string, network: any) => {
     const ticker = _ticker.trim().toLowerCase();
     const id = parseInt(_id.trim());
 
-    let deployment = null;
+    const amount = parseStringToBigInt(_amount, dec);
+    if(amount === 0n) throw new Error('Invalid rate');
 
-    try {
-        deployment = await getDeployment(ticker, id);
-    } catch (e) {
-        throw new Error('Deployment not found');   
-    }
-
-    if (deployment === null) {
-        throw new Error('Deployment not found');
-    }
-
-    const amount = BigInt(resolveNumberString(_amount, deployment.dec));
     const rate = BigInt(_rate);
+    if(rate < 2n) throw new Error('Invalid rate');
 
-    const vin = [];
+    const vin: any = [];
     let found = 0n;
     let sats_found = 0n;
     const sats_amount = 1092n;
@@ -119,9 +72,7 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
 
         if (utxos[i].status.confirmed) {
             try {
-                const _utxo = await fetchUtxo(utxos[i].txid, utxos[i].vout);
-
-                if (_utxo.tick === ticker && _utxo.id === id) {
+                if (utxos[i].tick === ticker && utxos[i].id === id) {
                     vin.push({
                         txid: utxos[i].txid,
                         vout: utxos[i].vout,
@@ -131,7 +82,7 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
                         }
                     });
     
-                    found += BigInt(_utxo.amt);
+                    found += BigInt(utxos[i].amt || 0);
                 }
             } catch (e) {
                 console.error(e);
@@ -144,17 +95,8 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
             break;
         }
 
-        let token_utxo_exists = false;
-
-        try {
-            await fetchUtxo(utxos[i].txid, utxos[i].vout);
-            token_utxo_exists = true;
-        } catch(e){
-            console.error(e);
-        }
-
         if (
-            !token_utxo_exists &&
+            !utxos[i].tick &&
             utxos[i].status.confirmed
         ) {
             vin.push({
@@ -184,12 +126,14 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
 
     vout.push({
         value: 546n,
-        scriptPubKey: await addressToScriptPubKey(to, network)
+        scriptPubKey: addressToScriptPubKey(to, network)
     });
 
     const ec = new TextEncoder();
-    const conv_amount = cleanFloat(formatNumberString(amount.toString(), deployment.dec));
     const token_change = found - amount;
+
+    const conv_amount = bigIntToString(amount, dec);
+    const conv_change = bigIntToString(token_change, dec);
 
     if (token_change <= 0n) {
         vout.push({
@@ -198,11 +142,9 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
             ]
         })
     } else {
-        const conv_change = cleanFloat(formatNumberString(token_change.toString(), deployment.dec));
-
         vout.push({
             value: 546n,
-            scriptPubKey: await addressToScriptPubKey(currentAddress, network)
+            scriptPubKey: addressToScriptPubKey(currentAddress, network)
         });
 
         vout.push({
@@ -235,7 +177,7 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
 };
 
 export const sendSats = async (account: any, currentAddress: string, utxos: Utxo[], toAddress: string, amount: bigint, rate: bigint, network: any): Promise<string> => {
-    const vin = [];
+    const vin: any = [];
     let found = 0n;
 
     if(utxos.length === 0) throw new Error("No UTXOs available")
@@ -244,17 +186,7 @@ export const sendSats = async (account: any, currentAddress: string, utxos: Utxo
     {
         if(found >= amount + (163n * rate * 2n)) break;
 
-        let token_utxo_exists = false;
-
-        try
-        {
-            await fetchUtxo(utxos[i].txid, utxos[i].vout);
-            token_utxo_exists = true;
-        } catch(e) {
-            console.error(e);
-        }
-
-        if(!token_utxo_exists && utxos[i].status.confirmed) {
+        if(!utxos[i].tick && utxos[i].status.confirmed) {
             vin.push({
                 txid: utxos[i].txid,
                 vout: utxos[i].vout,
@@ -270,7 +202,7 @@ export const sendSats = async (account: any, currentAddress: string, utxos: Utxo
 
     if(found < amount + (163n * rate * 2n)) throw new Error("Insufficient token funds, or transaction still unconfirmed")
 
-    const vout = [];
+    const vout: any = [];
     vout.push({
         value: amount,
         scriptPubKey: addressToScriptPubKey(toAddress, network)
@@ -297,7 +229,7 @@ export const sendSats = async (account: any, currentAddress: string, utxos: Utxo
 }
 
 export function selectUtxos(fromAddress: string, rate: bigint, utxos: Utxo[], utxos_db: any[], amount: bigint, ticker: string, id: number, network: any) {
-    const vin = [];
+    const vin: any = [];
     let found = 0n;
     let sats_found = 0n;
     const sats_amount = 1092n;

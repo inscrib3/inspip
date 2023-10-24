@@ -1,6 +1,6 @@
 import { Layer, Box, Text, Button, TextInput } from 'grommet';
 import { useState } from 'react';
-import { loadWallet } from '../../lib/wallet';
+import { loadWallet } from '../../bitcoin/wallet-storage';
 
 export function ShowMnemonicModal({ onClose}: { onClose: any }) {
   const [mnemonic, setMnemonic] = useState<string>("");

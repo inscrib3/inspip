@@ -2,11 +2,11 @@ import { Header, Box, Button, Select, TextInput, Text, Spinner, Anchor } from "g
 import * as Icons from "grommet-icons";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import { validateAddress } from "../lib/utils";
+import { getNetwork, validateAddress } from "../bitcoin/helpers";
 import { SetFees } from "../components";
 import { useSendSats, useSendTokens, useGetBalances } from "../hooks";
 import { useApp } from "../app";
-import { sendTransaction } from "../lib/node";
+import { sendTransaction } from "../bitcoin/node";
 import { save } from "../hooks/show-transactions.hook";
 
 export const Send = () => {
@@ -39,8 +39,19 @@ export const Send = () => {
   const send = async () => {
     setError("");
 
-    if(!validateAddress(address, app.network)) {
+    if(!validateAddress(address, getNetwork(app.network))) {
       setError("Invalid address");
+      return;
+    }
+
+    const splittedTicker = ticker.split(":");
+
+    const token = app.tokens.filter((t) => t.tick === splittedTicker[0].toLowerCase() && t.id === parseInt(splittedTicker[1]));
+
+    if (
+      ticker.toLowerCase() !== 'btc'
+      && Math.floor(parseFloat(amount) * Math.pow(10, token[0].dec)) === 0) {
+      setError(`Amount exceeds ${token[0].dec} decimals`);
       return;
     }
 
@@ -49,7 +60,7 @@ export const Send = () => {
     if (ticker.toLowerCase() === "btc") {
       try {
         const hex = await sendSats.dispatch(address, `${Math.floor(parseFloat(amount) * Math.pow(10, 8))}`, `${app.feerate}`);
-        const txid = await sendTransaction(hex);
+        const txid = await sendTransaction(hex, app.network);
         save({txid, from: app.currentAddress, to: address, amount, timestamp: Date.now(), confirmed: false });
         navigate(-1);
       } catch (e) {
@@ -69,7 +80,7 @@ export const Send = () => {
         amount,
         `${app.feerate}`
       );
-      const txid = await sendTransaction(hex);
+      const txid = await sendTransaction(hex, app.network);
       save({txid, from: app.currentAddress, to: address, amount, token: ticker, timestamp: Date.now(), confirmed: false });
     } catch (e) {
       setError((e as Error).message);

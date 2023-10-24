@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { Box, Button, RangeInput, ResponsiveContext, TextInput } from "grommet";
 import { useApp } from "../app";
-import { FeesResponse, getFees } from "../lib/node";
+import { FeesResponse, getFees } from "../bitcoin/node";
 
 export const SetFees = (): JSX.Element => {
   const app = useApp();

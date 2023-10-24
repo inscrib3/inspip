@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useApp } from "../app";
-import { sendSats } from "../lib/wallet";
-import { fetchUtxos } from "../lib/node";
+import { sendSats } from "../bitcoin/wallet";
+import { getNetwork } from "../bitcoin/helpers";
 
 export type SendSats = {
   dispatch: (address: string, amount: string, fee_rate: string) => Promise<string | undefined>;
@@ -19,23 +19,8 @@ export const useSendSats = (): SendSats => {
       if (loading) return;
       setLoading(true);
 
-      const fetchedUtxos = await fetchUtxos(app.currentAddress);
-      const utxos = [];
-
-      for (const utxo of fetchedUtxos) {
-        try {
-          const token = await fetch(
-            `${import.meta.env.VITE_APP_API}/utxo/${utxo.txid}/${utxo.vout}`
-          );
-
-          if (!token.ok) {
-            utxos.push(utxo);
-          }
-        } catch (e) {
-          console.error(e);
-          utxos.push(utxo);
-        }
-      }
+      let utxos = await app.fetchUtxos();
+      utxos = utxos.filter((u) => !u.tick && u.status.confirmed);
 
       const data = sendSats(
         app.account,
@@ -44,7 +29,7 @@ export const useSendSats = (): SendSats => {
         address,
         BigInt(amount),
         BigInt(fee_rate),
-        app.network
+        getNetwork(app.network)
       );
       
       setData(data);
@@ -52,7 +37,7 @@ export const useSendSats = (): SendSats => {
       setLoading(false);
       return data;
     },
-    [app.account, app.currentAddress, app.network, loading]
+    [app, loading]
   );
 
   return {

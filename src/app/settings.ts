@@ -1,4 +1,4 @@
-import { decrypt, encrypt } from "../lib/crypto";
+import { decrypt, encrypt } from "../utils/crypto";
 import { generateFingerprint } from "../utils/fingerprint";
 
 type Settings = {

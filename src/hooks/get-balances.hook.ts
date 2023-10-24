@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
 import { useApp } from "../app";
-import { fetchUtxos } from "../lib/node";
 import { satsToBtc } from "../utils/sats-to-btc";
 
 export type GetBalances = {
@@ -24,40 +23,24 @@ export const useGetBalances = (): GetBalances => {
       [key: string]: string;
     } = {};
 
-    const utxos = await fetchUtxos(app.currentAddress);
+    const utxos = await app.fetchUtxos();
 
     const sumOfSats = utxos.reduce(
-      (acc: number, utxo: { txid: string; vout: number; value: number }) => {
+      (acc: number, utxo) => {
+        if (utxo.tick) return acc;
         return acc + utxo.value;
-        return acc;
       },
       0
     );
 
-    for (const utxo of utxos) {
+    for (const utxo of utxos.filter((u) => !!u.tick)) {
       try {
-        const token = await fetch(
-          `${import.meta.env.VITE_APP_API}/utxo/${utxo.txid}/${utxo.vout}`
-        );
-
-        if (!token.ok) continue;
-
-        const data = await token.json();
-
-        const deployment = await fetch(
-          `${import.meta.env.VITE_APP_API}/getdeployment?ticker=${data.tick}&id=${data.id}`
-        );
-
-        if (!deployment.ok) continue;
-
-        const deploymentData = await deployment.json();
-
-        if (typeof nextData[data.tick + ":" + data.id] === "undefined") {
-          nextData[data.tick + ":" + data.id] = "0";
+        if (typeof nextData[utxo.tick + ":" + utxo.id] === "undefined") {
+          nextData[utxo.tick + ":" + utxo.id] = "0";
         }
 
-        nextData[data.tick + ":" + data.id] =
-          (parseFloat(nextData[data.tick + ":" + data.id]) + (parseInt(data.amt) / Math.pow(10, deploymentData.data.dec))).toString();
+        nextData[utxo.tick + ":" + utxo.id] =
+          (parseFloat(nextData[utxo.tick + ":" + utxo.id]) + (parseInt(utxo.amt || '0') / Math.pow(10, utxo.dec || 0))).toString();
       } catch (e) {
         console.error(e);
       }
@@ -68,10 +51,12 @@ export const useGetBalances = (): GetBalances => {
     setData(nextData);
     setLoading(false);
     return nextData;
-  }, [app.currentAddress, loading]);
+  }, [app, loading]);
 
   useEffect(() => {
     dispatch();
+    const interval = setInterval(dispatch, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   return {
