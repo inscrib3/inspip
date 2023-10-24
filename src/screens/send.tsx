@@ -44,6 +44,15 @@ export const Send = () => {
       return;
     }
 
+    const token = app.tokens.filter((t) => t.tick === ticker);
+
+    if (
+      ticker.toLowerCase() !== 'btc'
+      && Math.floor(parseFloat(amount) * Math.pow(10, token[0].dec)) === 0) {
+      setError(`Amount exceeds ${token[0].dec} decimals`);
+      return;
+    }
+
     setLoading(true);
 
     if (ticker.toLowerCase() === "btc") {
