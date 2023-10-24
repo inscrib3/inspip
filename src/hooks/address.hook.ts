@@ -10,12 +10,12 @@ export type Address = {
   switchAddress: (address: string, index: number) => void;
 }
 
-// @todo check the double "generateNewAddress" calls
 export const useAddress = (): Address => {
   const app = useApp();
 
   const data = useMemo(() => {
     return app.addresses.map((_index) => {
+      // @todo check it
       const account0 = generateNewAddress(app.account.rootKey, getNetwork(app.network), 0);
       return generateNewAddress(account0.rootKey, getNetwork(app.network), _index).address;
     });
@@ -26,6 +26,7 @@ export const useAddress = (): Address => {
   };
 
   const switchAddress = (address: string, index: number) => {
+    // @todo check it
     const account0 = generateNewAddress(app.account.rootKey, getNetwork(app.network), 0);
     app.setAccount(generateNewAddress(account0.rootKey, getNetwork(app.network), index));
     app.setCurrentAddress(address, index);

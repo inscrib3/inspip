@@ -1,8 +1,6 @@
 import { useState, useCallback } from "react";
 import { useApp } from "../app";
 import { sendTokens } from "../bitcoin/wallet";
-import { fetchUtxos } from "../bitcoin/node";
-import { getNetwork } from "../bitcoin/helpers";
 
 export type SendTokens = {
   dispatch: (address: string, ticker: string, id: string, amount: string, fee_rate: string) => Promise<any>
@@ -20,15 +18,16 @@ export const useSendTokens = (): SendTokens => {
       if (loading) return;
       setLoading(true);
 
-      const utxos = await fetchUtxos(app.currentAddress, app.network)
-      const data = await sendTokens(app.account, app.currentAddress, utxos, address, ticker, id, amount, fee_rate, getNetwork(app.network))
+      const utxos = await app.fetchUtxos();
+      const deployment = await app.tokens.filter((token) => token.tick === ticker.toLowerCase() && token.id === parseInt(id))[0];
+      const data = await sendTokens(app.account, app.currentAddress, utxos, address, ticker, id, deployment.dec, amount, fee_rate, app.network)
 
       setData(data);
 
       setLoading(false);
       return data;
     },
-    [app.account, app.currentAddress, app.network, loading]
+    [app, loading]
   );
 
   return {

@@ -10,18 +10,13 @@ export function getNetwork(network: string) {
     else throw new Error('Invalid network');
 }
 
-export function parseStringToBigInt(amount: string, mantissaDecimalPoints: number, maxDecimals: number) {
+export function parseStringToBigInt(amount: string, mantissaDecimalPoints: number) {
     if (/[^0-9.]/.test(amount)) {
       throw new Error("Invalid character in amount");
     }
   
     const [, decimalPart = ''] = amount.split('.');
-  
     const decimalPartLength = decimalPart.length
-    if (decimalPartLength > maxDecimals) {
-      throw new Error("Too many decimal places");
-    }
-  
     const amountBigInt = BigInt(amount.replace('.', ''));
     const mantissa = BigInt(10**mantissaDecimalPoints);
     const decimals = BigInt(10**decimalPartLength);
@@ -37,26 +32,6 @@ export function bigIntToString(valueBigInt: bigint, decimalPlaces: number) {
     const paddedDecimalPart = decimalPart.toString().padStart(decimalPlaces, '0');
 
     return `${wholePart}.${paddedDecimalPart}`;
-  }
-
-export function isValidNumber(strNum: string)
-{
-    const validNumber = new RegExp(/^\d*\.?\d*$/);
-    return validNumber.test(''+strNum);
-}
-
-export function isSegwitAddress(to: string)
-{
-    if(to.startsWith('tb1q') || to.startsWith('bc1q'))
-    {
-        return true;
-    }
-    else if(to.startsWith('tb1p') || to.startsWith('bc1p'))
-    {
-        return true;
-    }
-
-    return false;
 }
 
 export function addressToScriptPubKey(address: string, network: any) {
@@ -85,59 +60,6 @@ export function validateAddress(address: string, network: any): boolean {
     } catch(e) {
         return false;
     }
-}
-
-export function resolveNumberString(number: string, decimals: number) {
-    if (!isValidNumber(number)) {
-        throw new Error('Invalid op number');
-    }
-
-    let [integerPart, decimalPart = ''] = number.split(".");
-    
-    // Adjust the decimal part to the desired length
-    while (decimalPart.length < decimals) {
-        decimalPart += "0";
-    }
-    decimalPart = decimalPart.substring(0, decimals);
-
-    // Combine the integer and decimal parts
-    number = integerPart + decimalPart;
-
-    // Remove leading zeros
-    number = number.replace(/^0+/, '');
-
-    return number || '0';
-}
-
-export function cleanFloat(input: string) {
-    // Remove commas
-    input = input.replace(/,/g, '');
-
-    // Parse the input as a float to handle leading and trailing zeros
-    const floatNumber = parseFloat(input);
-
-    // Return the parsed float as a string or throw an error if it's NaN
-    if (!isNaN(floatNumber)) {
-        return String(floatNumber);
-    } else {
-        throw new Error('Invalid float to clean');
-    }
-}
-
-export function formatNumberString(str: string, decimals: number) {
-
-    const pos = str.length - decimals;
-
-    if(decimals == 0) {
-        // nothing
-    }else
-    if(pos > 0){
-        str = str.substring(0, pos) + "." + str.substring(pos, str.length);
-    }else{
-        str = '0.' + ( "0".repeat( decimals - str.length ) ) + str;
-    }
-
-    return str;
 }
 
 function charRange(start: string, stop: string) {

@@ -44,6 +44,17 @@ export const Send = () => {
       return;
     }
 
+    const splittedTicker = ticker.split(":");
+
+    const token = app.tokens.filter((t) => t.tick === splittedTicker[0].toLowerCase() && t.id === parseInt(splittedTicker[1]));
+
+    if (
+      ticker.toLowerCase() !== 'btc'
+      && Math.floor(parseFloat(amount) * Math.pow(10, token[0].dec)) === 0) {
+      setError(`Amount exceeds ${token[0].dec} decimals`);
+      return;
+    }
+
     setLoading(true);
 
     if (ticker.toLowerCase() === "btc") {

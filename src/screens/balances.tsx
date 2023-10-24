@@ -6,7 +6,7 @@ import { RoutePath } from "../router";
 import { Layout } from "../components";
 import { Checkmark, Clock, MoreVertical } from "grommet-icons";
 import { truncateInMiddle } from "../utils/truncate-in-middle";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ShowAddressModal } from "./modals/show-address";
 import { satsToDollars } from "../utils/sats-to-dollars";
 import { getBitcoinPrice } from "../utils/bitcoin-price";
@@ -33,7 +33,11 @@ export const Balances = () => {
     }
   }, []);
 
+  const called = useRef(false);
+
   useEffect(() => {
+    if (called.current) return;
+    called.current = true;
     getBitcoinPrice().then((price) => {
       setBitcoinPrice(price);
     });
@@ -69,7 +73,7 @@ export const Balances = () => {
           render: () => (
             <Menu
               key={0}
-              label={app.network}
+              label={''}
               icon={<MoreVertical />}
               items={[
                 {
