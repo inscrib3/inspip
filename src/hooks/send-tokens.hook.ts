@@ -19,7 +19,7 @@ export const useSendTokens = (): SendTokens => {
       setLoading(true);
 
       const utxos = await app.fetchUtxos();
-      const deployment = await app.tokens.filter((token) => token.tick === ticker && token.id === parseInt(id))[0];
+      const deployment = await app.tokens.filter((token) => token.tick === ticker.toLowerCase() && token.id === parseInt(id))[0];
       const data = await sendTokens(app.account, app.currentAddress, utxos, address, ticker, id, deployment.dec, amount, fee_rate, app.network)
 
       setData(data);
@@ -27,7 +27,7 @@ export const useSendTokens = (): SendTokens => {
       setLoading(false);
       return data;
     },
-    [app.account, app.currentAddress, app.network, loading]
+    [app, loading]
   );
 
   return {
