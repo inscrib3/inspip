@@ -26,8 +26,11 @@ export const useRestoreWallet = (): RestoreWallet => {
       const address = generateNewAddress(wallet.rootKey, getNetwork(app.network), 0);
       saveWallet(wallet.mnemonic, app.network, address.address, [0], password);
       setData({...wallet, network: app.network});
+  
+      app.setAccount(importWallet(wallet.mnemonic, getNetwork(app.network), 0));
+      app.setNetwork(app.network);
+      app.setCurrentAddress(address.address, 0)
       app.setAddresses([0]);
-      app.setCurrentAddress(address.address, 0);
 
       setLoading(false);
 
