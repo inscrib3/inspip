@@ -4,8 +4,7 @@ import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import * as bip39 from "bip39";
 import { ScriptData, Signer, Tap, Tx, ValueData, Word } from '@cmdcode/tapscript';
 import { addressToScriptPubKey, textToHex, toBytes, toInt26, toXOnly } from './helpers';
-import { fetchUtxo, getDeployment } from './providers/server';
-import { Utxo } from './lib/bitcoin-lib';
+import { Utxo } from '../app/app-context';
 
 export function generateWallet(network: any) {
     bip39.setDefaultWordlist('english');
@@ -33,22 +32,11 @@ export function generateNewAddress(rootKey: any, network: any, index: number = 0
     return { rootKey, account, internalPubkey, address, output }
 }
 
-export const sendTokens = async (account: any, currentAddress: string, utxos: Utxo[], to: string, _ticker: string, _id: string, _amount: string, _rate: string, network: any) => {
+export const sendTokens = async (account: any, currentAddress: string, utxos: Utxo[], to: string, _ticker: string, _id: string, dec: number, _amount: string, _rate: string, network: any) => {
     const ticker = _ticker.trim().toLowerCase();
     const id = parseInt(_id.trim());
 
-    let deployment = null;
-    try {
-        deployment = await getDeployment(ticker, id);
-    } catch (e) {
-        throw new Error('Deployment not found');   
-    }
-
-    if (deployment === null) {
-        throw new Error('Deployment not found');
-    }
-
-    const mantissa = BigInt(10 ** deployment.dec)
+    const mantissa = BigInt(10 ** dec)
     if(mantissa <= 1n) throw new Error('Invalid mantissa'); // @todo do tokens with 0 decimals exist?
 
     const amount = BigInt(_amount) * mantissa;
@@ -69,9 +57,7 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
 
         if (utxos[i].status.confirmed) {
             try {
-                const _utxo = await fetchUtxo(utxos[i].txid, utxos[i].vout);
-
-                if (_utxo.tick === ticker && _utxo.id === id) {
+                if (utxos[i].tick === ticker && utxos[i].id === id) {
                     vin.push({
                         txid: utxos[i].txid,
                         vout: utxos[i].vout,
@@ -81,7 +67,7 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
                         }
                     });
     
-                    found += BigInt(_utxo.amt);
+                    found += BigInt(utxos[i].amt || 0);
                 }
             } catch (e) {
                 console.error(e);
@@ -94,16 +80,8 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
             break;
         }
 
-        let token_utxo_exists = false;
-        try {
-            await fetchUtxo(utxos[i].txid, utxos[i].vout);
-            token_utxo_exists = true;
-        } catch(e){
-            console.error(e);
-        }
-
         if (
-            !token_utxo_exists &&
+            !utxos[i].tick &&
             utxos[i].status.confirmed
         ) {
             vin.push({
@@ -193,17 +171,7 @@ export const sendSats = async (account: any, currentAddress: string, utxos: Utxo
     {
         if(found >= amount + (163n * rate * 2n)) break;
 
-        let token_utxo_exists = false;
-
-        try
-        {
-            await fetchUtxo(utxos[i].txid, utxos[i].vout);
-            token_utxo_exists = true;
-        } catch(e) {
-            console.error(e);
-        }
-
-        if(!token_utxo_exists && utxos[i].status.confirmed) {
+        if(!utxos[i].tick && utxos[i].status.confirmed) {
             vin.push({
                 txid: utxos[i].txid,
                 vout: utxos[i].vout,
