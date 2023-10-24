@@ -1,16 +1,16 @@
 import { Utxo } from "./lib/bitcoin-lib";
 
-export async function fetchUtxos(address: string): Promise<Utxo[]> {
+export async function fetchUtxos(address: string, network: string): Promise<Utxo[]> {
   if(address.length === 0) throw new Error('Invalid address provided');
 
   const response = await fetch(
-    `https://mempool.space/api/address/${address}/utxo`
+    `https://mempool.space/${network === 'testnet' ? 'testnet/' : ''}api/address/${address}/utxo`
   );
   let utxos: Utxo[] = await response.json();
 
   utxos = await Promise.all(
     utxos.map(async (utxo) => {
-      const hex = await fetchHex(utxo.txid);
+      const hex = await fetchHex(utxo.txid, network);
       utxo.hex = hex;
 
       return utxo;
@@ -24,14 +24,14 @@ export async function fetchUtxos(address: string): Promise<Utxo[]> {
   return utxos;
 }
 
-export async function fetchHex(txid: any) {
-  const response = await fetch(`https://mempool.space/api/tx/${txid}/hex`);
+export async function fetchHex(txid: any, network: string) {
+  const response = await fetch(`https://mempool.space/${network === 'testnet' ? 'testnet/' : ''}api/tx/${txid}/hex`);
   return await response.text();
 }
 
-export async function sendTransaction(hexstring: any) {
+export async function sendTransaction(hexstring: any, network: string) {
   try {
-    const response = await fetch("https://mempool.space/api/tx", {
+    const response = await fetch(`https://mempool.space/${network === 'testnet' ? 'testnet/' : ''}api/tx`, {
       method: "POST",
       body: hexstring,
     });

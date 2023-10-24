@@ -3,10 +3,10 @@ import { bitcoin } from "../bitcoin/lib/bitcoin-lib";
 import { editWallet } from '../bitcoin/wallet-storage';
 
 export const AppContext = createContext<{
-  network: any,
+  network: string,
+  setNetwork: (network: string) => void,
   account: any,
   setAccount: (account: any) => void,
-  setNetwork: (network: any) => void,
   currentAddress: string,
   setCurrentAddress: (address: string, index: number) => void,
   addresses: number[],
@@ -18,7 +18,7 @@ export const AppContext = createContext<{
 }>({
   account: {},
   setAccount: () => undefined,
-  network: bitcoin.networks.bitcoin,
+  network: 'mainnet',
   setNetwork: () => undefined,
   currentAddress: '',
   setCurrentAddress: () => undefined,
@@ -36,7 +36,7 @@ export interface AppProviderProps {
 
 export const AppProvider = (props: AppProviderProps) => {
   const [account, setAccount] = useState<any>({});
-  const [network, setNetwork] = useState(bitcoin.networks.bitcoin);
+  const [network, setNetwork] = useState<string>('mainnet');
   const [addresses, _setAddresses] = useState<number[]>([]);
   const [currentAddress, _setCurrentAddress] = useState<string>('');
   const [feerate, setFeerate] = useState(0);

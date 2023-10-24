@@ -7,6 +7,7 @@ import { importWallet } from "../bitcoin/wallet";
 import { loadWallet } from "../bitcoin/wallet-storage";
 import { ResetStorageModal } from "./modals/reset-storage";
 import { getPasswordFromSettings, savePasswordInSettings } from "../app/settings";
+import { getNetwork } from "../bitcoin/helpers";
 
 export const Password = () => {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ export const Password = () => {
         throw new Error("Invalid password");
       }
 
-      app.setAccount(importWallet(wallet.mnemonic, wallet.network, wallet.addressIndex));
+      app.setAccount(importWallet(wallet.mnemonic, getNetwork(wallet.network), wallet.addressIndex));
       app.setNetwork(wallet.network);
       app.setCurrentAddress(wallet.currentAddress, wallet.addressIndex)
       app.setAddresses(wallet.addresses);

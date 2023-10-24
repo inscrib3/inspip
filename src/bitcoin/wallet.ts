@@ -3,9 +3,10 @@ import BIP32Factory from 'bip32';
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import * as bip39 from "bip39";
 import { ScriptData, Signer, Tap, Tx, ValueData, Word } from '@cmdcode/tapscript';
-import { addressToScriptPubKey, textToHex, toBytes, toInt26, toXOnly } from './helpers';
+import { addressToScriptPubKey, bigIntToString, parseStringToBigInt, textToHex, toBytes, toInt26, toXOnly } from './helpers';
 import { fetchUtxo, getDeployment } from './providers/server';
 import { Utxo } from './lib/bitcoin-lib';
+
 
 export function generateWallet(network: any) {
     bip39.setDefaultWordlist('english');
@@ -19,6 +20,19 @@ export function importWallet(mnemonic: string, network: any, index: number = 0) 
     const bip32 = BIP32Factory(ecc);
     const seed = bip39.mnemonicToSeedSync(mnemonic);
     const rootKey = bip32.fromSeed(seed, network);
+
+    /*{
+    const network = bitcoin.networks.bitcoin;
+    const wif = "L2YzKBgqJfmQdb6fo2cueovqmHQ2E8guxX6qUVPSnvzxE466Z9LD"
+    const ECPair: ECPairAPI = ECPairFactory(ecc);
+    console.log("ECPair", ECPair)
+    const keyPair: ECPairInterface = ECPair.fromWIF(wif, network);
+    console.log("keyPair", keyPair);
+    const privateKey = keyPair.privateKey?.toString('hex');
+    const hdMaster = bip32.fromSeed(Buffer.from(privateKey, 'hex'), network);
+    const chainCode = hdMaster.chainCode.toString('hex');
+    console.log('chainCode', chainCode);
+    }*/
 
     const data = generateNewAddress(rootKey, network, index);
     return { ...data, mnemonic, rootKey };
@@ -37,27 +51,24 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
     const ticker = _ticker.trim().toLowerCase();
     const id = parseInt(_id.trim());
 
-    let deployment = null;
+    let deployment: any = null;
     try {
         deployment = await getDeployment(ticker, id);
     } catch (e) {
         throw new Error('Deployment not found');   
     }
 
-    if (deployment === null) {
-        throw new Error('Deployment not found');
+    if (deployment?.dec > 8) {
+        throw new Error('Invalid deployment data');
     }
 
-    const mantissa = BigInt(10 ** deployment.dec)
-    if(mantissa <= 1n) throw new Error('Invalid mantissa'); // @todo do tokens with 0 decimals exist?
-
-    const amount = BigInt(_amount) * mantissa;
-    if(amount === 0n) throw new Error('Invalid rate');
+    const amount = parseStringToBigInt(_amount, deployment.dec, 8);
+    if(amount === 0n) throw new Error('Invalid amount');
 
     const rate = BigInt(_rate);
-    if(rate === 0n) throw new Error('Invalid rate');
+    if(rate < 2n) throw new Error('Invalid rate');
 
-    const vin = [];
+    const vin: any = [];
     let found = 0n;
     let sats_found = 0n;
     const sats_amount = 1092n;
@@ -137,8 +148,10 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
     });
 
     const ec = new TextEncoder();
-    const conv_amount = amount.toString();
     const token_change = found - amount;
+
+    const conv_amount = bigIntToString(amount, deployment.dec);
+    const conv_change = bigIntToString(token_change, deployment.dec);
 
     if (token_change <= 0n) {
         vout.push({
@@ -147,8 +160,6 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
             ]
         })
     } else {
-        const conv_change = token_change.toString();
-
         vout.push({
             value: 546n,
             scriptPubKey: addressToScriptPubKey(currentAddress, network)
@@ -184,7 +195,7 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
 };
 
 export const sendSats = async (account: any, currentAddress: string, utxos: Utxo[], toAddress: string, amount: bigint, rate: bigint, network: any): Promise<string> => {
-    const vin = [];
+    const vin: any = [];
     let found = 0n;
 
     if(utxos.length === 0) throw new Error("No UTXOs available")
@@ -219,7 +230,7 @@ export const sendSats = async (account: any, currentAddress: string, utxos: Utxo
 
     if(found < amount + (163n * rate * 2n)) throw new Error("Insufficient token funds, or transaction still unconfirmed")
 
-    const vout = [];
+    const vout: any = [];
     vout.push({
         value: amount,
         scriptPubKey: addressToScriptPubKey(toAddress, network)
@@ -246,7 +257,7 @@ export const sendSats = async (account: any, currentAddress: string, utxos: Utxo
 }
 
 export function selectUtxos(fromAddress: string, rate: bigint, utxos: Utxo[], utxos_db: any[], amount: bigint, ticker: string, id: number, network: any) {
-    const vin = [];
+    const vin: any = [];
     let found = 0n;
     let sats_found = 0n;
     const sats_amount = 1092n;

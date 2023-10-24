@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useApp } from "../app";
 import { sendSats } from "../bitcoin/wallet";
 import { fetchUtxos } from "../bitcoin/node";
+import { getNetwork } from "../bitcoin/helpers";
 
 export type SendSats = {
   dispatch: (address: string, amount: string, fee_rate: string) => Promise<string | undefined>;
@@ -19,7 +20,7 @@ export const useSendSats = (): SendSats => {
       if (loading) return;
       setLoading(true);
 
-      const fetchedUtxos = await fetchUtxos(app.currentAddress);
+      const fetchedUtxos = await fetchUtxos(app.currentAddress, app.network);
       const utxos = [];
 
       for (const utxo of fetchedUtxos) {
@@ -44,7 +45,7 @@ export const useSendSats = (): SendSats => {
         address,
         BigInt(amount),
         BigInt(fee_rate),
-        app.network
+        getNetwork(app.network)
       );
       
       setData(data);

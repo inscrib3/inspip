@@ -16,7 +16,7 @@ export function editWallet(currentAddress: string = '', addresses: number[] = []
   return parsedData;
 }
 
-export function saveWallet(mnemonic: string, network: any, currentAddress: string, addresses: number[], password: string) {
+export function saveWallet(mnemonic: string, network: string, currentAddress: string, addresses: number[], password: string) {
   const wallet = {
       mnemonic: encrypt(mnemonic, password),
       network,

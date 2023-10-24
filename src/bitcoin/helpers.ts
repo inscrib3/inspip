@@ -4,6 +4,41 @@ import { Address } from '@cmdcode/tapscript';
 
 export const toXOnly = (pubKey: Buffer) => (pubKey.length === 32 ? pubKey : pubKey.slice(1, 33));
 
+export function getNetwork(network: string) {
+    if(network === '' || network === 'mainnet') return bitcoin.networks.bitcoin;
+    else if(network === 'testnet') return bitcoin.networks.testnet;
+    else throw new Error('Invalid network');
+}
+
+export function parseStringToBigInt(amount: string, mantissaDecimalPoints: number, maxDecimals: number) {
+    if (/[^0-9.]/.test(amount)) {
+      throw new Error("Invalid character in amount");
+    }
+  
+    const [, decimalPart = ''] = amount.split('.');
+  
+    const decimalPartLength = decimalPart.length
+    if (decimalPartLength > maxDecimals) {
+      throw new Error("Too many decimal places");
+    }
+  
+    const amountBigInt = BigInt(amount.replace('.', ''));
+    const mantissa = BigInt(10**mantissaDecimalPoints);
+    const decimals = BigInt(10**decimalPartLength);
+    const result = amountBigInt *  mantissa / decimals;
+  
+    return result;
+}
+
+export function bigIntToString(valueBigInt: bigint, decimalPlaces: number) {
+    const factor = BigInt(10 ** decimalPlaces);
+    const wholePart = valueBigInt / factor;
+    const decimalPart = valueBigInt % factor;
+    const paddedDecimalPart = decimalPart.toString().padStart(decimalPlaces, '0');
+
+    return `${wholePart}.${paddedDecimalPart}`;
+  }
+
 export function isValidNumber(strNum: string)
 {
     const validNumber = new RegExp(/^\d*\.?\d*$/);
@@ -24,7 +59,7 @@ export function isSegwitAddress(to: string)
     return false;
 }
 
-export function addressToScriptPubKey(address: string, network: string) {
+export function addressToScriptPubKey(address: string, network: any) {
     let _toAddress, _script;
 
     if (address.startsWith('tb1q') || address.startsWith('bc1q')) {
@@ -106,7 +141,7 @@ export function formatNumberString(str: string, decimals: number) {
 }
 
 function charRange(start: string, stop: string) {
-    const result = [];
+    const result: any = [];
 
     // get all chars from starting char
     // to ending char

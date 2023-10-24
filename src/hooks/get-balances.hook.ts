@@ -24,7 +24,7 @@ export const useGetBalances = (): GetBalances => {
       [key: string]: string;
     } = {};
 
-    const utxos = await fetchUtxos(app.currentAddress);
+    const utxos = await fetchUtxos(app.currentAddress, app.network);
 
     const sumOfSats = utxos.reduce(
       (acc: number, utxo: { txid: string; vout: number; value: number }) => {
@@ -34,7 +34,6 @@ export const useGetBalances = (): GetBalances => {
     );
 
     for (const utxo of utxos) {
-      console.log("test", `${import.meta.env.VITE_SERVER_HOST}`);
       try {
         const token = await fetch(
           `${import.meta.env.VITE_SERVER_HOST}/utxo/${utxo.txid}/${utxo.vout}`

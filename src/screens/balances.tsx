@@ -69,7 +69,7 @@ export const Balances = () => {
           render: () => (
             <Menu
               key={0}
-              label=""
+              label={app.network}
               icon={<MoreVertical />}
               items={[
                 {
@@ -169,7 +169,7 @@ export const Balances = () => {
                         <Clock color="brand" />
                       )}
                     </Box>
-                    <Anchor color="white" target="_blank" href={`https://mempool.space/tx/${transaction.txid}`} style={{ wordBreak: "break-all" }}>
+                    <Anchor color="white" target="_blank" href={`https://mempool.space/${app.network === 'testnet' ? 'testnet/' : ''}tx/${transaction.txid}`} style={{ wordBreak: "break-all" }}>
                       {transaction.token ? (
                         <>
                           Sent {transaction.amount} {transaction.token} to {truncateInMiddle(transaction.to, 20)}
