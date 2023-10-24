@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useApp } from "../app";
-import { sendTokens } from "../lib/wallet";
-import { fetchUtxos } from "../lib/node";
+import { sendTokens } from "../bitcoin/wallet";
+import { fetchUtxos } from "../bitcoin/node";
 
 export type SendTokens = {
   dispatch: (address: string, ticker: string, id: string, amount: string, fee_rate: string) => Promise<any>

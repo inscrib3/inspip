@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useApp } from "../app";
-import { sendSats } from "../lib/wallet";
-import { fetchUtxos } from "../lib/node";
+import { sendSats } from "../bitcoin/wallet";
+import { fetchUtxos } from "../bitcoin/node";
 
 export type SendSats = {
   dispatch: (address: string, amount: string, fee_rate: string) => Promise<string | undefined>;
@@ -25,7 +25,7 @@ export const useSendSats = (): SendSats => {
       for (const utxo of fetchedUtxos) {
         try {
           const token = await fetch(
-            `${import.meta.env.VITE_APP_API}/utxo/${utxo.txid}/${utxo.vout}`
+            `${import.meta.env.VITE_SERVER_HOST}/utxo/${utxo.txid}/${utxo.vout}`
           );
 
           if (!token.ok) {

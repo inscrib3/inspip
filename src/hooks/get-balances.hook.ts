@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useApp } from "../app";
-import { fetchUtxos } from "../lib/node";
+import { fetchUtxos } from "../bitcoin/node";
 import { satsToBtc } from "../utils/sats-to-btc";
 
 export type GetBalances = {
@@ -29,15 +29,15 @@ export const useGetBalances = (): GetBalances => {
     const sumOfSats = utxos.reduce(
       (acc: number, utxo: { txid: string; vout: number; value: number }) => {
         return acc + utxo.value;
-        return acc;
       },
       0
     );
 
     for (const utxo of utxos) {
+      console.log("test", `${import.meta.env.VITE_SERVER_HOST}`);
       try {
         const token = await fetch(
-          `${import.meta.env.VITE_APP_API}/utxo/${utxo.txid}/${utxo.vout}`
+          `${import.meta.env.VITE_SERVER_HOST}/utxo/${utxo.txid}/${utxo.vout}`
         );
 
         if (!token.ok) continue;
@@ -45,7 +45,7 @@ export const useGetBalances = (): GetBalances => {
         const data = await token.json();
 
         const deployment = await fetch(
-          `${import.meta.env.VITE_APP_API}/getdeployment?ticker=${data.tick}&id=${data.id}`
+          `${import.meta.env.VITE_SERVER_HOST}/getdeployment?ticker=${data.tick}&id=${data.id}`
         );
 
         if (!deployment.ok) continue;

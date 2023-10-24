@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RoutePath } from "../router";
 import { useApp } from "../app";
-import { importWallet, loadWallet } from "../lib/wallet";
+import { importWallet } from "../bitcoin/wallet";
+import { loadWallet } from "../bitcoin/wallet-storage";
 import { ResetStorageModal } from "./modals/reset-storage";
 import { getPasswordFromSettings, savePasswordInSettings } from "../app/settings";
 

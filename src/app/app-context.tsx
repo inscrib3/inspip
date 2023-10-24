@@ -1,6 +1,6 @@
 import { createContext, useState } from 'react';
-import { bitcoin } from "../lib/bitcoin-lib";
-import { editWallet } from '../lib/wallet';
+import { bitcoin } from "../bitcoin/lib/bitcoin-lib";
+import { editWallet } from '../bitcoin/wallet-storage';
 
 export const AppContext = createContext<{
   network: any,

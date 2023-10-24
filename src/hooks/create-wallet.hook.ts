@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
-import { generateNewAddress, generateWallet, saveWallet } from "../lib/wallet";
+import { generateNewAddress, generateWallet } from "../bitcoin/wallet";
+import { saveWallet } from "../bitcoin/wallet-storage";
 import { BIP32Interface } from "bip32";
 import { useApp } from "../app";
 

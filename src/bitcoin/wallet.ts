@@ -1,66 +1,11 @@
-import { bitcoin } from './bitcoin-lib';
+import { bitcoin } from './lib/bitcoin-lib';
 import BIP32Factory from 'bip32';
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import * as bip39 from "bip39";
 import { ScriptData, Signer, Tap, Tx, ValueData, Word } from '@cmdcode/tapscript';
-import { addressToScriptPubKey, cleanFloat, formatNumberString, resolveNumberString, textToHex, toBytes, toInt26, toXOnly } from './utils';
-import { fetchUtxo, getDeployment } from './node';
-import { decrypt, encrypt } from './crypto';
-
-interface Utxo {
-    txid: string;
-    vout: number;
-    value: number;
-    confirmations: number;
-    spendable: boolean;
-    solvable: boolean;
-    safe: boolean;
-    address: string;
-    hex: string;
-    status: any;
-}
-
-export function editWallet(currentAddress: string = '', addresses: number[] = [], addressIndex: number = 0) {
-    const data = localStorage.getItem('wallet');
-    if (!data) throw new Error('Wallet not found');
-
-    const parsedData = JSON.parse(data);
-    if (!parsedData?.mnemonic) throw new Error('Wallet corrupted');
-
-    if (currentAddress !== '') parsedData.currentAddress = currentAddress;
-    if (addresses.length > 0) parsedData.addresses = addresses;
-    if (parsedData.addressIndex !== addressIndex) parsedData.addressIndex = addressIndex;
-
-    localStorage.setItem('wallet', JSON.stringify(parsedData));
-
-    return parsedData;
-}
-
-export function saveWallet(mnemonic: string, network: any, currentAddress: string, addresses: number[], password: string) {
-    const wallet = {
-        mnemonic: encrypt(mnemonic, password),
-        network,
-        currentAddress,
-        addresses,
-    }
-    localStorage.setItem('wallet', JSON.stringify(wallet));
-}
-
-export function loadWallet(password: string) {
-    const data = localStorage.getItem('wallet');
-    if (!data) throw new Error('Wallet not found');
-
-    const parsedData = JSON.parse(data);
-    if (!parsedData?.mnemonic) throw new Error('Wallet corrupted');
-
-    try {
-        parsedData.mnemonic = decrypt(parsedData.mnemonic, password);
-    } catch (e) {
-        throw new Error('Wrong password');
-    }
-    
-    return parsedData;
-}
+import { addressToScriptPubKey, textToHex, toBytes, toInt26, toXOnly } from './helpers';
+import { fetchUtxo, getDeployment } from './providers/server';
+import { Utxo } from './lib/bitcoin-lib';
 
 export function generateWallet(network: any) {
     bip39.setDefaultWordlist('english');

@@ -29,7 +29,7 @@ jobs:
     - name: Build project
       run: npm run build
       env:
-        VITE_APP_API: ${{ secrets.VITE_APP_API }}
+        VITE_SERVER_HOST: ${{ secrets.VITE_SERVER_HOST }}
 
     - name: Package /dist directory
       run: zip -r dist.zip dist/

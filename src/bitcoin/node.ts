@@ -1,43 +1,15 @@
-export const getDeployment = async (ticker: string, id: number) => {
-  try {
-    const deployment = await fetch(
-      `${import.meta.env.VITE_APP_API}/getdeployment?ticker=${ticker}&id=${id}`
-    );
+import { Utxo } from "./lib/bitcoin-lib";
 
-    if (!deployment.ok) throw new Error("Deployment not found");
+export async function fetchUtxos(address: string): Promise<Utxo[]> {
+  if(address.length === 0) throw new Error('Invalid address provided');
 
-    const deploymentData = await deployment.json();
-
-    return deploymentData.data;
-  } catch (e) {
-    throw new Error("Deployment not found");
-  }
-};
-
-export const fetchUtxo = async (txid: string, vout: number) => {
-  try {
-    const utxo = await fetch(
-      `${import.meta.env.VITE_APP_API}/utxo/${txid}/${vout}`
-    );
-
-    if (!utxo.ok) throw new Error("Utxo not found");
-
-    const data = await utxo.json();
-
-    return data;
-  } catch (e) {
-    throw new Error("Utxo not found");
-  }
-};
-
-export async function fetchUtxos(address: string) {
   const response = await fetch(
     `https://mempool.space/api/address/${address}/utxo`
   );
-  let utxos: { txid: string, hex: string, value: number }[] = await response.json();
+  let utxos: Utxo[] = await response.json();
 
   utxos = await Promise.all(
-    utxos.map(async (utxo: { txid: string; hex: string, value: number }) => {
+    utxos.map(async (utxo) => {
       const hex = await fetchHex(utxo.txid);
       utxo.hex = hex;
 

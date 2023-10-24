@@ -2,11 +2,11 @@ import { Header, Box, Button, Select, TextInput, Text, Spinner, Anchor } from "g
 import * as Icons from "grommet-icons";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import { validateAddress } from "../lib/utils";
+import { validateAddress } from "../bitcoin/helpers";
 import { SetFees } from "../components";
 import { useSendSats, useSendTokens, useGetBalances } from "../hooks";
 import { useApp } from "../app";
-import { sendTransaction } from "../lib/node";
+import { sendTransaction } from "../bitcoin/node";
 import { save } from "../hooks/show-transactions.hook";
 
 export const Send = () => {

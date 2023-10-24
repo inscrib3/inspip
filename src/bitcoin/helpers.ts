@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import { bitcoin } from './bitcoin-lib';
+import { bitcoin } from './lib/bitcoin-lib';
 import { Address } from '@cmdcode/tapscript';
 
 export const toXOnly = (pubKey: Buffer) => (pubKey.length === 32 ? pubKey : pubKey.slice(1, 33));

@@ -13,6 +13,7 @@
   "dependencies": {
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
     "@cmdcode/tapscript": "^1.4.1",
+    "@mempool/mempool.js": "^2.3.0",
     "@types/murmurhash-js": "^1.0.5",
     "bip32": "^4.0.0",
     "bip39": "^3.1.0",
@@ -28,6 +29,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.16.0",
+    "rpc-bitcoin": "^2.0.0",
     "sort-by": "^1.2.0",
     "styled-components": "^5.1.0"
   },

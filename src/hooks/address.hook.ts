@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useApp } from "../app";
-import { generateNewAddress } from "../lib/wallet";
+import { generateNewAddress } from "../bitcoin/wallet";
 
 export type Address = {
   data: string[];
