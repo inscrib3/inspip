@@ -6,7 +6,6 @@ import { ScriptData, Signer, Tap, Tx, ValueData, Word } from '@cmdcode/tapscript
 import { addressToScriptPubKey, bigIntToString, parseStringToBigInt, textToHex, toBytes, toInt26, toXOnly } from './helpers';
 import { Utxo } from '../app/app-context';
 
-
 export function generateWallet(network: any) {
     bip39.setDefaultWordlist('english');
     const mnemonic = bip39.generateMnemonic();

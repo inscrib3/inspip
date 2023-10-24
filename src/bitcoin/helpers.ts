@@ -14,7 +14,7 @@ export function parseStringToBigInt(amount: string, mantissaDecimalPoints: numbe
     if (/[^0-9.]/.test(amount)) {
       throw new Error("Invalid character in amount");
     }
-  
+
     const [, decimalPart = ''] = amount.split('.');
     const decimalPartLength = decimalPart.length
     const amountBigInt = BigInt(amount.replace('.', ''));
