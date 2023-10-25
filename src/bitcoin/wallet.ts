@@ -5,6 +5,7 @@ import { ScriptData, Signer, Tap, Tx, ValueData, Word } from '@cmdcode/tapscript
 import { addressToScriptPubKey, bigIntToString, parseStringToBigInt, textToHex, toBytes, toInt26, toXOnly } from './helpers';
 import { bitcoin } from './lib/bitcoin-lib';
 import { Utxo } from '../app/app-context';
+import { estimateFee } from './fees';
 
 export function generateWallet(network: any) {
     bip39.setDefaultWordlist('english');
@@ -47,10 +48,6 @@ export function generateNewAddress(rootKey: any, network: any, index: number = 0
     const { address, output } = bitcoin.payments.p2tr({ internalPubkey: internalPubkey, network });
   
     return { rootKey, account, internalPubkey, address, output }
-}
-
-const estimateFee = (vin: bigint, vout: bigint, rate: bigint) => {
-    return (102n + vin * 112n + vout * 33n) * rate;
 }
 
 export const sendTokens = async (account: any, currentAddress: string, utxos: Utxo[], to: string, _ticker: string, _id: string, dec: number, _amount: string, _rate: string, network: any) => {
