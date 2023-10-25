@@ -21,6 +21,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "src/lib/bitcoinjs-lib-standalone.js"],
+  "include": ["src", "src/bitcoin/bitcoinjs-lib-standalone.js"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

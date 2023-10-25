@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useApp } from "../app";
-import { generateNewAddress } from "../lib/wallet";
+import { generateNewAddress } from "../bitcoin/wallet";
+import { getNetwork } from "../bitcoin/helpers";
 
 export type Address = {
   data: string[];
@@ -14,8 +15,9 @@ export const useAddress = (): Address => {
 
   const data = useMemo(() => {
     return app.addresses.map((_index) => {
-      const account0 = generateNewAddress(app.account.rootKey, app.network, 0);
-      return generateNewAddress(account0.rootKey, app.network, _index).address;
+      // @todo check it
+      const account0 = generateNewAddress(app.account.rootKey, getNetwork(app.network), 0);
+      return generateNewAddress(account0.rootKey, getNetwork(app.network), _index).address;
     });
   }, [app.account.rootKey, app.addresses, app.network]);
 
@@ -24,11 +26,11 @@ export const useAddress = (): Address => {
   };
 
   const switchAddress = (address: string, index: number) => {
-    const account0 = generateNewAddress(app.account.rootKey, app.network, 0);
-    app.setAccount(generateNewAddress(account0.rootKey, app.network, index));
+    // @todo check it
+    const account0 = generateNewAddress(app.account.rootKey, getNetwork(app.network), 0);
+    app.setAccount(generateNewAddress(account0.rootKey, getNetwork(app.network), index));
     app.setCurrentAddress(address, index);
   };
-
 
   return {
     address: app.currentAddress,
@@ -36,4 +38,4 @@ export const useAddress = (): Address => {
     createAddress,
     switchAddress,
   };
-};
+}

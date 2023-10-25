@@ -64,19 +64,21 @@ export const getBitcoinPriceFromBybit = async () => {
 };
 
 export const getBitcoinPrice = async () => {
-  const prices = [];
   const cbprice = await getBitcoinPriceFromCoinbase();
   const kprice = await getBitcoinPriceFromKraken();
   const cdprice = await getBitcoinPriceFromCoindesk();
   const gprice = await getBitcoinPriceFromGemini();
   const bprice = await getBitcoinPriceFromBybit();
-  prices.push(
+
+  let prices = [
     parseFloat(cbprice),
     parseFloat(kprice),
     parseFloat(cdprice),
     parseFloat(gprice),
     parseFloat(bprice)
-  );
-  prices.sort();
-  return prices[2];
+  ];
+  prices = prices.filter((value) => !Number.isNaN(value) && value > 0);
+  const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
+
+  return avg;
 };

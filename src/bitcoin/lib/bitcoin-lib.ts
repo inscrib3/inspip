@@ -24,3 +24,11 @@ interface Bitcoin {
     initEccLib: (ecc: any) => void;
 }
 export const bitcoin: Bitcoin = _bitcoin as unknown as Bitcoin;
+
+export interface Utxo {
+    txid: string;
+    value: number;
+    hex: string;
+    status: any;
+    vout: number;
+}

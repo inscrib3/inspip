@@ -1,17 +1,19 @@
 import { useState, useCallback } from "react";
-import { generateNewAddress, importWallet, saveWallet } from "../lib/wallet";
+import { generateNewAddress, importWallet } from "../bitcoin/wallet";
+import { saveWallet } from "../bitcoin/wallet-storage";
 import { BIP32Interface } from "bip32";
 import { useApp } from "../app";
+import { getNetwork } from "../bitcoin/helpers";
 
 export type RestoreWallet = {
-  dispatch: (mnemonic: string, password: string) => Promise<any>; //{ network: any; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; } | undefined>;
+  dispatch: (mnemonic: string, password: string) => Promise<any>;
   loading: boolean;
-  data?: { network: any; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; };
+  data?: { network: string; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; };
 };
 
 export const useRestoreWallet = (): RestoreWallet => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [data, setData] = useState<{ network: any; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; } | undefined>();
+  const [data, setData] = useState<{ network: string; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; } | undefined>();
   const app = useApp();
 
   const dispatch = useCallback(
@@ -20,12 +22,15 @@ export const useRestoreWallet = (): RestoreWallet => {
 
       setLoading(true);
 
-      const wallet = importWallet(mnemonic, app.network);
-      const address = generateNewAddress(wallet.rootKey, app.network, 0);
+      const wallet = importWallet(mnemonic, getNetwork(app.network));
+      const address = generateNewAddress(wallet.rootKey, getNetwork(app.network), 0);
       saveWallet(wallet.mnemonic, app.network, address.address, [0], password);
       setData({...wallet, network: app.network});
+  
+      app.setAccount(importWallet(wallet.mnemonic, getNetwork(app.network), 0));
+      app.setNetwork(app.network);
+      app.setCurrentAddress(address.address, 0)
       app.setAddresses([0]);
-      app.setCurrentAddress(address.address, 0);
 
       setLoading(false);
 
