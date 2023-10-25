@@ -1,9 +1,9 @@
-import { bitcoin } from './lib/bitcoin-lib';
 import BIP32Factory from 'bip32';
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import * as bip39 from "bip39";
 import { ScriptData, Signer, Tap, Tx, ValueData, Word } from '@cmdcode/tapscript';
 import { addressToScriptPubKey, bigIntToString, parseStringToBigInt, textToHex, toBytes, toInt26, toXOnly } from './helpers';
+import { bitcoin } from './lib/bitcoin-lib';
 import { Utxo } from '../app/app-context';
 
 export function generateWallet(network: any) {
@@ -19,18 +19,17 @@ export function importWallet(mnemonic: string, network: any, index: number = 0) 
     const seed = bip39.mnemonicToSeedSync(mnemonic);
     const rootKey = bip32.fromSeed(seed, network);
 
-    /*{
-    const network = bitcoin.networks.bitcoin;
-    const wif = ""
-    const ECPair: ECPairAPI = ECPairFactory(ecc);
-    console.log("ECPair", ECPair)
-    const keyPair: ECPairInterface = ECPair.fromWIF(wif, network);
-    console.log("keyPair", keyPair);
-    const privateKey = keyPair.privateKey?.toString('hex');
-    const hdMaster = bip32.fromSeed(Buffer.from(privateKey, 'hex'), network);
-    const chainCode = hdMaster.chainCode.toString('hex');
-    console.log('chainCode', chainCode);
-    }*/
+    /*
+    {
+        const network = bitcoin.networks.bitcoin;
+        const wif = ""
+        const ECPair: ECPairAPI = ECPairFactory(ecc);
+        const keyPair: ECPairInterface = ECPair.fromWIF(wif, network);
+        const privateKey = keyPair.privateKey?.toString('hex');
+        const hdMaster = bip32.fromSeed(Buffer.from(privateKey, 'hex'), network);
+        const chainCode = hdMaster.chainCode.toString('hex');
+    }
+    */
 
     const data = generateNewAddress(rootKey, network, index);
     return { ...data, mnemonic, rootKey };
@@ -48,6 +47,10 @@ export function generateNewAddress(rootKey: any, network: any, index: number = 0
     const { address, output } = bitcoin.payments.p2tr({ internalPubkey: internalPubkey, network });
   
     return { rootKey, account, internalPubkey, address, output }
+}
+
+const estimateFee = (vin: bigint, vout: bigint, rate: bigint) => {
+    return (102n + vin * 112n + vout * 33n) * rate;
 }
 
 export const sendTokens = async (account: any, currentAddress: string, utxos: Utxo[], to: string, _ticker: string, _id: string, dec: number, _amount: string, _rate: string, network: any) => {
@@ -90,8 +93,10 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
         }
     }
 
+    const fee = estimateFee(BigInt(vin.length), 4n, rate);
+
     for (let i = 0; i < utxos.length; i++) {
-        if (sats_found >= sats_amount + (163n * rate * 2n)) {
+        if (sats_found >= sats_amount + fee) {
             break;
         }
 
@@ -114,7 +119,7 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
 
     if(
         found < amount ||
-        sats_found < sats_amount + (163n * rate * 2n)
+        sats_found < sats_amount + fee
     ) {
         throw new Error('Insufficient token funds, or transaction still unconfirmed');
     }
@@ -156,7 +161,7 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
     }
 
     vout.push({
-        value: sats_found - (163n * rate * 2n), // @todo check 163n default
+        value: sats_found - fee,
         scriptPubKey: addressToScriptPubKey(currentAddress, network)
     })
 
@@ -200,7 +205,9 @@ export const sendSats = async (account: any, currentAddress: string, utxos: Utxo
         }
     }
 
-    if(found < amount + (163n * rate * 2n)) throw new Error("Insufficient token funds, or transaction still unconfirmed")
+    const fee = estimateFee(BigInt(vin.length), 2n, rate);
+
+    if(found < amount + fee) throw new Error("Insufficient token funds, or transaction still unconfirmed")
 
     const vout: any = [];
     vout.push({
@@ -208,7 +215,7 @@ export const sendSats = async (account: any, currentAddress: string, utxos: Utxo
         scriptPubKey: addressToScriptPubKey(toAddress, network)
     });
     vout.push({
-        value: found - amount - (163n * rate * 2n), // @todo check 163n default
+        value: found - amount - fee,
         scriptPubKey: addressToScriptPubKey(currentAddress, network)
     })
 
