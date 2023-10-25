@@ -4,17 +4,18 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { getNetwork, validateAddress } from "../bitcoin/helpers";
 import { SetFees } from "../components";
-import { useSendSats, useSendTokens, useGetBalances } from "../hooks";
+import { useSendSats, useSendTokens } from "../hooks";
 import { useApp } from "../app";
 import { sendTransaction } from "../bitcoin/node";
 import { save } from "../hooks/show-transactions.hook";
+import { useSafeBalances } from "../hooks/safe-balances.hook";
 
 export const Send = () => {
   const navigate = useNavigate();
   const app = useApp();
   const sendSats = useSendSats();
   const sendTokens = useSendTokens();
-  const balances = useGetBalances();
+  const balances = useSafeBalances();
   const [ticker, setTicker] = useState<string>('');
   const [address, setAddress] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
@@ -52,6 +53,9 @@ export const Send = () => {
       ticker.toLowerCase() !== 'btc'
       && Math.floor(parseFloat(amount) * Math.pow(10, token[0].dec)) === 0) {
       setError(`Amount exceeds ${token[0].dec} decimals`);
+      return;
+    } else if (ticker.toLowerCase() === 'btc' && Math.floor(parseFloat(amount) * Math.pow(10, 8)) === 0) {
+      setError("Amount exceeds 8 decimals");
       return;
     }
 
@@ -100,11 +104,14 @@ export const Send = () => {
       <Box flex="grow" pad={{ horizontal: "large", vertical: "small" }}>
         {!!error && (<Text color="red" margin={{ bottom: "small" }}>{error}</Text>)}
         {ticker && balances.data[ticker.toLowerCase()] && (
-          <Box justify="end" margin={{ bottom: "medium" }} direction="row" gap="small">
-            <Anchor onClick={() => {
-              setAmount(balances.data[ticker.toLowerCase()])
-            }}><Text>{balances.data[ticker.toLowerCase()]}</Text></Anchor>
-            <Text>{ticker}</Text>
+          <Box>
+            <Text textAlign="end">MAX SAFE</Text>
+            <Box justify="end" margin={{ bottom: "medium" }} direction="row" gap="small">
+              <Anchor onClick={() => {
+                setAmount(balances.data[ticker.toLowerCase()])
+              }}><Text>{balances.data[ticker.toLowerCase()]}</Text></Anchor>
+              <Text>{ticker}</Text>
+            </Box>
           </Box>
         )}
         <Box direction="row" gap="medium">          

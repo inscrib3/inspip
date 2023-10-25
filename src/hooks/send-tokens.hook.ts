@@ -19,7 +19,9 @@ export const useSendTokens = (): SendTokens => {
       if (loading) return;
       setLoading(true);
 
-      const utxos = await app.fetchUtxos();
+      let utxos = await app.fetchUtxos();
+      utxos = utxos.filter((u) => u.status.confirmed);
+
       const deployment = await app.tokens.filter((token) => token.tick === ticker.toLowerCase() && token.id === parseInt(id))[0];
       const network = getNetwork(app.network);
       const data = await sendTokens(app.account, app.currentAddress, utxos, address, ticker, id, deployment.dec, amount, fee_rate, network)

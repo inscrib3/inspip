@@ -5,7 +5,7 @@ import { ScriptData, Signer, Tap, Tx, ValueData, Word } from '@cmdcode/tapscript
 import { addressToScriptPubKey, bigIntToString, parseStringToBigInt, textToHex, toBytes, toInt26, toXOnly } from './helpers';
 import { bitcoin } from './lib/bitcoin-lib';
 import { Utxo } from '../app/app-context';
-import { estimateFee } from './fees';
+import { hexToBytes } from '../utils/hex-to-bytes';
 
 export function generateWallet(network: any) {
     bip39.setDefaultWordlist('english');
@@ -60,7 +60,11 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
     const rate = BigInt(_rate);
     if(rate < 2n) throw new Error('Invalid rate');
 
-    const vin: any = [];
+    let vin = [];
+    let vout: {
+        value?: ValueData | undefined;
+        scriptPubKey?: ScriptData | undefined;
+    }[] | undefined = [];
     let found = 0n;
     let sats_found = 0n;
     const sats_amount = 1092n;
@@ -90,7 +94,104 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
         }
     }
 
-    const fee = estimateFee(BigInt(vin.length), 4n, rate);
+    for (let i = 0; i < utxos.length; i++) {
+        if (sats_found >= sats_amount + 5_000n) {
+            break;
+        }
+
+        if (
+            !utxos[i].tick &&
+            utxos[i].status.confirmed
+        ) {
+            vin.push({
+                txid: utxos[i].txid,
+                vout: utxos[i].vout,
+                prevout: {
+                    value: BigInt(utxos[i].value),
+                    scriptPubKey: addressToScriptPubKey(currentAddress, network)
+                }
+            });
+
+            sats_found += BigInt(utxos[i].value);
+        }
+    }
+
+    vout.push({
+        value: 546n,
+        scriptPubKey: addressToScriptPubKey(to, network)
+    });
+
+    let ec = new TextEncoder();
+    let token_change = found - amount;
+
+    let conv_amount = bigIntToString(amount, dec);
+    let conv_change = bigIntToString(token_change, dec);
+
+    if (token_change <= 0n) {
+        vout.push({
+            scriptPubKey: [ 'OP_RETURN', ec.encode('P'), ec.encode('T'),
+                toBytes(toInt26(ticker)) as Word, toBytes(BigInt(id)) as Word, toBytes(0n) as Word, textToHex(conv_amount)
+            ]
+        })
+    } else {
+        vout.push({
+            value: 546n,
+            scriptPubKey: addressToScriptPubKey(currentAddress, network)
+        });
+
+        vout.push({
+            scriptPubKey: [ 'OP_RETURN', ec.encode('P'), ec.encode('T'),
+                toBytes(toInt26(ticker)) as Word, toBytes(BigInt(id)) as Word, toBytes(0n) as Word, textToHex(conv_amount),
+                toBytes(toInt26(ticker)) as Word, toBytes(BigInt(id)) as Word, toBytes(1n) as Word, textToHex(conv_change)
+            ]
+        });
+    }
+
+    vout.push({
+        value: sats_found - 5_000n,
+        scriptPubKey: addressToScriptPubKey(currentAddress, network)
+    })
+
+    let txdata = Tx.create({
+        vin: vin,
+        vout: vout
+    });
+
+    const data = hexToBytes(Tx.encode(txdata).hex);
+    const prefix = 143n;
+    const txsize = prefix + BigInt(Math.floor(data.length / 4));
+
+    const fee = rate * txsize;
+
+    vin = [];
+    vout = [];
+    found = 0n;
+    sats_found = 0n;
+
+    for (let i = 0; i < utxos.length; i++) {
+        if (found >= amount) {
+            break;
+        }
+
+        if (utxos[i].status.confirmed) {
+            try {
+                if (utxos[i].tick === ticker && utxos[i].id === id) {
+                    vin.push({
+                        txid: utxos[i].txid,
+                        vout: utxos[i].vout,
+                        prevout: {
+                            value: BigInt(utxos[i].value),
+                            scriptPubKey: addressToScriptPubKey(currentAddress, network)
+                        }
+                    });
+    
+                    found += BigInt(utxos[i].amt || 0);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    }
 
     for (let i = 0; i < utxos.length; i++) {
         if (sats_found >= sats_amount + fee) {
@@ -114,28 +215,16 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
         }
     }
 
-    if(
-        found < amount ||
-        sats_found < sats_amount + fee
-    ) {
-        throw new Error('Insufficient token funds, or transaction still unconfirmed');
-    }
-
-    const vout: {
-        value?: ValueData | undefined;
-        scriptPubKey?: ScriptData | undefined;
-    }[] | undefined = [];
-
     vout.push({
         value: 546n,
         scriptPubKey: addressToScriptPubKey(to, network)
     });
 
-    const ec = new TextEncoder();
-    const token_change = found - amount;
+    ec = new TextEncoder();
+    token_change = found - amount;
 
-    const conv_amount = bigIntToString(amount, dec);
-    const conv_change = bigIntToString(token_change, dec);
+    conv_amount = bigIntToString(amount, dec);
+    conv_change = bigIntToString(token_change, dec);
 
     if (token_change <= 0n) {
         vout.push({
@@ -162,7 +251,14 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
         scriptPubKey: addressToScriptPubKey(currentAddress, network)
     })
 
-    const txdata = Tx.create({
+    if(
+        found < amount ||
+        sats_found < sats_amount + fee
+    ) {
+        throw new Error('Insufficient token funds, or transaction still unconfirmed');
+    }
+
+    txdata = Tx.create({
         vin  : vin,
         vout : vout
     });
@@ -178,15 +274,26 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
     return Tx.encode(txdata).hex;
 };
 
-export const sendSats = async (account: any, currentAddress: string, utxos: Utxo[], toAddress: string, amount: bigint, rate: bigint, network: any): Promise<string> => {
-    const vin: any = [];
+export const sendSats = async (
+    account: any,
+    currentAddress: string,
+    utxos: Utxo[],
+    toAddress: string,
+    amount: bigint,
+    rate: bigint,
+    network: any,
+): Promise<string> => {
+    let vin = [];
+    let vout = [];
     let found = 0n;
 
     if(utxos.length === 0) throw new Error("No UTXOs available")
+
     utxos = utxos.sort((a, b) => b.value - a.value);
+
     for(let i = 0; i < utxos.length; i++)
     {
-        if(found >= amount + (163n * rate * 2n)) break;
+        if(found >= amount + 5_000n) break;
 
         if(!utxos[i].tick && utxos[i].status.confirmed) {
             vin.push({
@@ -202,21 +309,62 @@ export const sendSats = async (account: any, currentAddress: string, utxos: Utxo
         }
     }
 
-    const fee = estimateFee(BigInt(vin.length), 2n, rate);
-
-    if(found < amount + fee) throw new Error("Insufficient token funds, or transaction still unconfirmed")
-
-    const vout: any = [];
     vout.push({
         value: amount,
         scriptPubKey: addressToScriptPubKey(toAddress, network)
     });
+
+    vout.push({
+        value: found - amount - 5_000n,
+        scriptPubKey: addressToScriptPubKey(currentAddress, network)
+    })
+
+    let txdata = Tx.create({
+        vin: vin,
+        vout: vout
+    });
+
+    const data = hexToBytes(Tx.encode(txdata).hex);
+    const prefix = 143n;
+    const txsize = prefix + BigInt(Math.floor(data.length / 4));
+
+    const fee = rate * txsize;
+
+    vin = [];
+    vout = [];
+    found = 0n;
+
+    for(let i = 0; i < utxos.length; i++)
+    {
+        if(found >= amount + fee) break;
+
+        if(!utxos[i].tick && utxos[i].status.confirmed) {
+            vin.push({
+                txid: utxos[i].txid,
+                vout: utxos[i].vout,
+                prevout: {
+                    value: BigInt(utxos[i].value),
+                    scriptPubKey: addressToScriptPubKey(currentAddress, network)
+                }
+            });
+            
+            found += BigInt(utxos[i].value);
+        }
+    }
+
+    if(found < amount + fee) throw new Error("Insufficient token funds, or transaction still unconfirmed");
+
+    vout.push({
+        value: amount,
+        scriptPubKey: addressToScriptPubKey(toAddress, network)
+    });
+
     vout.push({
         value: found - amount - fee,
         scriptPubKey: addressToScriptPubKey(currentAddress, network)
     })
 
-    const txdata = Tx.create({
+    txdata = Tx.create({
         vin: vin,
         vout: vout
     });
@@ -230,72 +378,4 @@ export const sendSats = async (account: any, currentAddress: string, utxos: Utxo
     }
       
     return Tx.encode(txdata).hex;
-}
-
-export function selectUtxos(fromAddress: string, rate: bigint, utxos: Utxo[], utxos_db: any[], amount: bigint, ticker: string, id: number, network: any) {
-    const vin: any = [];
-    let found = 0n;
-    let sats_found = 0n;
-    const sats_amount = 1092n;
-
-    // UTXO selection for tokens
-    for (let i = 0; i < utxos.length; i++) {
-        if (found >= amount) {
-            break;
-        }
-
-        if(utxos[i].status.confirmed) {
-            const utxoKey = 'utxo_' + utxos[i].txid + '_' + utxos[i].vout;
-
-            const _utxo = utxos_db.find((utxo) => utxo.key === utxoKey);
-            if(_utxo !== undefined) {
-                const get_utxo = JSON.parse(_utxo);
-
-                if (get_utxo.tick === ticker && get_utxo.id === id) {
-                    vin.push({
-                        txid: utxos[i].txid,
-                        vout: utxos[i].vout,
-                        prevout: {
-                            value: BigInt(utxos[i].value),
-                            scriptPubKey: addressToScriptPubKey(fromAddress, network) 
-                        }
-                    });
-
-                    found += BigInt(get_utxo.amt);
-                }
-            }
-        }
-    }
-
-    // UTXO selection for satoshis
-    for (let i = 0; i < utxos.length; i++) {
-        if (sats_found >= sats_amount + (rate * 2n)) {
-            break;
-        }
-
-        const utxoKey = 'utxo_' + utxos[i].txid + '_' + utxos[i].vout;
-        const _utxo = utxos_db.find(utxo => utxo.key === utxoKey);
-        const token_utxo_exists = _utxo === undefined ? false : true;
-        if (
-            !token_utxo_exists &&
-            utxos[i].status.confirmed
-        ) {
-            vin.push({
-                txid: utxos[i].txid,
-                vout: utxos[i].vout,
-                prevout: {
-                    value: BigInt(utxos[i].value),
-                    scriptPubKey: addressToScriptPubKey(fromAddress, network)
-                }
-            });
-
-            sats_found += BigInt(utxos[i].value);
-        }
-    }
-
-    if (found < amount) {
-        throw new Error('Insufficient token funds, or transaction still unconfirmed');
-    }
-
-    return { vin, found };
 }
