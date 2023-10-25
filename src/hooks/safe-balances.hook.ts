@@ -42,7 +42,7 @@ export const useSafeBalances = (): SafeBalances => {
         }
 
         nextData[utxo.tick + ":" + utxo.id] =
-          (parseFloat(nextData[utxo.tick + ":" + utxo.id]) + (parseInt(utxo.amt || '0') / Math.pow(10, utxo.dec || 0))).toString();
+          parseFloat(((parseFloat(nextData[utxo.tick + ":" + utxo.id]) + (parseInt(utxo.amt || '0') / Math.pow(10, utxo.dec || 0))).toFixed(8))).toString();
       } catch (e) {
         console.error(e);
       }
