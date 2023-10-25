@@ -13,7 +13,6 @@
   "dependencies": {
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
     "@cmdcode/tapscript": "^1.4.1",
-    "@mempool/mempool.js": "^2.3.0",
     "@types/murmurhash-js": "^1.0.5",
     "bip32": "^4.0.0",
     "bip39": "^3.1.0",
