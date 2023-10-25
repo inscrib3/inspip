@@ -23,7 +23,7 @@ export const Balances = () => {
   const [isMnemonicModalOpen, setMnemonicModalOpen] = useState(false);
   const [isResetModalOpen, setResetModalOpen] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([])
-  const balancesWithoutBTC = Object.keys(balances.data).filter(
+  const balancesWithoutBTC = Object.keys(balances.data).sort().filter(
     (balance) => balance !== "btc" && balance !== "sats"
   );
 
