@@ -165,14 +165,14 @@ export const Balances = () => {
                     pad="medium"
                     margin={{ top: "medium" }}
                     style={{ borderRadius: "5px" }}
-                  >
+                  >{/* 
                     <Box margin={{ right: "medium" }}>
                       {transaction.confirmed ? (
                         <Checkmark color="brand" />
                       ) : (
                         <Clock color="brand" />
                       )}
-                    </Box>
+                    </Box> */}
                     <Anchor color="white" target="_blank" href={`https://mempool.space/${app.network === 'testnet' ? 'testnet/' : ''}tx/${transaction.txid}`} style={{ wordBreak: "break-all" }}>
                       {transaction.token ? (
                         <>
