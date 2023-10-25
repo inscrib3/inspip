@@ -4,7 +4,7 @@ import { useApp } from "../app";
 import { useNavigate } from "react-router-dom";
 import { RoutePath } from "../router";
 import { Layout } from "../components";
-import { Checkmark, Clock, MoreVertical } from "grommet-icons";
+import { MoreVertical } from "grommet-icons";
 import { truncateInMiddle } from "../utils/truncate-in-middle";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ShowAddressModal } from "./modals/show-address";
