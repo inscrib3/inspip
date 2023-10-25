@@ -54,7 +54,9 @@ export const useGetBalances = (): GetBalances => {
   }, [app, loading]);
 
   useEffect(() => {
-    dispatch();
+    setTimeout(() => {
+      dispatch();
+    }, 1000);
     const interval = setInterval(dispatch, 10000);
     return () => clearInterval(interval);
   }, []);
