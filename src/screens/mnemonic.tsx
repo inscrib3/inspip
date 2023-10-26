@@ -45,9 +45,16 @@ export const Mnemonic = () => {
                   <Text
                     weight="bold"
                     size="small"
+                    style={{ userSelect: "none" }}
+                  >
+                    {rowIndex * 3 + wordIndex + 1}{". "}
+                  </Text>
+                  <Text
+                    weight="bold"
+                    size="small"
                     style={{ wordBreak: "break-all" }}
                   >
-                    {rowIndex * 3 + wordIndex + 1}. {word}
+                    {word}
                   </Text>
                 </Box>
               ))}
