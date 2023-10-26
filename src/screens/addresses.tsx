@@ -21,10 +21,11 @@ export const Addresses = (): JSX.Element => {
           <InfiniteScroll items={address.data}>
             {(item: string, index: number) => (
               <Box
-                pad="medium"
-                key={item}
+                flex="grow"
                 background={address.address === item ? "brand" : undefined}
                 onClick={() => address.switchAddress(item, index)}
+                pad="medium"
+                margin={{ bottom: "medium" }}
               >
                 <Text size="small" weight="bold">
                   Account {index + 1}
