@@ -1,4 +1,7 @@
 # Inspip | Pipe Wallet Extension
+
+## Experimental Public Beta: Use at your own risk, no refunds, no warranties.
+
 Easily manage and interact with PIPE tokens on the Bitcoin network right from your browser. The Pipe Wallet extension provides a simple interface to *Deploy*, *Mint*, and *Transfer* tokens adhering to the PIPE protocol specifications.
 
 ## Features
@@ -22,7 +25,9 @@ Any PR is welcome. You can also tip us some spare sats if you like the project.
 Your donations will contribute to the ongoing development, maintenance, and customer support. Find more [here](SUPPORT.md).
 
 ## PIPE Protocol Overview
-PIPE is a Bitcoin-native token protocol with three main functions: **Deploy**, **Mint**, and **Transfer** (DMT):
+[PIPE](https://github.com/BennyTheDev/pipe-specs) is a Bitcoin-native token protocol with three main functions:
+
+**Deploy**, **Mint**, and **Transfer** (DMT):
 
 - **Deploy**: Initiates a new token with defined attributes like ticker name, maximum supply, and minting limits.
 - **Mint**: Allows the creation of new tokens within the defined limits set during deployment.
