@@ -7,4 +7,5 @@ export enum RoutePath {
   Password = "/password",
   Send = "/send",
   Addresses = "/addresses",
+  ConfirmTransaction = "/confirm-transaction",
 }

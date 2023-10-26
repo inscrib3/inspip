@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useApp } from "../app";
-import { satsToBtc } from "../utils/sats-to-btc";
+import { bigIntToString, parseStringToBigInt } from "../bitcoin/helpers";
+import { cleanFloat } from "../utils/clean-float";
 
 export type GetBalances = {
   dispatch: () => Promise<{ [key: string]: string } | undefined>;
@@ -27,7 +28,6 @@ export const useGetBalances = (): GetBalances => {
 
     const sumOfSats = utxos.reduce(
       (acc: number, utxo) => {
-        if (utxo.tick) return acc;
         return acc + utxo.value;
       },
       0
@@ -39,14 +39,23 @@ export const useGetBalances = (): GetBalances => {
           nextData[utxo.tick + ":" + utxo.id] = "0";
         }
 
-        nextData[utxo.tick + ":" + utxo.id] =
-          parseFloat((parseFloat(nextData[utxo.tick + ":" + utxo.id]) + (parseInt(utxo.amt || '0') / Math.pow(10, utxo.dec || 0))).toFixed(8)).toString();
+        if (typeof utxo.amt === 'undefined') continue;
+        if (typeof utxo.dec === 'undefined') continue;
+
+        nextData[utxo.tick + ":" + utxo.id] = cleanFloat(bigIntToString(
+          parseStringToBigInt(
+            nextData[utxo.tick + ":" + utxo.id],
+            utxo.dec
+          ) + BigInt(utxo.amt),
+          utxo.dec
+          )
+        );
       } catch (e) {
         console.error(e);
       }
     }
 
-    nextData["btc"] = satsToBtc(sumOfSats).toString();
+    nextData["btc"] = cleanFloat(bigIntToString(BigInt(sumOfSats), 8));
 
     setData(nextData);
     setLoading(false);

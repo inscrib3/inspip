@@ -16,7 +16,10 @@ export function parseStringToBigInt(amount: string, mantissaDecimalPoints: numbe
     }
 
     const [, decimalPart = ''] = amount.split('.');
-    const decimalPartLength = decimalPart.length
+    const decimalPartLength = decimalPart.length;
+    if (decimalPartLength > mantissaDecimalPoints) {
+        throw new Error(`Amount exceeds ${mantissaDecimalPoints} decimal`);
+    }
     const amountBigInt = BigInt(amount.replace('.', ''));
     const mantissa = BigInt(10**mantissaDecimalPoints);
     const decimals = BigInt(10**decimalPartLength);

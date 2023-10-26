@@ -2,13 +2,12 @@ import { Header, Box, Button, Select, TextInput, Text, Spinner, Anchor } from "g
 import * as Icons from "grommet-icons";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import { getNetwork, validateAddress } from "../bitcoin/helpers";
+import { bigIntToString, getNetwork, parseStringToBigInt, validateAddress } from "../bitcoin/helpers";
 import { SetFees } from "../components";
 import { useSendSats, useSendTokens } from "../hooks";
 import { useApp } from "../app";
-import { sendTransaction } from "../bitcoin/node";
-import { save } from "../hooks/show-transactions.hook";
 import { useSafeBalances } from "../hooks/safe-balances.hook";
+import { RoutePath } from "../router";
 
 export const Send = () => {
   const navigate = useNavigate();
@@ -49,13 +48,22 @@ export const Send = () => {
 
     const token = app.tokens.filter((t) => t.tick === splittedTicker[0].toLowerCase() && t.id === parseInt(splittedTicker[1]));
 
-    if (
-      ticker.toLowerCase() !== 'btc'
-      && Math.floor(parseFloat(amount) * Math.pow(10, token[0].dec)) === 0) {
-      setError(`Amount exceeds ${token[0].dec} decimals`);
-      return;
-    } else if (ticker.toLowerCase() === 'btc' && Math.floor(parseFloat(amount) * Math.pow(10, 8)) === 0) {
-      setError("Amount exceeds 8 decimals");
+    try {
+      if (ticker.toLowerCase() === 'btc') {
+        if (!parseStringToBigInt(amount, 8)) {
+          throw new Error("Amount exceeds 8 decimals");
+        }
+      } else {
+        if (!parseStringToBigInt(amount, token[0].dec)) {
+          throw new Error("Amount exceeds 8 decimals");
+        }
+      }
+    } catch (e) {
+      if (!(e instanceof Error)) {
+        setError("Unknown error");
+        return;
+      }
+      setError(e.message);
       return;
     }
 
@@ -63,10 +71,12 @@ export const Send = () => {
 
     if (ticker.toLowerCase() === "btc") {
       try {
-        const hex = await sendSats.dispatch(address, `${Math.floor(parseFloat(amount) * Math.pow(10, 8))}`, `${app.feerate}`);
-        const txid = await sendTransaction(hex, app.network);
-        save({txid, from: app.currentAddress, to: address, amount, timestamp: Date.now(), confirmed: false });
-        navigate(-1);
+        const tx = await sendSats.dispatch(address, bigIntToString(parseStringToBigInt(amount, 8), 8), `${app.feerate}`);
+        if ((tx?.vin?.length || 0) > 0 && (tx?.vout?.length || 0) > 0) {
+          navigate(RoutePath.ConfirmTransaction, { state: tx })
+        } else {
+          throw new Error("Something went wrong, please try again");
+        }
       } catch (e) {
         setError((e as Error).message);
       }
@@ -77,23 +87,26 @@ export const Send = () => {
     const tickerSplit = ticker.split(":");
 
     try {
-      const hex = await sendTokens.dispatch(
+      const tx = await sendTokens.dispatch(
         address,
         tickerSplit[0],
         tickerSplit[1],
         amount,
         `${app.feerate}`
       );
-      const txid = await sendTransaction(hex, app.network);
-      save({txid, from: app.currentAddress, to: address, amount, token: ticker, timestamp: Date.now(), confirmed: false });
+      setLoading(false);
+      if ((tx?.vin?.length || 0) > 0 && (tx?.vout?.length || 0) > 0) {
+        navigate(RoutePath.ConfirmTransaction, { state: tx })
+      } else {
+        throw new Error("Something went wrong, please try again");
+      }
+      // const txid = await sendTransaction(hex, app.network);
+      // save({txid, from: app.currentAddress, to: address, amount, token: ticker, timestamp: Date.now(), confirmed: false });
     } catch (e) {
       setError((e as Error).message);
       setLoading(false);
       return;
     }
-
-    setLoading(false);
-    navigate(-1);
   };
 
   return (

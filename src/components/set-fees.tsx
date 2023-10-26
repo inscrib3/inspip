@@ -29,10 +29,16 @@ export const SetFees = (): JSX.Element => {
 
   useEffect(() => {
     getFees().then((fees) => {
-      setFees(fees);
-      setCustomFee(fees.fastestFee);
+      setFees({
+        fastestFee: Math.floor(fees.fastestFee * 1.5),
+        halfHourFee: Math.floor(fees.halfHourFee * 1.5),
+        hourFee: Math.floor(fees.hourFee * 1.5),
+        economyFee: Math.floor(fees.economyFee * 1.5),
+        minimumFee: Math.floor(fees.minimumFee * 1.5),
+      });
+      setCustomFee(Math.floor(fees.fastestFee * 1.5));
       if (selectedFee === "custom") return;
-      app.setFeerate(fees[selectedFee]);
+      app.setFeerate(Math.floor(fees[selectedFee] * 1.5));
     });
   }, []);
 

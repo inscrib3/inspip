@@ -6,6 +6,7 @@ import { addressToScriptPubKey, bigIntToString, parseStringToBigInt, textToHex, 
 import { bitcoin } from './lib/bitcoin-lib';
 import { Utxo } from '../app/app-context';
 import { hexToBytes } from '../utils/hex-to-bytes';
+import { cleanFloat } from '../utils/clean-float';
 
 export function generateWallet(network: any) {
     bip39.setDefaultWordlist('english');
@@ -50,7 +51,30 @@ export function generateNewAddress(rootKey: any, network: any, index: number = 0
     return { rootKey, account, internalPubkey, address, output }
 }
 
-export const sendTokens = async (account: any, currentAddress: string, utxos: Utxo[], to: string, _ticker: string, _id: string, dec: number, _amount: string, _rate: string, network: any) => {
+export const sendTokens = (
+    account: any,
+    currentAddress: string,
+    utxos: Utxo[],
+    to: string,
+    _ticker: string,
+    _id: string,
+    dec: number,
+    _amount: string,
+    _rate: string,
+    network: any
+): {
+    hex: string;
+    vin: any[];
+    vout: any[];
+    fee: string;
+    ticker: string;
+    id: string;
+    amount: string;
+    change: string;
+    sats: string;
+    sats_change: string;
+    to: string;
+} => {
     const ticker = _ticker.trim().toLowerCase();
     const id = parseInt(_id.trim());
 
@@ -124,8 +148,8 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
     let ec = new TextEncoder();
     let token_change = found - amount;
 
-    let conv_amount = bigIntToString(amount, dec);
-    let conv_change = bigIntToString(token_change, dec);
+    let conv_amount = cleanFloat(bigIntToString(amount, dec));
+    let conv_change = cleanFloat(bigIntToString(token_change, dec));
 
     if (token_change <= 0n) {
         vout.push({
@@ -158,10 +182,10 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
     });
 
     const data = hexToBytes(Tx.encode(txdata).hex);
-    const prefix = 143n;
+    const prefix = 160n;
     const txsize = prefix + BigInt(Math.floor(data.length / 4));
 
-    const fee = rate * txsize;
+    const fee = rate * txsize * 2n;
 
     vin = [];
     vout = [];
@@ -223,8 +247,8 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
     ec = new TextEncoder();
     token_change = found - amount;
 
-    conv_amount = bigIntToString(amount, dec);
-    conv_change = bigIntToString(token_change, dec);
+    conv_amount = cleanFloat(bigIntToString(amount, dec));
+    conv_change = cleanFloat(bigIntToString(token_change, dec));
 
     if (token_change <= 0n) {
         vout.push({
@@ -271,10 +295,31 @@ export const sendTokens = async (account: any, currentAddress: string, utxos: Ut
         Signer.taproot.verify(txdata, i, { throws: true })
     }
 
-    return Tx.encode(txdata).hex;
+    return {
+        hex: Tx.encode(txdata).hex,
+        vin: vin.map((v) => ({
+            ...v,
+            prevout: {
+                ...v.prevout,
+                value: v.prevout.value.toString(),
+            }
+        })),
+        vout: vout.map((v) => ({
+            ...v,
+            value: v.value?.toString(),
+        })),
+        fee: fee.toString(),
+        ticker,
+        id: _id,
+        to: to,
+        amount: conv_amount,
+        change: conv_change,
+        sats: sats_found.toString(),
+        sats_change: (sats_found - fee).toString(),
+    };
 };
 
-export const sendSats = async (
+export const sendSats = (
     account: any,
     currentAddress: string,
     utxos: Utxo[],
@@ -282,7 +327,16 @@ export const sendSats = async (
     amount: bigint,
     rate: bigint,
     network: any,
-): Promise<string> => {
+): {
+    hex: string;
+    vin: any[];
+    vout: any[];
+    fee: string;
+    sats: string;
+    to: string;
+    sats_amount: string,
+    sats_change: string;
+} => {
     let vin = [];
     let vout = [];
     let found = 0n;
@@ -325,10 +379,10 @@ export const sendSats = async (
     });
 
     const data = hexToBytes(Tx.encode(txdata).hex);
-    const prefix = 143n;
+    const prefix = 160n;
     const txsize = prefix + BigInt(Math.floor(data.length / 4));
 
-    const fee = rate * txsize;
+    const fee = rate * txsize * 2n;
 
     vin = [];
     vout = [];
@@ -377,5 +431,23 @@ export const sendSats = async (
         Signer.taproot.verify(txdata, i, { throws: true })
     }
       
-    return Tx.encode(txdata).hex;
+    return {
+        hex: Tx.encode(txdata).hex,
+        vin: vin.map((v) => ({
+            ...v,
+            prevout: {
+                ...v.prevout,
+                value: v.prevout.value.toString(),
+            }
+        })),
+        vout: vout.map((v) => ({
+            ...v,
+            value: v.value?.toString(),
+        })),
+        fee: fee.toString(),
+        sats: found.toString(),
+        to: toAddress,
+        sats_amount: amount.toString(),
+        sats_change: (found - amount - fee).toString(),
+    };
 }
