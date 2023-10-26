@@ -38,7 +38,7 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         artifacts: dist.zip
-        tag: "test"
+        tag: "v0.1.0"
         allowUpdates: true
         artifactContentType: application/zip
 
@@ -46,4 +46,4 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: dist.zip
-        tag_name: "test"
+        tag_name: "v0.1.0"
