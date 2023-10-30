@@ -1,6 +1,6 @@
 import { decrypt, encrypt } from '../utils/crypto';
 
-export function editWallet(currentAddress: string = '', addresses: number[] = [], addressIndex: number = 0) {
+export function editWallet(currentAddress: string = '', addresses: number[] = [], addressIndex: number | undefined = undefined) {
   const data = localStorage.getItem('wallet');
   if (!data) throw new Error('Wallet not found');
 
@@ -9,7 +9,10 @@ export function editWallet(currentAddress: string = '', addresses: number[] = []
 
   if (currentAddress !== '') parsedData.currentAddress = currentAddress;
   if (addresses.length > 0) parsedData.addresses = addresses;
-  if (parsedData.addressIndex !== addressIndex) parsedData.addressIndex = addressIndex;
+
+  if (addressIndex !== undefined && parsedData.addressIndex !== addressIndex) {
+    parsedData.addressIndex = addressIndex;
+  }
 
   localStorage.setItem('wallet', JSON.stringify(parsedData));
 
