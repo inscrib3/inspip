@@ -1,11 +1,25 @@
 import { defineConfig } from 'vite'
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill'
 import react from '@vitejs/plugin-react'
 import inject from '@rollup/plugin-inject'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
+export default defineConfig({
+  plugins: [
+    nodePolyfills({
+      globals: {
+        Buffer: true,
+        global: true,
+        process: true,
+      },
+      protocolImports: true,
+    }),
+  ],
+})
+
+/*
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  //plugins: [react()],
 
   optimizeDeps: {
     esbuildOptions: {
@@ -15,8 +29,13 @@ export default defineConfig({
       },
       // Enable esbuild polyfill plugins
       plugins: [
-        NodeGlobalsPolyfillPlugin({
-          buffer: true
+        nodePolyfills({
+          globals: {
+            Buffer: true,
+            global: true,
+            process: true,
+          },
+          protocolImports: true,
         })
       ],
     },
@@ -28,3 +47,4 @@ export default defineConfig({
 		},
   }
 })
+*/
