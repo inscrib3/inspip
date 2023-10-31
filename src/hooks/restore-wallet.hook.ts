@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
-import { generateNewAddress, importWallet } from "../bitcoin/wallet";
+import { generateNewAddress, importWallet, importWalletFromWif } from "../bitcoin/wallet";
 import { saveWallet } from "../bitcoin/wallet-storage";
-import { BIP32Interface } from "bip32";
+import * as bip39 from 'bip39';
 import { useApp } from "../app";
 import { getNetwork } from "../bitcoin/helpers";
 
@@ -22,7 +22,14 @@ export const useRestoreWallet = (): RestoreWallet => {
 
       setLoading(true);
 
-      const wallet = importWallet(mnemonic, getNetwork(app.network));
+      let wallet;
+
+      if (bip39.validateMnemonic(mnemonic)) {
+        wallet = importWallet(mnemonic, getNetwork(app.network));
+      } else {
+        wallet = importWalletFromWif(mnemonic, getNetwork(app.network));
+      }
+
       const address = generateNewAddress(wallet.rootKey, getNetwork(app.network), 0);
       saveWallet(wallet.mnemonic, app.network, address.address, [0], password);
       setData({...wallet, network: app.network});

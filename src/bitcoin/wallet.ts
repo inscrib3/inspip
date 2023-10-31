@@ -23,7 +23,7 @@ export function importWallet(mnemonic: string, network: any, index: number = 0) 
     const rootKey = bip32.fromSeed(seed, network);
 
     const data = generateNewAddress(rootKey, network, index);
-    return { ...data, mnemonic, wif: "", rootKey };
+    return { ...data, mnemonic, rootKey };
 }
 
 export function importWalletFromWif(wif: string, network: any, index: number = 0) {
@@ -31,7 +31,7 @@ export function importWalletFromWif(wif: string, network: any, index: number = 0
     const rootKey: ECPairInterface = ECPairInstance.fromWIF(wif, network);
 
     const data = generateNewAddress(rootKey, network, index);
-    return { ...data, mnemonic: "", wif, rootKey };
+    return { ...data, mnemonic: wif, rootKey };
 }
 
 export function generateNewAddress(rootKey: any, network: any, index: number = 0) {
@@ -43,11 +43,27 @@ export function generateNewAddress(rootKey: any, network: any, index: number = 0
     } else {
         path = `m/86'/0'/0'/0/${index}`;
     }
-    const account: any = rootKey.derivePath(path);
-    const internalPubkey: any = toXOnly(account.publicKey);
-    const { address, output } = bitcoin.payments.p2tr({ internalPubkey: internalPubkey, network });
+    
+    let account;
+    let internalPubkey;
+    let address: string;
+    let output;
+
+    if (typeof rootKey.derivePath === 'function') {
+        account = rootKey.derivePath(path);
+        internalPubkey = toXOnly(account.publicKey);
+        const payments = bitcoin.payments.p2tr({ internalPubkey: internalPubkey, network });
+        address = payments.address;
+        output = payments.output;
+    } else {
+        internalPubkey = toXOnly(rootKey.publicKey);
+        bitcoin.initEccLib(ecc);
+        const payments = bitcoin.payments.p2tr({ internalPubkey: internalPubkey, network });
+        address = payments.address;
+        output = payments.output;
+    }
   
-    return { rootKey, account, internalPubkey, address, output }
+    return { rootKey, account: account ?? rootKey, internalPubkey, address, output }
 }
 
 export const sendTokens = (
