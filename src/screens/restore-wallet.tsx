@@ -94,7 +94,7 @@ export const RestoreWallet = (): JSX.Element => {
       </Box>
       <Box align="center">
         <TextInput
-          placeholder="Seed Phrase"
+          placeholder="Seed or WIF"
           value={seedPhrase}
           onChange={(e) => setSeedPhrase(e.target.value)}
         />

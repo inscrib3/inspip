@@ -1,6 +1,7 @@
 import BIP32Factory from 'bip32';
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import * as bip39 from "bip39";
+import ECPairFactory, { ECPairAPI, ECPairInterface } from 'ecpair';
 import { ScriptData, Signer, Tap, Tx, ValueData, Word } from '@cmdcode/tapscript';
 import { addressToScriptPubKey, bigIntToString, parseStringToBigInt, textToHex, toBytes, toInt26, toXOnly } from './helpers';
 import { bitcoin } from './lib/bitcoin-lib';
@@ -21,34 +22,48 @@ export function importWallet(mnemonic: string, network: any, index: number = 0) 
     const seed = bip39.mnemonicToSeedSync(mnemonic);
     const rootKey = bip32.fromSeed(seed, network);
 
-    /*
-    {
-        const network = bitcoin.networks.bitcoin;
-        const wif = ""
-        const ECPair: ECPairAPI = ECPairFactory(ecc);
-        const keyPair: ECPairInterface = ECPair.fromWIF(wif, network);
-        const privateKey = keyPair.privateKey?.toString('hex');
-        const hdMaster = bip32.fromSeed(Buffer.from(privateKey, 'hex'), network);
-        const chainCode = hdMaster.chainCode.toString('hex');
-    }
-    */
-
     const data = generateNewAddress(rootKey, network, index);
     return { ...data, mnemonic, rootKey };
 }
 
+export function importWalletFromWif(wif: string, network: any, index: number = 0) {
+    const ECPairInstance: ECPairAPI = ECPairFactory(ecc);
+    const rootKey: ECPairInterface = ECPairInstance.fromWIF(wif, network);
+
+    const data = generateNewAddress(rootKey, network, index);
+    return { ...data, mnemonic: wif, rootKey };
+}
+
 export function generateNewAddress(rootKey: any, network: any, index: number = 0) {
+    if(rootKey?.privateKey === undefined) throw new Error('Invalid private key');
+
     let path: string;
     if(network === bitcoin.networks.testnet) {
         path = `m/49'/1'/0'/0/${index}`;
     } else {
         path = `m/86'/0'/0'/0/${index}`;
     }
-    const account: any = rootKey.derivePath(path);
-    const internalPubkey: any = toXOnly(account.publicKey);
-    const { address, output } = bitcoin.payments.p2tr({ internalPubkey: internalPubkey, network });
+    
+    let account;
+    let internalPubkey;
+    let address: string;
+    let output;
+
+    if (typeof rootKey.derivePath === 'function') {
+        account = rootKey.derivePath(path);
+        internalPubkey = toXOnly(account.publicKey);
+        const payments = bitcoin.payments.p2tr({ internalPubkey: internalPubkey, network });
+        address = payments.address;
+        output = payments.output;
+    } else {
+        internalPubkey = toXOnly(rootKey.publicKey);
+        bitcoin.initEccLib(ecc);
+        const payments = bitcoin.payments.p2tr({ internalPubkey: internalPubkey, network });
+        address = payments.address;
+        output = payments.output;
+    }
   
-    return { rootKey, account, internalPubkey, address, output }
+    return { rootKey, account: account ?? rootKey, internalPubkey, address, output }
 }
 
 export const sendTokens = (

@@ -3,20 +3,27 @@ import { Layout } from "../components";
 import { useAddress } from "../hooks/address.hook";
 import { truncateInMiddle } from "../utils/truncate-in-middle";
 import { Add } from "grommet-icons";
+import * as bip39 from "bip39";
+import { useApp } from "../app";
 
 export const Addresses = (): JSX.Element => {
   const address = useAddress();
+  const app = useApp();
+
+  const isMnemo = bip39.validateMnemonic(app.account.mnemonic);
 
   return (
     <Layout showBack={true}>
       <Box height="full" pad="large">
-        <Button
-          secondary
-          label="Add new address"
-          icon={<Add />}
-          pad="small"
-          onClick={() => address.createAddress()}
-        />
+        {isMnemo && (
+          <Button
+            secondary
+            label="Add new address"
+            icon={<Add />}
+            pad="small"
+            onClick={() => address.createAddress()}
+          />
+        )}
         <Box overflow="auto" flex margin={{ top: "large" }}>
           <InfiniteScroll items={address.data}>
             {(item: string, index: number) => (
