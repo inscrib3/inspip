@@ -8,12 +8,12 @@ import { getNetwork } from "../bitcoin/helpers";
 export type RestoreWallet = {
   dispatch: (mnemonic: string, password: string) => Promise<any>;
   loading: boolean;
-  data?: { network: string; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; };
+  data?: { network: string; rootKey: any; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; };
 };
 
 export const useRestoreWallet = (): RestoreWallet => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [data, setData] = useState<{ network: string; rootKey: BIP32Interface; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; } | undefined>();
+  const [data, setData] = useState<{ network: string; rootKey: any; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; } | undefined>();
   const app = useApp();
 
   const dispatch = useCallback(
