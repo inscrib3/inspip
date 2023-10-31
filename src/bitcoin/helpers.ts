@@ -1,8 +1,29 @@
 import { Buffer } from 'buffer';
-import { bitcoin } from './lib/bitcoin-lib';
 import { Address } from '@cmdcode/tapscript';
+import * as bip39 from "bip39";
+import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
+import ECPairFactory from 'ecpair';
+import { bitcoin } from './lib/bitcoin-lib';
 
 export const toXOnly = (pubKey: Buffer) => (pubKey.length === 32 ? pubKey : pubKey.slice(1, 33));
+
+export function isPrivateKey(secret: string): boolean {
+    return /^[0-9a-fA-F]{64}$/.test(secret);
+}
+
+export function isWif(secret: string, network: any): boolean {
+    try {
+        const ECPairInstance = ECPairFactory(ecc);
+        ECPairInstance.fromWIF(secret, network);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+export function isMnemonic(secret: string): boolean {
+    return bip39.validateMnemonic(secret);
+}
 
 export function getNetwork(network: string) {
     if(network === '' || network === 'mainnet') return bitcoin.networks.bitcoin;

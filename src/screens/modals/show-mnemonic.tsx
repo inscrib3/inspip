@@ -19,7 +19,7 @@ export function ShowMnemonicModal({ onClose}: { onClose: any }) {
   const load = () => {
     try {
       const wallet = loadWallet(password);
-      setMnemonic(wallet.mnemonic);
+      setMnemonic(wallet.secret);
     } catch (e) {
       alert("Wrong password")
     }

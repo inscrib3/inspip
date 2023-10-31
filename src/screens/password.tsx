@@ -33,11 +33,11 @@ export const Password = () => {
     try {
       const wallet = loadWallet(pass);
       
-      if (wallet.mnemonic === "") {
+      if (wallet.secret === "") {
         throw new Error("Invalid password");
       }
 
-      app.setAccount(importWallet(wallet.mnemonic, getNetwork(wallet.network), wallet.addressIndex));
+      app.setAccount(importWallet(wallet.secret, getNetwork(wallet.network), wallet.addressIndex));
       app.setNetwork(wallet.network);
       app.setCurrentAddress(wallet.currentAddress, wallet.addressIndex)
       app.setAddresses(wallet.addresses);

@@ -1,9 +1,9 @@
-import BIP32Factory from 'bip32';
+import BIP32Factory, { BIP32API, BIP32Interface } from 'bip32';
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import * as bip39 from "bip39";
 import ECPairFactory, { ECPairAPI, ECPairInterface } from 'ecpair';
 import { ScriptData, Signer, Tap, Tx, ValueData, Word } from '@cmdcode/tapscript';
-import { addressToScriptPubKey, bigIntToString, parseStringToBigInt, textToHex, toBytes, toInt26, toXOnly } from './helpers';
+import { addressToScriptPubKey, bigIntToString, isMnemonic, isWif, parseStringToBigInt, textToHex, toBytes, toInt26, toXOnly } from './helpers';
 import { bitcoin } from './lib/bitcoin-lib';
 import { Utxo } from '../app/app-context';
 import { hexToBytes } from '../utils/hex-to-bytes';
@@ -13,25 +13,44 @@ export function generateWallet(network: any) {
     bip39.setDefaultWordlist('english');
     const mnemonic = bip39.generateMnemonic();
 
-    return importWallet(mnemonic, network);
+    return importWalletFromMnemonic(mnemonic, network);
 }
 
-export function importWallet(mnemonic: string, network: any, index: number = 0) {
+export function importWallet(secret: string, network: any, index: number = 0) {
     bitcoin.initEccLib(ecc);
-    const bip32 = BIP32Factory(ecc);
-    const seed = bip39.mnemonicToSeedSync(mnemonic);
-    const rootKey = bip32.fromSeed(seed, network);
 
-    const data = generateNewAddress(rootKey, network, index);
-    return { ...data, mnemonic, wif: "", rootKey };
+    if (isMnemonic(secret)) {
+        return importWalletFromMnemonic(secret, network, index);
+    } else if (isWif(secret, network)) {
+        return importWalletFromWif(secret, network);
+    } else {
+        throw new Error('Invalid secret');
+    }
 }
 
-export function importWalletFromWif(wif: string, network: any, index: number = 0) {
-    const ECPairInstance: ECPairAPI = ECPairFactory(ecc);
-    const rootKey: ECPairInterface = ECPairInstance.fromWIF(wif, network);
+function importWalletFromMnemonic(mnemonic: string, network: any, index: number = 0) {
+    const bip32: BIP32API = BIP32Factory(ecc);
+    const seed: Buffer = bip39.mnemonicToSeedSync(mnemonic);
+    const rootKey: BIP32Interface = bip32.fromSeed(seed, network);
+
+    const wif = rootKey.toWIF()
+    const { address } = importWalletFromWif(wif, network);
+    console.log("address1", address)
 
     const data = generateNewAddress(rootKey, network, index);
-    return { ...data, mnemonic: "", wif, rootKey };
+    console.log("address2", data.address)
+
+    return { ...data, secret: mnemonic };
+}
+
+function importWalletFromWif(wif: string, network: any) {
+    const ECPairInstance: ECPairAPI = ECPairFactory(ecc);
+    const keyPair: ECPairInterface = ECPairInstance.fromWIF(wif, network);
+    
+    const internalPubkey: any = toXOnly(keyPair.publicKey);
+    const { address, output } = bitcoin.payments.p2tr({ internalPubkey: internalPubkey, network });
+
+    return { rootKey: "", account: keyPair, internalPubkey, address, output, secret: wif };
 }
 
 export function generateNewAddress(rootKey: any, network: any, index: number = 0) {

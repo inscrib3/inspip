@@ -5,7 +5,7 @@ export function editWallet(currentAddress: string = '', addresses: number[] = []
   if (!data) throw new Error('Wallet not found');
 
   const parsedData = JSON.parse(data);
-  if (!parsedData?.mnemonic) throw new Error('Wallet corrupted');
+  if (!parsedData?.secret) throw new Error('Wallet corrupted');
 
   if (currentAddress !== '') parsedData.currentAddress = currentAddress;
   if (addresses.length > 0) parsedData.addresses = addresses;
@@ -16,9 +16,9 @@ export function editWallet(currentAddress: string = '', addresses: number[] = []
   return parsedData;
 }
 
-export function saveWallet(mnemonic: string, network: string, currentAddress: string, addresses: number[], password: string) {
+export function saveWallet(secret: string, network: string, currentAddress: string, addresses: number[], password: string) {
   const wallet = {
-      mnemonic: encrypt(mnemonic, password),
+      secret: encrypt(secret, password),
       network,
       currentAddress,
       addresses,
@@ -31,10 +31,10 @@ export function loadWallet(password: string) {
   if (!data) throw new Error('Wallet not found');
 
   const parsedData = JSON.parse(data);
-  if (!parsedData?.mnemonic) throw new Error('Wallet corrupted');
+  if (!parsedData?.secret) throw new Error('Wallet corrupted');
 
   try {
-      parsedData.mnemonic = decrypt(parsedData.mnemonic, password);
+      parsedData.secret = decrypt(parsedData.secret, password);
   } catch (e) {
       throw new Error('Wrong password');
   }
