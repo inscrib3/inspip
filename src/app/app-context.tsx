@@ -3,7 +3,7 @@ import { editWallet } from '../bitcoin/wallet-storage';
 
 export type Utxo = {
   txid: string,
-  hex: string,
+  hex?: string,
   status: {
     confirmed: boolean,
   },
@@ -24,6 +24,7 @@ export const AppContext = createContext<{
   setCurrentAddress: (address: string, index: number) => void,
   addresses: number[],
   setAddresses: (addresses: number[]) => void,
+  loading: boolean,
   feerate: number,
   setFeerate: (feerate: number) => void,
   tokens: { tick: string, id: number, dec: number }[],
@@ -32,6 +33,7 @@ export const AppContext = createContext<{
   fetchUtxos: () => Promise<Utxo[]>,
 }>({
   account: {},
+  loading: false,
   setAccount: () => undefined,
   network: 'mainnet',
   setNetwork: () => undefined,
@@ -46,6 +48,188 @@ export const AppContext = createContext<{
   utxos: [],
   fetchUtxos: async () => [],
 });
+
+export type Tx = {
+  txid: string;
+  vin: {
+    txid: string;
+    vout: number;
+  }[];
+  vout: {
+    index: number;
+    scriptpubkey_address: string;
+    value: number;
+  }[];
+  status?: {
+    confirmed: boolean;
+  }
+};
+
+export type TxsStorage = {
+  last_txid: string;
+  data: {
+    [txid: string]: Tx;
+  };
+};
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const getUtxos = async (address: string) => {
+  const savedUtxos = localStorage.getItem(`txs_${address}`);
+
+  let txs: TxsStorage = {
+    last_txid: "",
+    data: {},
+  };
+
+  if (savedUtxos !== null) {
+    txs = JSON.parse(savedUtxos);
+  }
+
+  let numOfRes = 0;
+
+  do {
+    let nextTxs: Tx[];
+
+    try {
+      const res = await fetch(
+        `https://mempool.space/api/address/${address}/txs/chain/${txs.last_txid}`
+      );
+      nextTxs = (await res.json()) as Tx[];
+      await sleep(2000);
+    } catch (e) {
+      await sleep(2000);
+      const res = await fetch(
+        `https://mempool.space/api/address/${address}/txs/chain/${txs.last_txid}`
+      );
+      nextTxs = (await res.json()) as Tx[];
+    }
+
+    const data = nextTxs.filter((tx) => !txs.data[tx.txid]);
+
+    if (data.length === 0) {
+      txs.last_txid = '';
+      localStorage.setItem(`txs_${address}`, JSON.stringify(txs));
+      break;
+    }
+
+    for (const tx of data) {
+      txs.data[tx.txid] = {
+        txid: tx.txid,
+        vin: tx.vin.map((input) => ({
+          txid: input.txid,
+          vout: input.vout,
+        })),
+        vout: [],
+      };
+
+      for (const [voutIndex, vout] of tx.vout.entries()) {
+        if (vout.scriptpubkey_address !== address) continue;
+
+        txs.data[tx.txid].vout.push({
+          index: voutIndex,
+          scriptpubkey_address: vout.scriptpubkey_address,
+          value: vout.value,
+        });
+      }
+    }
+
+    txs.last_txid = data[data.length - 1].txid;
+
+    if (data.length < 25) {
+      txs.last_txid = '';
+    }
+
+    localStorage.setItem(`txs_${address}`, JSON.stringify(txs));
+
+    numOfRes = data.length;
+  } while (numOfRes === 25);
+
+  const utxos: {
+    [txid: string]: {
+      [vout: number]: {
+        scriptpubkey_address: string;
+        value: number;
+      };
+    }
+  } = {};
+
+  for (const tx of Object.values(txs.data)) {
+    for (const vout of tx.vout) {
+      if (!utxos[tx.txid]) {
+        utxos[tx.txid] = {};
+      }
+
+      utxos[tx.txid][vout.index] = vout;
+    }
+  }
+
+  for (const tx of Object.values(txs.data)) {
+    for (const vin of tx.vin) {
+      if (utxos[vin.txid]) {
+        delete utxos[vin.txid][vin.vout];
+
+        if (Object.keys(utxos[vin.txid]).length === 0) {
+          delete utxos[vin.txid];
+        }
+      }
+    }
+  }
+
+  let unconfirmed: Tx[] = [];
+
+  try {
+    const data = await fetch(`https://mempool.space/api/address/${address}/txs/mempool`);
+    unconfirmed = (await data.json()) as Tx[];
+  } catch (error) {
+    await sleep(4000);
+    const data = await fetch(`https://mempool.space/api/address/${address}/txs/mempool`);
+    unconfirmed = (await data.json()) as Tx[];
+  }
+
+
+  for (const tx of unconfirmed) {
+    if (tx.status?.confirmed) continue;
+
+    for (const vin of tx.vin) {
+      if (utxos[vin.txid]) {
+        delete utxos[vin.txid][vin.vout];
+
+        if (Object.keys(utxos[vin.txid]).length === 0) {
+          delete utxos[vin.txid];
+        }
+      }
+    }
+  }
+
+  localStorage.setItem(`txs_${address}`, JSON.stringify(txs));
+
+  const finalUtxos: {
+    txid: string
+    vout: number
+    value: number;
+    status: {
+      confirmed: true,
+    }
+  }[] = [];
+
+  for (const tx in utxos) {
+    for (const vout in utxos[tx]) {
+      finalUtxos.push({
+        txid: tx,
+        vout: parseInt(vout),
+        value: utxos[tx][vout].value,
+        status: {
+          confirmed: true,
+        },
+      });
+    }
+  }
+
+  console.log(finalUtxos);
+
+  return finalUtxos;
+};
 
 export interface AppProviderProps {
   children: React.ReactNode;
@@ -63,18 +247,29 @@ export const AppProvider = (props: AppProviderProps) => {
   const loading = useRef(false);
 
   const fetchUtxos = useCallback(async (): Promise<Utxo[]> => {
-    if (loading.current || !currentAddress) return [];
-
     loading.current = true;
 
     try {
-      const utxoRes = await fetch(`https://mempool.space/${network === 'testnet' ? 'testnet/' : ''}api/address/${currentAddress}/utxo`);
+      let satsUtxo: Utxo[];
 
-      if (!utxoRes.ok) {
-        throw new Error('Failed to fetch utxos');
+      try {
+        const utxoRes = await fetch(`https://mempool.space/${network === 'testnet' ? 'testnet/' : ''}api/address/${currentAddress}/utxo`);
+
+        if (!utxoRes.ok) {
+          satsUtxo = await getUtxos(currentAddress);
+        }
+  
+        satsUtxo = await utxoRes.json();
+      } catch (e) {
+        satsUtxo = await getUtxos(currentAddress);
       }
 
-      let satsUtxo: Utxo[] = await utxoRes.json();
+      if (satsUtxo.length === 0) {
+        setUtxos([]);
+        loading.current = false;
+        return [];
+      }
+
       satsUtxo = satsUtxo.sort((a, b) => b.value - a.value);
 
       const tokensUtxosRes = await fetch(`${import.meta.env.VITE_SERVER_HOST}/utxos`, {
@@ -178,6 +373,7 @@ export const AppProvider = (props: AppProviderProps) => {
         addresses,
         setAddresses,
         feerate,
+        loading: loading.current,
         setFeerate,
         tokens,
         setTokens,

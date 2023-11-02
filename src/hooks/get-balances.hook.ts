@@ -66,7 +66,7 @@ export const useGetBalances = (): GetBalances => {
     setTimeout(() => {
       dispatch();
     }, 1000);
-    const interval = setInterval(dispatch, 10000);
+    const interval = setInterval(dispatch, 60000);
     return () => clearInterval(interval);
   }, []);
 
