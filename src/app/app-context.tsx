@@ -226,8 +226,6 @@ const getUtxos = async (address: string) => {
     }
   }
 
-  console.log(finalUtxos);
-
   return finalUtxos;
 };
 
