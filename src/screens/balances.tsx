@@ -1,4 +1,14 @@
-import { Box, Text, Button, InfiniteScroll, Tabs, Tab, Menu, Anchor } from "grommet";
+import {
+  Box,
+  Text,
+  Button,
+  InfiniteScroll,
+  Tabs,
+  Tab,
+  Menu,
+  Anchor,
+  Spinner,
+} from "grommet";
 import { useGetBalances } from "../hooks";
 import { useApp } from "../app";
 import { useNavigate } from "react-router-dom";
@@ -22,13 +32,13 @@ export const Balances = () => {
   const [isAddressModalOpen, setAddressModalOpen] = useState(false);
   const [isMnemonicModalOpen, setMnemonicModalOpen] = useState(false);
   const [isResetModalOpen, setResetModalOpen] = useState(false);
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const balancesWithoutBTC = Object.keys(balances.data).sort().filter(
-    (balance) => balance !== "btc" && balance !== "sats"
-  );
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const balancesWithoutBTC = Object.keys(balances.data)
+    .sort()
+    .filter((balance) => balance !== "btc" && balance !== "sats");
 
   useEffect(() => {
-    if(!app.currentAddress) {
+    if (!app.currentAddress) {
       navigate(RoutePath.Root);
     }
   }, []);
@@ -42,7 +52,11 @@ export const Balances = () => {
       setBitcoinPrice(price);
     });
 
-    setTransactions(load().filter((t) => t.from === app.currentAddress).reverse());
+    setTransactions(
+      load()
+        .filter((t) => t.from === app.currentAddress)
+        .reverse()
+    );
   }, []);
 
   const dollars = useMemo(() => {
@@ -73,7 +87,7 @@ export const Balances = () => {
           render: () => (
             <Menu
               key={0}
-              label={''}
+              label={""}
               icon={<MoreVertical />}
               items={[
                 {
@@ -84,7 +98,9 @@ export const Balances = () => {
                 },
                 {
                   label: "Exit",
-                  onClick: () => { setResetModalOpen(true) },
+                  onClick: () => {
+                    setResetModalOpen(true);
+                  },
                 },
               ]}
             />
@@ -131,41 +147,47 @@ export const Balances = () => {
           <ResetStorageModal onClose={() => setResetModalOpen(false)} />
         )}
         <Box flex overflow="auto" margin={{ top: "medium" }}>
-          <Tabs>
-            <Tab title="TOKENS">
-              <InfiniteScroll items={balancesWithoutBTC}>
-                {(balance: string, index: number) => (
-                  <Box
-                    key={index}
-                    direction="row"
-                    gap="small"
-                    align="center"
-                    border={{ color: "brand" }}
-                    pad="medium"
-                    margin={{ top: "medium" }}
-                    style={{ borderRadius: "5px" }}
-                  >
-                    <Box flex>
-                      <Text>{balance.toUpperCase()}</Text>
+          {app.loading ? (
+            <Box align="center" pad="medium">
+              <Spinner size="medium" />
+            </Box>
+          ) : (
+            <Tabs>
+              <Tab title="TOKENS">
+                <InfiniteScroll items={balancesWithoutBTC}>
+                  {(balance: string, index: number) => (
+                    <Box
+                      key={index}
+                      direction="row"
+                      gap="small"
+                      align="center"
+                      border={{ color: "brand" }}
+                      pad="medium"
+                      margin={{ top: "medium" }}
+                      style={{ borderRadius: "5px" }}
+                    >
+                      <Box flex>
+                        <Text>{balance.toUpperCase()}</Text>
+                      </Box>
+                      <Text weight="bold">{balances.data[balance]}</Text>
                     </Box>
-                    <Text weight="bold">{balances.data[balance]}</Text>
-                  </Box>
-                )}
-              </InfiniteScroll>
-            </Tab>
-            <Tab title="TRANSACTIONS">
-              <InfiniteScroll items={transactions}>
-                {(transaction: Transaction) => (
-                  <Box
-                    key={transaction.txid}
-                    direction="row"
-                    gap="small"
-                    align="center"
-                    border={{ color: "brand" }}
-                    pad="medium"
-                    margin={{ top: "medium" }}
-                    style={{ borderRadius: "5px" }}
-                  >{/* 
+                  )}
+                </InfiniteScroll>
+              </Tab>
+              <Tab title="TRANSACTIONS">
+                <InfiniteScroll items={transactions}>
+                  {(transaction: Transaction) => (
+                    <Box
+                      key={transaction.txid}
+                      direction="row"
+                      gap="small"
+                      align="center"
+                      border={{ color: "brand" }}
+                      pad="medium"
+                      margin={{ top: "medium" }}
+                      style={{ borderRadius: "5px" }}
+                    >
+                      {/* 
                     <Box margin={{ right: "medium" }}>
                       {transaction.confirmed ? (
                         <Checkmark color="brand" />
@@ -173,22 +195,32 @@ export const Balances = () => {
                         <Clock color="brand" />
                       )}
                     </Box> */}
-                    <Anchor color="white" target="_blank" href={`https://mempool.space/${app.network === 'testnet' ? 'testnet/' : ''}tx/${transaction.txid}`} style={{ wordBreak: "break-all" }}>
-                      {transaction.token ? (
-                        <>
-                          Sent {transaction.amount} {transaction.token} to {truncateInMiddle(transaction.to, 20)}
-                        </>
-                      ) : (
-                        <>
-                          Sent {transaction.amount} BTC to {truncateInMiddle(transaction.to, 20)}
-                        </>
-                      )}
-                    </Anchor>
-                  </Box>
-                )}
-              </InfiniteScroll>
-            </Tab>
-          </Tabs>
+                      <Anchor
+                        color="white"
+                        target="_blank"
+                        href={`https://mempool.space/${
+                          app.network === "testnet" ? "testnet/" : ""
+                        }tx/${transaction.txid}`}
+                        style={{ wordBreak: "break-all" }}
+                      >
+                        {transaction.token ? (
+                          <>
+                            Sent {transaction.amount} {transaction.token} to{" "}
+                            {truncateInMiddle(transaction.to, 20)}
+                          </>
+                        ) : (
+                          <>
+                            Sent {transaction.amount} BTC to{" "}
+                            {truncateInMiddle(transaction.to, 20)}
+                          </>
+                        )}
+                      </Anchor>
+                    </Box>
+                  )}
+                </InfiniteScroll>
+              </Tab>
+            </Tabs>
+          )}
         </Box>
       </Box>
     </Layout>
