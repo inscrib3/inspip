@@ -255,9 +255,9 @@ export const AppProvider = (props: AppProviderProps) => {
 
         if (!utxoRes.ok) {
           satsUtxo = await getUtxos(currentAddress);
+        } else {
+          satsUtxo = await utxoRes.json();
         }
-  
-        satsUtxo = await utxoRes.json();
       } catch (e) {
         satsUtxo = await getUtxos(currentAddress);
       }
