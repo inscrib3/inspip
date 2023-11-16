@@ -141,7 +141,7 @@ export const sendTokens = (
         if (
             !utxos[i].tick &&
             utxos[i].status.confirmed &&
-            utxos[i].value >= 546
+            utxos[i].value >= 600
         ) {
             vin.push({
                 txid: utxos[i].txid,
@@ -241,7 +241,7 @@ export const sendTokens = (
         if (
             !utxos[i].tick &&
             utxos[i].status.confirmed &&
-            utxos[i].value >= 546
+            utxos[i].value >= 600
         ) {
             vin.push({
                 txid: utxos[i].txid,
@@ -366,7 +366,7 @@ export const sendSats = (
     {
         if(found >= amount + 5_000n) break;
 
-        if(!utxos[i].tick && utxos[i].status.confirmed && utxos[i].value >= 546) {
+        if(!utxos[i].tick && utxos[i].status.confirmed && utxos[i].value >= 600) {
             vin.push({
                 txid: utxos[i].txid,
                 vout: utxos[i].vout,
@@ -409,7 +409,7 @@ export const sendSats = (
     {
         if(found >= amount + fee) break;
 
-        if(!utxos[i].tick && utxos[i].status.confirmed && utxos[i].value >= 546) {
+        if(!utxos[i].tick && utxos[i].status.confirmed && utxos[i].value >= 600) {
             vin.push({
                 txid: utxos[i].txid,
                 vout: utxos[i].vout,
