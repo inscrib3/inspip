@@ -30,7 +30,7 @@ export const useSafeBalances = (): SafeBalances => {
 
     const sumOfSats = utxos.reduce(
       (acc: number, utxo) => {
-        if (utxo.tick) return acc;
+        if (utxo.tick || utxo.value < 546) return acc;
         return acc + utxo.value;
       },
       0

@@ -229,6 +229,31 @@ const getUtxos = async (address: string) => {
   return finalUtxos;
 };
 
+export interface IndexerToken {
+  beneficiaryAddress: string;
+  block: number;
+  bvo: number;
+  collectionAddress: string;
+  collectionNumber: number;
+  createdAt: string;
+  decimals: number;
+  id: number;
+  limit: number;
+  maxSupply: number;
+  pid: number;
+  amount?: number;
+  remaining: number;
+  ticker: string;
+  txId: string;
+  updatedAt: string;
+  vo: number;
+  vout: number;
+  metadata?: string;
+  mime?: string;
+  ref?: string;
+  traits?: string[];
+}
+
 export interface AppProviderProps {
   children: React.ReactNode;
 }
@@ -245,6 +270,8 @@ export const AppProvider = (props: AppProviderProps) => {
   const loading = useRef(false);
 
   const fetchUtxos = useCallback(async (): Promise<Utxo[]> => {
+    if (loading.current || currentAddress === '') return [];
+
     loading.current = true;
 
     try {
@@ -270,67 +297,42 @@ export const AppProvider = (props: AppProviderProps) => {
 
       satsUtxo = satsUtxo.sort((a, b) => b.value - a.value);
 
-      const tokensUtxosRes = await fetch(`${import.meta.env.VITE_SERVER_HOST}/utxos`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          utxos: satsUtxo,
-        }),
-      });
+      const tokensUtxosRes = await fetch(`${import.meta.env.VITE_SERVER_HOST}/utxo/search?params=${satsUtxo.map((utxo) => `${utxo.txid}_${utxo.vout}`).join(',')}`);
 
       if (!tokensUtxosRes.ok) {
         throw new Error('Failed to fetch tokens utxos');
       }
 
-      const tokensUtxos: Utxo[] = await tokensUtxosRes.json();
+      const tokensUtxos: IndexerToken[] = await tokensUtxosRes.json();
 
       const uniqueTickers: {
-        ticker?: string,
-        id?: number,
+        tick: string,
+        id: number,
+        dec: number,
       }[] = [];
 
       tokensUtxos.forEach((utxo) => {
-        if (uniqueTickers.find((ticker) => ticker.ticker === utxo.tick && ticker.id === utxo.id)) return;
+        if (uniqueTickers.find((ticker) => ticker.tick === utxo.ticker && ticker.id === utxo.id)) return;
         uniqueTickers.push({
-          ticker: utxo.tick,
+          tick: utxo.ticker,
           id: utxo.id,
+          dec: utxo.decimals,
         });
       });
 
-      const deploymentRes = await fetch(`${import.meta.env.VITE_SERVER_HOST}/deployments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tickers: uniqueTickers,
-        }),
-      });
-
-      if (!deploymentRes.ok) {
-        throw new Error('Failed to fetch deployments');
-      }
-
-      const deployments: Utxo[] = await deploymentRes.json();
-
-      setTokens(deployments.map((d) => ({
-        tick: d.tick!,
-        id: d.id!,
-        dec: d.dec!,
-      })));
+      setTokens(uniqueTickers);
 
       const nextUtxos: Utxo[] =  satsUtxo.map((utxo) => {
-        const tokenUtxo = tokensUtxos.find((tokenUtxo) => tokenUtxo.txid === utxo.txid && tokenUtxo.vout === utxo.vout);
-        const deployment = deployments.find((deployment) => deployment.id === tokenUtxo?.id && deployment.tick === tokenUtxo?.tick);
+        const tokenUtxo = tokensUtxos.find((tokenUtxo) => {
+          return tokenUtxo.txId === utxo.txid && tokenUtxo.vout === utxo.vout;
+        });
 
         return {
           ...utxo,
-          tick: tokenUtxo?.tick,
+          tick: tokenUtxo?.ticker,
           id: tokenUtxo?.id,
-          amt: tokenUtxo?.amt,
-          dec: deployment?.dec,
+          amt: tokenUtxo?.amount?.toString(),
+          dec: tokenUtxo?.decimals,
         };
       });
 
@@ -343,7 +345,7 @@ export const AppProvider = (props: AppProviderProps) => {
       loading.current = false;
       return []; 
     }
-  }, [currentAddress]);
+  }, [currentAddress, network]);
 
   useEffect(() => {
     fetchUtxos();
