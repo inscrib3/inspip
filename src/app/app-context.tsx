@@ -297,13 +297,19 @@ export const AppProvider = (props: AppProviderProps) => {
 
       satsUtxo = satsUtxo.sort((a, b) => b.value - a.value);
 
-      const tokensUtxosRes = await fetch(`${import.meta.env.VITE_SERVER_HOST}/utxo/search?params=${satsUtxo.map((utxo) => `${utxo.txid}_${utxo.vout}`).join(',')}`);
+      const utxoChunks: string[][] = [];
 
-      if (!tokensUtxosRes.ok) {
-        throw new Error('Failed to fetch tokens utxos');
+      for (let i = 0; i < satsUtxo.length; i += 25) {
+        utxoChunks.push(satsUtxo.slice(i, i + 25).map((utxo) => `${utxo.txid}_${utxo.vout}`));
       }
 
-      const tokensUtxos: IndexerToken[] = await tokensUtxosRes.json();
+      const utxoChunksRes = await Promise.all(utxoChunks.map((chunk) => fetch(`${
+        import.meta.env.VITE_SERVER_HOST
+      }/utxo/search?params=${chunk.join(',')}`)));
+
+      const utxoChunksData = await Promise.all(utxoChunksRes.map((res) => res.json()));
+
+      const tokensUtxos = utxoChunksData.flat();
 
       const uniqueTickers: {
         tick: string,
