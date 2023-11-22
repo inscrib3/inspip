@@ -1,5 +1,7 @@
 import { defineConfig } from 'vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import { crx } from '@crxjs/vite-plugin'
+import manifest from './public/manifest.json'
 
 export default defineConfig({
   plugins: [
@@ -11,5 +13,6 @@ export default defineConfig({
       },
       protocolImports: true,
     }),
+    crx({ manifest }),
   ],
 })
