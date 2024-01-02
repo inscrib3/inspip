@@ -4,7 +4,7 @@ export async function fetchUtxos(address: string, network: string): Promise<Utxo
   if(address.length === 0) throw new Error('Invalid address provided');
 
   const response = await fetch(
-    `https://blockstream.info/${network === 'testnet' ? 'testnet/' : ''}api/address/${address}/utxo`
+    `https://mempool.space/${network === 'testnet' ? 'testnet/' : ''}api/address/${address}/utxo`
   );
   let utxos: Utxo[] = await response.json();
 
@@ -25,13 +25,13 @@ export async function fetchUtxos(address: string, network: string): Promise<Utxo
 }
 
 export async function fetchHex(txid: any, network: string) {
-  const response = await fetch(`https://blockstream.info/${network === 'testnet' ? 'testnet/' : ''}api/tx/${txid}/hex`);
+  const response = await fetch(`https://mempool.space/${network === 'testnet' ? 'testnet/' : ''}api/tx/${txid}/hex`);
   return await response.text();
 }
 
 export async function sendTransaction(hexstring: any, network: string) {
   try {
-    const response = await fetch(`https://blockstream.info/${network === 'testnet' ? 'testnet/' : ''}api/tx`, {
+    const response = await fetch(`https://mempool.space/${network === 'testnet' ? 'testnet/' : ''}api/tx`, {
       method: "POST",
       body: hexstring,
     });
@@ -57,7 +57,7 @@ export type FeesResponse = {
 };
 
 export const getFees = async () => {
-  const response = await fetch("https://blockstream.info/api/v1/fees/recommended");
+  const response = await fetch("https://mempool.space/api/v1/fees/recommended");
   const data: FeesResponse = await response.json();
   return {
     ...data,
