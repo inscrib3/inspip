@@ -198,7 +198,7 @@ export const Balances = () => {
                       <Anchor
                         color="white"
                         target="_blank"
-                        href={`https://mempool.space/${
+                        href={`https://blockstream.info/${
                           app.network === "testnet" ? "testnet/" : ""
                         }tx/${transaction.txid}`}
                         style={{ wordBreak: "break-all" }}

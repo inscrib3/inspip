@@ -93,14 +93,14 @@ const getUtxos = async (address: string) => {
 
     try {
       const res = await fetch(
-        `https://mempool.space/api/address/${address}/txs/chain/${txs.last_txid}`
+        `https://blockstream.info/api/address/${address}/txs/chain/${txs.last_txid}`
       );
       nextTxs = (await res.json()) as Tx[];
       await sleep(2000);
     } catch (e) {
       await sleep(2000);
       const res = await fetch(
-        `https://mempool.space/api/address/${address}/txs/chain/${txs.last_txid}`
+        `https://blockstream.info/api/address/${address}/txs/chain/${txs.last_txid}`
       );
       nextTxs = (await res.json()) as Tx[];
     }
@@ -179,11 +179,11 @@ const getUtxos = async (address: string) => {
   let unconfirmed: Tx[] = [];
 
   try {
-    const data = await fetch(`https://mempool.space/api/address/${address}/txs/mempool`);
+    const data = await fetch(`https://blockstream.info/api/address/${address}/txs/mempool`);
     unconfirmed = (await data.json()) as Tx[];
   } catch (error) {
     await sleep(4000);
-    const data = await fetch(`https://mempool.space/api/address/${address}/txs/mempool`);
+    const data = await fetch(`https://blockstream.info/api/address/${address}/txs/mempool`);
     unconfirmed = (await data.json()) as Tx[];
   }
 
@@ -278,7 +278,7 @@ export const AppProvider = (props: AppProviderProps) => {
       let satsUtxo: Utxo[];
 
       try {
-        const utxoRes = await fetch(`https://mempool.space/${network === 'testnet' ? 'testnet/' : ''}api/address/${currentAddress}/utxo`);
+        const utxoRes = await fetch(`https://blockstream.info/${network === 'testnet' ? 'testnet/' : ''}api/address/${currentAddress}/utxo`);
 
         if (!utxoRes.ok) {
           satsUtxo = await getUtxos(currentAddress);
