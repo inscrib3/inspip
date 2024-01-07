@@ -259,7 +259,7 @@ export interface AppProviderProps {
 }
 
 export const AppProvider = (props: AppProviderProps) => {
-  const [account, setAccount] = useState({});
+  const [account, setAccount] = useState<any>({});
   const [network, setNetwork] = useState<string>('mainnet');
   const [addresses, _setAddresses] = useState<number[]>([]);
   const [currentAddress, _setCurrentAddress] = useState<string>('');
@@ -366,6 +366,36 @@ export const AppProvider = (props: AppProviderProps) => {
     _setCurrentAddress(address);
     editWallet(address, [], index);
   };
+
+  useEffect(() => {
+    const handleMessage = (request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
+      let message = {};
+      if(request.action === 'login') {
+        message = {
+          network,
+          currentAddress
+        };
+      } else if(request.action === 'signature') {
+        message = {
+          network,
+          currentAddress,
+          publicKey: account?.publicKey,
+          signature: request.msg+"-pong"
+        }
+      }
+
+      console.log("sender", sender);
+
+      sendResponse({ message });
+    };
+
+    // Add the listener
+    chrome.runtime.onMessage.addListener(handleMessage);
+
+    return () => {
+      chrome.runtime.onMessage.removeListener(handleMessage);
+    };
+  }, []);
 
   return (
     <AppContext.Provider
