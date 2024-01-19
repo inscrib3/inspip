@@ -8,4 +8,6 @@ export enum RoutePath {
   Send = "/send",
   Addresses = "/addresses",
   ConfirmTransaction = "/confirm-transaction",
+  ConnectWallet = "/connect-wallet",
+  SendBTC = "/send-btc"
 }

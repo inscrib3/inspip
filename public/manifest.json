@@ -1,6 +1,28 @@
 {
   "manifest_version": 3,
   "name": "Inspip",
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "run_at": "document_end",
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["test.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["injectScript.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
   "description": "Inspip | Pipe Wallet Extension",
   "version": "0.1.7",
   "action": {

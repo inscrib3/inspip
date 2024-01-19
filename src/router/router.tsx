@@ -5,6 +5,7 @@ import { CreateWallet, RestoreWallet, Mnemonic, Balances, Send } from "../screen
 import { Addresses } from "../screens/addresses";
 import { Password } from "../screens/password";
 import { ConfirmTransaction } from "../screens/confirm-transaction";
+import { ConnectWallet } from "../screens/connect-wallet";
 
 export const router = createHashRouter([
   {
@@ -42,5 +43,9 @@ export const router = createHashRouter([
   {
     path: RoutePath.ConfirmTransaction,
     element: <ConfirmTransaction />,
-  }
+  },
+  {
+    path: RoutePath.ConnectWallet,
+    element: <ConnectWallet />,
+  },
 ]);
