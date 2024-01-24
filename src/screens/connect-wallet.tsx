@@ -1,29 +1,20 @@
 import { Text, Image, Box, Button } from "grommet";
 import { Layout } from "../components";
-import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useApp } from "../app";
-import { toXOnly } from "../bitcoin/helpers";
 
 export const ConnectWallet = (): JSX.Element => {
-  const location = useLocation();
   const app = useApp();
-  console.log('app',app,app.account.internalPubkey)
-  console.log('location in connect wallet', location);
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
+  
   const returnConnectInfo = () => {
-    console.log('clicked YEs')
     chrome.runtime.sendMessage({ message: `ReturnConnectWalletInfo;${app.currentAddress};chiavepubblica`});
-    /*const message = {
-      action: "ReturnConnectWalletInfo",
-      data: {
-        address: app.currentAddress,
-        pubkey: toXOnly(app.account.internalPubkey)
-      }
-    }
-    chrome.runtime.sendMessage({ message });*/
+    setTimeout(()=>{
+      window.close();
+    },1000)
   };
   const goBack = () => {
-    console.log("returnConnectInfo");
+    navigate(-1);
   };
   return (
     <Layout showBack>
@@ -31,25 +22,23 @@ export const ConnectWallet = (): JSX.Element => {
         <Box align="center" gap="medium">
           <Image src="/logo.svg" width={50} />
           <Box>
-            <Text size="medium">Current address: {app.currentAddress}</Text>
+            <Text size="medium">Current address:</Text>
           </Box>
           <Box>
-            <Text size="medium">Current address: {app.account && app.account.publicKey && toXOnly(app.account.publicKey)}</Text>
+            <Text size="medium">{app.currentAddress}</Text>
           </Box>
           <Box>
             <Text size="medium">Connect wallet?</Text>
           </Box>
-          <Box>
+          <Box gap="medium" direction="row" justify="center">
             <Button
-              primary
+              size="small"
               label="Yes"
-              style={{ width: "100%" }}
               onClick={returnConnectInfo}
             />
             <Button
-              primary
+              size="small"
               label="No"
-              style={{ width: "100%" }}
               onClick={goBack}
             />
           </Box>

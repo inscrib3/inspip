@@ -34,4 +34,12 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         chrome.tabs.sendMessage(tabs[0].id, { message: request.message });
     });
   }
+  if (request.message.includes('ReturnSendBitcoin')) {
+    console.log('ReturnSendBitcoin in background: ',request.message)
+    // eslint-disable-next-line no-undef
+    chrome.tabs.query({ active: true }, function(tabs) {
+        // eslint-disable-next-line no-undef
+        chrome.tabs.sendMessage(tabs[0].id, { message: request.message });
+    });
+  }
 });

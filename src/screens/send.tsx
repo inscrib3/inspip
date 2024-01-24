@@ -17,8 +17,8 @@ export const Send = () => {
   const sendTokens = useSendTokens();
   const balances = useSafeBalances();
   const [ticker, setTicker] = useState<string>('');
-  const [address, setAddress] = useState<string>(location.state.toAddress || '');
-  const [amount, setAmount] = useState<string>(location.state.satoshi || '');
+  const [address, setAddress] = useState<string>(location?.state?.toAddress || '');
+  const [amount, setAmount] = useState<string>(location?.state?.satoshi ? (parseInt(location?.state?.satoshi) / Math.pow(10, 8)).toString() : '');
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -74,7 +74,7 @@ export const Send = () => {
       try {
         const tx = await sendSats.dispatch(address, bigIntToString(parseStringToBigInt(amount, 8), 8), `${app.feerate}`);
         if ((tx?.vin?.length || 0) > 0 && (tx?.vout?.length || 0) > 0) {
-          navigate(RoutePath.ConfirmTransaction, { state: tx })
+          navigate(RoutePath.ConfirmTransaction, { state: {tx, fromWeb: location?.state?.satoshi ? true : false} })
         } else {
           throw new Error("Something went wrong, please try again");
         }

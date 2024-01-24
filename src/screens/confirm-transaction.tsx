@@ -20,13 +20,16 @@ export const ConfirmTransaction = (): JSX.Element => {
 
   const onSend = async () => {
     try {
-        const txid = await sendTransaction(location.state.hex, app.network);
-        if (location.state.ticker && location.state.ticker !== '') {
-            save({txid, from: app.currentAddress, to: location.state.to, amount: location.state.amount, token: `${location.state.ticker.toUpperCase()}:${location.state.id}`, timestamp: Date.now(), confirmed: false });
+        const txid = await sendTransaction(location.state.tx.hex, app.network);
+        if (location.state.tx.ticker && location.state.tx.ticker !== '') {
+            save({txid, from: app.currentAddress, to: location.state.tx.to, amount: location.state.tx.amount, token: `${location.state.tx.ticker.toUpperCase()}:${location.state.tx.id}`, timestamp: Date.now(), confirmed: false });
         } else {
-            save({txid, from: app.currentAddress, to: location.state.to, amount: (parseInt(location.state.sats_amount) / Math.pow(10, 8)).toString(), timestamp: Date.now(), confirmed: false });
+            save({txid, from: app.currentAddress, to: location.state.tx.to, amount: (parseInt(location.state.tx.sats_amount) / Math.pow(10, 8)).toString(), timestamp: Date.now(), confirmed: false });
         }
-        navigate(-2);   
+        if(location.state.fromWeb){
+          chrome.runtime.sendMessage({ message: `ReturnSendBitcoin;${txid}`});
+        }
+        navigate(-2);
     } catch (e) {
         setError((e as Error).message);
     }
@@ -41,7 +44,7 @@ export const ConfirmTransaction = (): JSX.Element => {
             label={<Text margin={{ vertical: "small" }}>Inputs</Text>}
           >
             <Box pad="small" background="background-contrast">
-              {location.state.vin.map((vin: any, vinIndex: number) => (
+              {location.state.tx.vin.map((vin: any, vinIndex: number) => (
                 <Box
                   key={`vin-${vinIndex}`}
                   justify="between"
@@ -62,7 +65,7 @@ export const ConfirmTransaction = (): JSX.Element => {
             label={<Text margin={{ vertical: "small" }}>Outputs</Text>}
           >
             <Box pad="small" background="background-contrast">
-              {location.state.vout.map((vout: any, voutIndex: number) => (
+              {location.state.tx.vout.map((vout: any, voutIndex: number) => (
                 <Box
                   key={`vout-${voutIndex}`}
                   justify="between"
@@ -83,15 +86,15 @@ export const ConfirmTransaction = (): JSX.Element => {
                       <Box margin={{ bottom: "small" }} justify="between">
                         <Text>Amount out</Text>
                         <Text weight="bold">
-                          {location.state.amount}{" "}
-                          {`${location.state.ticker}:${location.state.id}`}
+                          {location.state.tx.amount}{" "}
+                          {`${location.state.tx.ticker}:${location.state.tx.id}`}
                         </Text>
                       </Box>
                       <Box margin={{ top: "small" }} justify="between">
                         <Text>Amount change</Text>
                         <Text weight="bold">
-                          {location.state.change}{" "}
-                          {`${location.state.ticker}:${location.state.id}`}
+                          {location.state.tx.change}{" "}
+                          {`${location.state.tx.ticker}:${location.state.tx.id}`}
                         </Text>
                       </Box>
                     </Box>
@@ -113,7 +116,7 @@ export const ConfirmTransaction = (): JSX.Element => {
             flex
           >
             <Text>Fee</Text>
-            <Text weight="bold">{location.state.fee} sats</Text>
+            <Text weight="bold">{location.state.tx.fee} sats</Text>
           </Box>
           <Box direction="row" flex justify="between" gap="large">
             <Button

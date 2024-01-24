@@ -36,12 +36,26 @@ window.addEventListener('ConnectWallet', function (event) {
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     // Handle the message from background.js
-    console.log('In content script get ReturnConnectWalletInfo from background',request.message);
-    const customEvent = new CustomEvent("ReturnConnectWalletInfo", {
-      detail: { message: request.message }
-    });
-    window.dispatchEvent(customEvent);
-    // Perform actions in your web app based on the message
+    if(request.message.includes("ReturnConnectWalletInfo")){
+      console.log('In content script get ReturnConnectWalletInfo from background',request.message);
+      const customEvent = new CustomEvent("ReturnConnectWalletInfo", {
+        detail: { message: request.message }
+      });
+      window.dispatchEvent(customEvent);
+    }
+  }
+);
+
+// eslint-disable-next-line no-undef
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+    if(request.message.includes("ReturnSendBitcoin")){
+      console.log('In content script get ReturnSendBitcoin from background',request.message);
+      const customEvent = new CustomEvent("ReturnSendBitcoin", {
+        detail: { message: request.message }
+      });
+      window.dispatchEvent(customEvent);
+    }
   }
 );
 
