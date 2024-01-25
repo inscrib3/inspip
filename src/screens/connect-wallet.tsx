@@ -6,9 +6,8 @@ import { useApp } from "../app";
 export const ConnectWallet = (): JSX.Element => {
   const app = useApp();
   const navigate = useNavigate();
-  
   const returnConnectInfo = () => {
-    chrome.runtime.sendMessage({ message: `ReturnConnectWalletInfo;${app.currentAddress};chiavepubblica`});
+    chrome.runtime.sendMessage({ message: `ReturnConnectWalletInfo;${app.currentAddress};${app.account.publickey}`});
     setTimeout(()=>{
       window.close();
     },1000)
