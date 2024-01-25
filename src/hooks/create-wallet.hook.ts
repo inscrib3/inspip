@@ -21,14 +21,14 @@ export const useCreateWallet = (): CreateWallet => {
 
       setLoading(true);
 
-      const wallet = generateWallet(getNetwork(app.network));
-      const address = generateNewAddress(wallet.rootKey, getNetwork(app.network), 0);
-      saveWallet(wallet.mnemonic, app.network, address.address, [0], password);
-      setData({...wallet, network: app.network});
+      const wallet = generateWallet(getNetwork('testnet'));
+      const address = generateNewAddress(wallet.rootKey, getNetwork('testnet'), 0);
+      saveWallet(wallet.mnemonic, 'testnet', address.address, [0], password);
+      setData({...wallet, network: 'testnet'});
 
-      app.setAccount(importWallet(wallet.mnemonic, getNetwork(app.network), 0));
-      app.setNetwork(app.network);
-      app.setCurrentAddress(address.address, 0)
+      app.setAccount(importWallet(wallet.mnemonic, getNetwork('testnet'), 0));
+      app.setNetwork('testnet');
+      app.setCurrentAddress('testnet', 0)
       app.setAddresses([0]);
 
       setLoading(false);

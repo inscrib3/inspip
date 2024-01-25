@@ -50,7 +50,7 @@ export const useSendSats = (): SendSats => {
         address,
         parseStringToBigInt(amount, 8),
         BigInt(fee_rate),
-        getNetwork(app.network)
+        getNetwork('testnet')
       );
       
       setData(data);

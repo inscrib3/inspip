@@ -35,7 +35,7 @@ export const AppContext = createContext<{
   account: {},
   loading: false,
   setAccount: () => undefined,
-  network: 'mainnet',
+  network: 'testnet',
   setNetwork: () => undefined,
   currentAddress: '',
   setCurrentAddress: () => undefined,
@@ -260,7 +260,7 @@ export interface AppProviderProps {
 
 export const AppProvider = (props: AppProviderProps) => {
   const [account, setAccount] = useState({});
-  const [network, setNetwork] = useState<string>('mainnet');
+  const [network, setNetwork] = useState<string>('testnet');
   const [addresses, _setAddresses] = useState<number[]>([]);
   const [currentAddress, _setCurrentAddress] = useState<string>('');
   const [feerate, setFeerate] = useState(0);
