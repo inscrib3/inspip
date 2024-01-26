@@ -4,3 +4,5 @@
     - [x] Connect
     - [x] Send bitcoin (window.inspip)
 - [x] Hot Reload for Extension
+- [x] Mnemo click to copy
+- [] Switch Testnet

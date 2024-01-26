@@ -24,16 +24,24 @@ export const Mnemonic = () => {
     navigate(-1);
   };
 
+  const copySeed = () => {
+    try {
+      navigator.clipboard.writeText(mnemonic);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
-    <Box height="full">
+    <Box height="full" pad="large">
       <Header pad="medium">
         <Button icon={<Icons.LinkPrevious />} onClick={goBack} />
       </Header>
       <Box align="center" justify="center" flex="grow" margin={{ horizontal: "small" }}>
         <Box>
-          <Text margin={{ bottom: "small" }}>Save this seed phrase in a secure place</Text>
+          <Text margin={{ bottom: "small" }}>Click to copy! Save this seed phrase in a secure place</Text>
           {mnemonicGrid.map((row, rowIndex) => (
-            <Box direction="row" gap="small" key={rowIndex}>
+            <Box direction="row" gap="small" key={rowIndex} onClick={copySeed}>
               {row.map((word, wordIndex) => (
                 <Box
                   border={{ color: "brand" }}
