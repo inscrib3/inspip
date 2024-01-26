@@ -1,7 +1,7 @@
 var scriptElement = document.createElement('script');
 
 // eslint-disable-next-line no-undef
-scriptElement.src = chrome.runtime.getURL('injectScript.js');
+scriptElement.src = chrome.runtime.getURL('inject.js');
 
 document.head.appendChild(scriptElement);
 
