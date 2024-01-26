@@ -21,15 +21,19 @@ export const App = () => {
 
   useEffect(() => {
     if (searchParams.get("toAddress")) {
-      send(params);
+      setTimeout(() => {
+        send(params);
+      }, 500);
     }
     if (
       searchParams.get("action") &&
       searchParams.get("action") === "ConnectWallet"
     ) {
-      connectWallet();
+      setTimeout(() => {
+        connectWallet();
+      }, 500);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   useEffect(() => {
@@ -43,7 +47,10 @@ export const App = () => {
       <Box fill align="center" justify="center">
         <Box align="center">
           <Image src="/logo.svg" width={50} margin={{ bottom: "small" }} />
-          <Text margin={{ top: "small", bottom: "medium" }} textAlign="center">Create & Store your Pipe DMT and ART in the world's first Open Source Chrome wallet for Pipe!</Text>
+          <Text margin={{ top: "small", bottom: "medium" }} textAlign="center">
+            Create & Store your Pipe DMT and ART in the world's first Open
+            Source Chrome wallet for Pipe!
+          </Text>
           <Box gap="medium">
             <Button primary label="Create Wallet" onClick={createWallet} />
             <Button label="Restore Wallet" onClick={restoreWallet} />
