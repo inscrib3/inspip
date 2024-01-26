@@ -3,8 +3,7 @@
   "name": "Inspip",
   "permissions": [
     "tabs",
-    "activeTab",
-    "<all_urls>"
+    "activeTab"
   ],
   "content_scripts": [
     {
