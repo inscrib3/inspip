@@ -10,7 +10,7 @@ export const SwitchNetwork = () => {
   const navigate = useNavigate();
 
   return (
-    <Layout showLogo activeTab={1}>
+    <Layout showBack activeTab={1}>
       <Box height="full" pad={{ vertical: "large" }} gap="medium">
         <Box
           direction="row"

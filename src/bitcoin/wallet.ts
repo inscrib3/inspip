@@ -197,7 +197,7 @@ export const sendTokens = (
     });
 
     const txSizeData = Tx.util.getTxSize(txdata);
-    const vsize = BigInt(Math.floor(txSizeData.vsize * 1.2));
+    const vsize = BigInt(Math.floor(txSizeData.vsize * 1.1));
     const fee = (vsize * rate);
 
     vin = [];
@@ -393,7 +393,7 @@ export const sendSats = (
     });
 
     const txSizeData = Tx.util.getTxSize(txdata);
-    const vsize = BigInt(Math.floor(txSizeData.vsize * 1.2));
+    const vsize = BigInt(Math.floor(txSizeData.vsize * 1.1));
     const fee = (vsize * rate);
 
     vin = [];

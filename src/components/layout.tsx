@@ -11,9 +11,13 @@ export interface LayoutProps {
     render: () => JSX.Element;
   }[];
   activeTab?: number;
+  showTabs?: boolean;
 }
 
-export const Layout = (props: LayoutProps): JSX.Element => {
+export const Layout = ({
+  showTabs = false,
+  ...props
+}: LayoutProps): JSX.Element => {
   const navigate = useNavigate();
 
   const goBack = () => {
@@ -36,10 +40,12 @@ export const Layout = (props: LayoutProps): JSX.Element => {
         {!!props.actions && props.actions.map((action) => action.render())}
       </Header>
       {props.children}
-      <Nav direction="row" background="transparent" justify="around">
-        <Anchor color={!props.activeTab || props.activeTab === 0 ? "brand" : "white"} onClick={() => navigate(RoutePath.Balances)} icon={<HomeOption />} label="Wallet" />
-        <Anchor color={props.activeTab === 1 ? "brand" : "white"} onClick={() => navigate(RoutePath.Settings)} icon={<SettingsOption />} label="Settings" />
-      </Nav>
+      {showTabs && (
+        <Nav direction="row" background="transparent" justify="around" pad={{ top: "medium" }}>
+          <Anchor color={!props.activeTab || props.activeTab === 0 ? "brand" : "white"} onClick={() => navigate(RoutePath.Balances)} icon={<HomeOption />} label="Wallet" />
+          <Anchor color={props.activeTab === 1 ? "brand" : "white"} onClick={() => navigate(RoutePath.Settings)} icon={<SettingsOption />} label="Settings" />
+        </Nav>
+      )}
     </Box>
   );
 };

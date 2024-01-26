@@ -82,6 +82,7 @@ export const Balances = () => {
   return (
     <Layout
       showLogo
+      showTabs
       actions={[
         {
           render: () => (

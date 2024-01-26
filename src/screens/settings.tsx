@@ -10,7 +10,7 @@ export const Settings = () => {
   const app = useApp();
 
   return (
-  <Layout showLogo activeTab={1}>
+  <Layout showTabs showLogo activeTab={1}>
     <Box height="full" pad={{ vertical: "large" }}>
       <Box
         direction="row"
