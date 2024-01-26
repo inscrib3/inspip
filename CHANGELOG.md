@@ -2,7 +2,9 @@
 
 - [x] Browser Injection:
     - [x] Connect
-    - [x] Send bitcoin (window.inspip)
+    - [x] Send bitcoin
 - [x] Hot Reload for Extension
 - [x] Mnemo click to copy
-- [] Switch Testnet
+- [x] Editor settings
+- [x] Wallet Settings
+- [x] Switch Testnet

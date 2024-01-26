@@ -39,14 +39,18 @@ export const Password = () => {
       }
 
       if (bip39.validateMnemonic(wallet.mnemonic)) {
-        app.setAccount(importWallet(wallet.mnemonic, getNetwork(wallet.network), wallet.addressIndex));
+        const nextAccount = importWallet(wallet.mnemonic, getNetwork(wallet.network), wallet.addressIndex);
+
+        app.setAccount(nextAccount);
         app.setNetwork(wallet.network);
-        app.setCurrentAddress(wallet.currentAddress, wallet.addressIndex)
+        app.setCurrentAddress(nextAccount.address, wallet.addressIndex)
         app.setAddresses(wallet.addresses);
       } else {
-        app.setAccount(importWalletFromWif(wallet.mnemonic, getNetwork(wallet.network), wallet.addressIndex));
+        const nextAccount = importWalletFromWif(wallet.mnemonic, getNetwork(wallet.network), wallet.addressIndex);
+
+        app.setAccount(nextAccount);
         app.setNetwork(wallet.network);
-        app.setCurrentAddress(wallet.currentAddress, wallet.addressIndex)
+        app.setCurrentAddress(nextAccount.address, wallet.addressIndex)
         app.setAddresses(wallet.addresses);
       }
     } catch(e) {

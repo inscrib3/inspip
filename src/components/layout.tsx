@@ -1,6 +1,7 @@
-import { Box, Button, Header, Image } from "grommet";
-import { LinkPrevious } from "grommet-icons";
+import { Anchor, Box, Button, Header, Image, Nav } from "grommet";
+import { HomeOption, LinkPrevious, SettingsOption } from "grommet-icons";
 import { useNavigate } from "react-router-dom";
+import { RoutePath } from "../router/route-path";
 
 export interface LayoutProps {
   children: React.ReactNode;
@@ -9,6 +10,7 @@ export interface LayoutProps {
   actions?: {
     render: () => JSX.Element;
   }[];
+  activeTab?: number;
 }
 
 export const Layout = (props: LayoutProps): JSX.Element => {
@@ -34,6 +36,10 @@ export const Layout = (props: LayoutProps): JSX.Element => {
         {!!props.actions && props.actions.map((action) => action.render())}
       </Header>
       {props.children}
+      <Nav direction="row" background="transparent" justify="around">
+        <Anchor color={!props.activeTab || props.activeTab === 0 ? "brand" : "white"} onClick={() => navigate(RoutePath.Balances)} icon={<HomeOption />} label="Wallet" />
+        <Anchor color={props.activeTab === 1 ? "brand" : "white"} onClick={() => navigate(RoutePath.Settings)} icon={<SettingsOption />} label="Settings" />
+      </Nav>
     </Box>
   );
 };

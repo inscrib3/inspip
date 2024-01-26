@@ -19,25 +19,19 @@ export const App = () => {
   const restoreWallet = () => navigate(RoutePath.RestoreWallet);
   const connectWallet = () => navigate(RoutePath.ConnectWallet);
   const send = (data: any) => navigate(RoutePath.Send, { state: data });
-  if (searchParams.get("toAddress")) {
-    setTimeout(() => {
+
+  useEffect(() => {
+    if (searchParams.get("toAddress")) {
       send(params);
-    }, 500);
-  }
-  if (
-    searchParams.get("action") &&
-    searchParams.get("action") === "ConnectWallet"
-  ) {
-    setTimeout(() => {
+    }
+    if (
+      searchParams.get("action") &&
+      searchParams.get("action") === "ConnectWallet"
+    ) {
       connectWallet();
-    }, 500);
-  }
-  /*const sendConnectInfoToWebPage = () => {
-    const message = {message: "Send Bitcoin"};
-    const event = new CustomEvent("SendBitcoin", {detail: message});
-    window.dispatchEvent(event);
-    console.log('sent from wallet')
-  }*/
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   useEffect(() => {
     if (localStorage.getItem("wallet")) {
