@@ -28,8 +28,12 @@ export const ConfirmTransaction = (): JSX.Element => {
         }
         if(location.state.fromWeb){
           chrome.runtime.sendMessage({ message: `ReturnSendBitcoin;${txid}`});
+          setTimeout(()=>{
+            window.close();
+          },1000)
+        } else {
+          navigate(-2);
         }
-        navigate(-2);
     } catch (e) {
         setError((e as Error).message);
     }

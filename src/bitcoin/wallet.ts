@@ -8,6 +8,7 @@ import { bitcoin } from './lib/bitcoin-lib';
 import { Utxo } from '../app/app-context';
 import { hexToBytes } from '../utils/hex-to-bytes';
 import { cleanFloat } from '../utils/clean-float';
+import bs58 from 'bs58';
 
 export function generateWallet(network: any) {
     bip39.setDefaultWordlist('english');
@@ -62,8 +63,10 @@ export function generateNewAddress(rootKey: any, network: any, index: number = 0
         address = payments.address;
         output = payments.output;
     }
+
+    // tentativi codifica sbagliata console.log('PUBLICKEY: 1',account.publicKey,account.publicKey.toString(),' 2 ',account.publicKey.toString("utf8", 0, account.publicKey.length, ' 3 ',new TextDecoder('utf-8').decode(account.publicKey)) )//buffer from buffer or hex to string
   
-    return { rootKey, account: account ?? rootKey, internalPubkey, address, output }
+    return { rootKey, account: account ?? rootKey, internalPubkey, address, output, publickey: bs58.encode(account.publicKey)  }
 }
 
 export const sendTokens = (
