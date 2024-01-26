@@ -1,21 +1,24 @@
 {
   "name": "inspip",
   "private": true,
-  "version": "0.1.7",
+  "version": "0.1.8",
   "type": "module",
   "license": "BUSL-1.1",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:watch": "vite build --watch",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
-    "@cmdcode/tapscript": "^1.4.1",
+    "@cmdcode/tapscript": "^1.4.3",
+    "@types/chrome": "^0.0.258",
     "bip32": "^4.0.0",
     "bip39": "^3.1.0",
     "bitcoinjs-lib": "^6.1.5",
+    "bs58": "^5.0.0",
     "buffer": "^6.0.3",
     "crypto-js": "^4.1.1",
     "ecpair": "^2.1.0",
@@ -45,6 +48,7 @@
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
+    "hot-reload-extension-vite": "^1.0.13",
     "patch-package": "^7.0.0",
     "vite": "^4.4.5",
     "vite-plugin-node-polyfills": "^0.15.0"

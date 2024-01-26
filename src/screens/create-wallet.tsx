@@ -59,7 +59,7 @@ export const CreateWallet = (): JSX.Element => {
     <Layout showBack>
       <Box fill align="center" justify="center">
         <Box align="center" gap="medium">
-        <Image src="/logo.svg" width={50} />
+        <Image src="/logo.svg" width={50} margin={{ bottom: "small" }} />
         {!!errors.error && (
           <Text size="small" color="status-critical">
             {errors.error}

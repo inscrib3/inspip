@@ -1,0 +1,14 @@
+diff --git a/node_modules/@cmdcode/tapscript/package.json b/node_modules/@cmdcode/tapscript/package.json
+index d3b3491..2d5ed53 100644
+--- a/node_modules/@cmdcode/tapscript/package.json
++++ b/node_modules/@cmdcode/tapscript/package.json
+@@ -15,7 +15,8 @@
+       "require": {
+         "types": "./dist/types/index.d.ts",
+         "default": "./dist/main.cjs"
+-      }
++      },
++      "types": "./dist/types/index.d.ts"
+     }
+   },
+   "scripts": {

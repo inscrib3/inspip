@@ -4,7 +4,10 @@ import { App } from "../app";
 import { CreateWallet, RestoreWallet, Mnemonic, Balances, Send } from "../screens";
 import { Addresses } from "../screens/addresses";
 import { Password } from "../screens/password";
+import { Settings} from "../screens/settings";
 import { ConfirmTransaction } from "../screens/confirm-transaction";
+import { ConnectWallet } from "../screens/connect-wallet";
+import { SwitchNetwork } from "../screens/switch-network";
 
 export const router = createHashRouter([
   {
@@ -42,5 +45,17 @@ export const router = createHashRouter([
   {
     path: RoutePath.ConfirmTransaction,
     element: <ConfirmTransaction />,
+  },
+  {
+    path: RoutePath.ConnectWallet,
+    element: <ConnectWallet />,
+  },
+  {
+    path: RoutePath.Settings,
+    element: <Settings />
+  },
+  {
+    path: RoutePath.SwitchNetwork,
+    element: <SwitchNetwork />,
   }
 ]);

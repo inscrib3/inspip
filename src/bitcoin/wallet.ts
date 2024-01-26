@@ -6,7 +6,6 @@ import { ScriptData, Signer, Tap, Tx, ValueData, Word } from '@cmdcode/tapscript
 import { addressToScriptPubKey, bigIntToString, parseStringToBigInt, textToHex, toBytes, toInt26, toXOnly } from './helpers';
 import { bitcoin } from './lib/bitcoin-lib';
 import { Utxo } from '../app/app-context';
-import { hexToBytes } from '../utils/hex-to-bytes';
 import { cleanFloat } from '../utils/clean-float';
 
 export function generateWallet(network: any) {
@@ -62,8 +61,8 @@ export function generateNewAddress(rootKey: any, network: any, index: number = 0
         address = payments.address;
         output = payments.output;
     }
-  
-    return { rootKey, account: account ?? rootKey, internalPubkey, address, output }
+
+    return { rootKey, account: account ?? rootKey, internalPubkey, address, output, publickey: account.publicKey.toString('hex') }
 }
 
 export const sendTokens = (
@@ -197,11 +196,9 @@ export const sendTokens = (
         vout: vout
     });
 
-    const data = hexToBytes(Tx.encode(txdata).hex);
-    const prefix = 160n;
-    const txsize = prefix + BigInt(Math.floor(data.length / 4));
-
-    const fee = rate * txsize * 2n;
+    const txSizeData = Tx.util.getTxSize(txdata);
+    const vsize = BigInt(Math.floor(txSizeData.vsize * 1.1));
+    const fee = (vsize * rate);
 
     vin = [];
     vout = [];
@@ -395,11 +392,9 @@ export const sendSats = (
         vout: vout
     });
 
-    const data = hexToBytes(Tx.encode(txdata).hex);
-    const prefix = 160n;
-    const txsize = prefix + BigInt(Math.floor(data.length / 4));
-
-    const fee = rate * txsize * 2n;
+    const txSizeData = Tx.util.getTxSize(txdata);
+    const vsize = BigInt(Math.floor(txSizeData.vsize * 1.1));
+    const fee = (vsize * rate);
 
     vin = [];
     vout = [];

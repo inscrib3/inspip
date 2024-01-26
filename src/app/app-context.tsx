@@ -1,5 +1,5 @@
 import { createContext, useCallback, useEffect, useRef, useState } from 'react';
-import { editWallet } from '../bitcoin/wallet-storage';
+import { editWallet, updateStoredWallet } from '../bitcoin/wallet-storage';
 
 export type Utxo = {
   txid: string,
@@ -260,7 +260,7 @@ export interface AppProviderProps {
 
 export const AppProvider = (props: AppProviderProps) => {
   const [account, setAccount] = useState({});
-  const [network, setNetwork] = useState<string>('mainnet');
+  const [network, _setNetwork] = useState<string>('mainnet');
   const [addresses, _setAddresses] = useState<number[]>([]);
   const [currentAddress, _setCurrentAddress] = useState<string>('');
   const [feerate, setFeerate] = useState(0);
@@ -365,6 +365,11 @@ export const AppProvider = (props: AppProviderProps) => {
   const setCurrentAddress = (address: string, index: number) => {
     _setCurrentAddress(address);
     editWallet(address, [], index);
+  };
+
+  const setNetwork = (network: string) => {
+    _setNetwork(network);
+    updateStoredWallet('network', network);
   };
 
   return (
