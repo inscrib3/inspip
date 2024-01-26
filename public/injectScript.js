@@ -8,7 +8,6 @@
       const eventListener = (event) => {
         if (event.type === "ReturnConnectWalletInfo") {
           window.removeEventListener("ReturnConnectWalletInfo", eventListener);
-          console.log('ReturnConnectWalletInfo success!!!',event.detail);
           const address = event.detail.message.split(';')[1];
           const pubkey = event.detail.message.split(';')[2];
           resolve({address,pubkey});
@@ -28,7 +27,6 @@
       const eventListener = (event) => {
         if (event.type === "ReturnSendBitcoin") {
           window.removeEventListener("ReturnSendBitcoin", eventListener);
-          console.log('ReturnSendBitcoin success!!!',event.detail);
           const txId = event.detail.message.split(";")[1];
           resolve(txId);
         }

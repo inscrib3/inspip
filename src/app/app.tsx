@@ -13,7 +13,6 @@ export const App = () => {
     satoshi: searchParams.get("satoshi"),
     feerate: searchParams.get("feerate"),
   };
-  console.log("params", params);
 
   const createWallet = () => navigate(RoutePath.CreateWallet);
   const restoreWallet = () => navigate(RoutePath.RestoreWallet);

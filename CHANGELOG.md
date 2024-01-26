@@ -8,3 +8,4 @@
 - [x] Editor settings
 - [x] Wallet Settings
 - [x] Switch Testnet
+- [x] Fee calculator with vsize
