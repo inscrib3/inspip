@@ -14,6 +14,15 @@ window.addEventListener('SendBitcoin', function (event) {
     function () {})
 })
 
+window.addEventListener('SendTokens', function (event) {
+  // eslint-disable-next-line no-undef
+  chrome.runtime.sendMessage(
+    {
+      message: {action:'SendTokens',params:event.detail},
+    },
+    function () {})
+})
+
 window.addEventListener('ConnectWallet', function (event) {
   // eslint-disable-next-line no-undef
   chrome.runtime.sendMessage(
@@ -41,6 +50,18 @@ chrome.runtime.onMessage.addListener(
   function(request) {
     if(request.message.includes("ReturnSendBitcoin")){
       const customEvent = new CustomEvent("ReturnSendBitcoin", {
+        detail: { message: request.message }
+      });
+      window.dispatchEvent(customEvent);
+    }
+  }
+);
+
+// eslint-disable-next-line no-undef
+chrome.runtime.onMessage.addListener(
+  function(request) {
+    if(request.message.includes("ReturnSendTokens")){
+      const customEvent = new CustomEvent("ReturnSendTokens", {
         detail: { message: request.message }
       });
       window.dispatchEvent(customEvent);

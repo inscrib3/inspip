@@ -155,7 +155,7 @@ export const Send = () => {
             />
           </Box>
         </Box>
-        <SetFees />
+        <SetFees initialFee={location?.state?.feerate} />
         {loading && <Spinner margin={{ top: "large" }} />}
         <Button
           primary

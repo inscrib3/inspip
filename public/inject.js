@@ -35,4 +35,22 @@
       window.addEventListener("ReturnSendBitcoin", eventListener);
     });
   };
+
+  window.inspip.sendTokens = function (ticker, id, toAddress, amount, feerate) {
+    const message = {ticker, id, toAddress, amount:amount.toString(), feerate:feerate.toString()};
+    const event = new CustomEvent("SendTokens", {detail: message});
+    window.dispatchEvent(event);
+
+    return new Promise((resolve) => {
+      const eventListener = (event) => {
+        if (event.type === "ReturnSendTokens") {
+          window.removeEventListener("ReturnSendTokens", eventListener);
+          const txId = event.detail.message.split(";")[1];
+          resolve(txId);
+        }
+      };
+
+      window.addEventListener("ReturnSendTokens", eventListener);
+    });
+  };
 })();

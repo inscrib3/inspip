@@ -10,6 +10,16 @@ chrome.runtime.onMessage.addListener(async (request) => {
       height: 600,
     });
   }
+  if (request.message.action === 'SendTokens') {
+    const params = request.message.params;
+    // eslint-disable-next-line no-undef
+    chrome.windows.create({
+      type: 'popup',
+      url: `index.html#?action=SendTokens&feerate=${params.feerate}&toAddress=${params.toAddress}&amount=${params.amount}&id=${params.id}&ticker=${params.ticker}`,
+      width: 400,
+      height: 600,
+    });
+  }
   if (request.message.action === 'ConnectWallet') {
     // eslint-disable-next-line no-undef
     chrome.windows.create({
@@ -27,6 +37,13 @@ chrome.runtime.onMessage.addListener(async (request) => {
     });
   }
   if (request.message.includes('ReturnSendBitcoin')) {
+    // eslint-disable-next-line no-undef
+    chrome.tabs.query({ active: true }, function(tabs) {
+        // eslint-disable-next-line no-undef
+        chrome.tabs.sendMessage(tabs[0].id, { message: request.message });
+    });
+  }
+  if (request.message.includes('ReturnSendTokens')) {
     // eslint-disable-next-line no-undef
     chrome.tabs.query({ active: true }, function(tabs) {
         // eslint-disable-next-line no-undef
