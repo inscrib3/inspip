@@ -17,8 +17,8 @@ export const Send = () => {
   const sendTokens = useSendTokens();
   const balances = useSafeBalances();
   const [ticker, setTicker] = useState<string>('');
-  const [address, setAddress] = useState<string>(location?.state?.toAddress || '');
-  const [amount, setAmount] = useState<string>(location?.state?.satoshi ? (parseInt(location?.state?.satoshi) / Math.pow(10, 8)).toString() : '');
+  const [address, setAddress] = useState<string>('');
+  const [amount, setAmount] = useState<string>('');
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -32,6 +32,48 @@ export const Send = () => {
       setTicker(tickers[0]);
     }
   }, [ticker, tickers]);
+
+  useEffect(() => {
+    if (location?.state?.satoshi) {
+      if (location?.state?.ticker && location?.state?.id) {
+        if (app?.tokens?.length > 0) {
+          const token = app.tokens.filter(
+            (t) =>
+              t.tick === location?.state?.ticker?.toLowerCase() &&
+              t.id === parseInt(location?.state?.id)
+          );
+          if (token) {
+            const decimals = token[0].dec;
+            const nextAmount = (
+              parseInt(location?.state?.satoshi) / Math.pow(10, decimals)
+            ).toString();
+            setTicker(
+              location?.state?.ticker &&
+                location?.state?.ticker + ":" + location?.state?.id
+            );
+            setAddress(location?.state?.toAddress);
+            setAmount(nextAmount);
+          } else {
+            console.error("Invalid token");
+          }
+        } else {
+          console.error("No tokens found");
+        }
+      } else {
+        const nextAmount = (
+          parseInt(location?.state?.satoshi) / Math.pow(10, 8)
+        ).toString();
+        setAddress(location?.state?.toAddress);
+        setAmount(nextAmount);
+      }
+    }
+  }, [
+    app.tokens,
+    location?.state,
+    location?.state?.id,
+    location?.state?.satoshi,
+    location?.state?.ticker,
+  ]);
 
   const goBack = () => {
     navigate(-1);

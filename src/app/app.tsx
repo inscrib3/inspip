@@ -9,8 +9,10 @@ export const App = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const params = {
+    ticker: searchParams.get("ticker"),
+    id: searchParams.get("id"),
     toAddress: searchParams.get("toAddress"),
-    satoshi: searchParams.get("satoshi"),
+    satoshi: searchParams.get("satoshi") || searchParams.get("amount"),
     feerate: searchParams.get("feerate"),
   };
 
