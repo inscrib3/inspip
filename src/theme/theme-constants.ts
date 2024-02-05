@@ -1,12 +1,21 @@
 import { ThemeType } from "grommet";
 
+export const colors = {
+  primary: "#6FFFB0",
+  secondary: "#D67BFF",
+  dark: "#1C1917",
+  inactive: "#858585",
+  odd: "#272727",
+  even: "#1C1917",
+};
+
 export const themeConstants: ThemeType = {
   global: {
     font: {
       family: "'Roboto', sans-serif",
     },
     colors: {
-      brand: "#6FFFB0",
+      brand: colors.primary
     },
   },
   button: {

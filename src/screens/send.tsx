@@ -1,6 +1,6 @@
 import { Header, Box, Button, Select, TextInput, Text, Spinner, Anchor } from "grommet";
 import * as Icons from "grommet-icons";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { bigIntToString, getNetwork, parseStringToBigInt, validateAddress } from "../bitcoin/helpers";
 import { SetFees } from "../components";
@@ -16,7 +16,7 @@ export const Send = () => {
   const sendSats = useSendSats();
   const sendTokens = useSendTokens();
   const balances = useSafeBalances();
-  const [ticker, setTicker] = useState<string>('');
+  const [ticker, setTicker] = useState<string>(location?.state?.ticker || '');
   const [address, setAddress] = useState<string>(location?.state?.toAddress || '');
   const [amount, setAmount] = useState<string>(location?.state?.satoshi ? (parseInt(location?.state?.satoshi) / Math.pow(10, 8)).toString() : '');
   const [error, setError] = useState<string>("");

@@ -1,4 +1,12 @@
-[next] - 0.1.8
+[next] - 0.1.9
+
+- [] UX & UI improvements
+- [] Browser Injection new features:
+    - [] Send Tokens
+    - [] Sign Message
+    - [] Sign Psbt
+
+[version] - 0.1.8
 
 - [x] Browser Injection:
     - [x] Connect

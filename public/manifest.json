@@ -23,7 +23,7 @@
     "type": "module"
   },
   "description": "Inspip | Pipe Wallet Extension",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "action": {
     "default_popup": "index.html",
     "default_icon": "logo.png"
