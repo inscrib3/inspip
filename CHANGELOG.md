@@ -1,10 +1,7 @@
-[next] - 0.1.9
+[version] - 0.1.9
 
-- [] UX & UI improvements
-- [] Browser Injection new features:
-    - [] Send Tokens
-    - [] Sign Message
-    - [] Sign Psbt
+- [x] UX & UI improvements
+- [x] Fix Sending Transactions vin issue
 
 [version] - 0.1.8
 
