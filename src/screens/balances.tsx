@@ -86,7 +86,7 @@ export const Balances = () => {
           const tickerParts = ticker.split(":");
           const token: IndexerToken = await (
             await fetch(
-              `${import.meta.env.VITE_SERVER_HOST}/token/get/${
+              `${import.meta.env.VITE_SERVER_HOST || "https://indexer.inspip.com"}/token/get/${
                 tickerParts[0]
               }/${tickerParts[1]}`
             )

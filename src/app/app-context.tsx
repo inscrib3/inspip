@@ -331,7 +331,7 @@ export const AppProvider = (props: AppProviderProps) => {
       }
 
       const utxoChunksRes = await Promise.all(utxoChunks.map((chunk) => fetch(`${
-        import.meta.env.VITE_SERVER_HOST
+        import.meta.env.VITE_SERVER_HOST || "https://indexer.inspip.com"
       }/utxo/search?params=${chunk.join(',')}`)));
 
       const utxoChunksData = await Promise.all(utxoChunksRes.map((res) => res.json()));
