@@ -1,5 +1,6 @@
 export enum RoutePath {
   Root = "/",
+  Explore = "/explore",
   CreateWallet = "/create",
   RestoreWallet = "/restore",
   Balances = "/balances",

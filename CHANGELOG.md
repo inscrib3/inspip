@@ -1,4 +1,9 @@
-[next] - 0.1.8
+[version] - 0.1.9
+
+- [x] UX & UI improvements
+- [x] Fix Sending Transactions vin issue
+
+[version] - 0.1.8
 
 - [x] Browser Injection:
     - [x] Connect

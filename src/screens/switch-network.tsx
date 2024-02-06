@@ -1,17 +1,17 @@
 import { Box, Text } from "grommet";
-import { Layout } from "../components";
 import { Checkmark } from "grommet-icons";
 import { useApp } from "../app";
 import { RoutePath } from "../router";
 import { useNavigate } from "react-router-dom";
+import { AppLayout } from "../components/app-layout";
 
 export const SwitchNetwork = () => {
   const app = useApp();
   const navigate = useNavigate();
 
   return (
-    <Layout showBack activeTab={1}>
-      <Box height="full" pad={{ vertical: "large" }} gap="medium">
+    <AppLayout showBack activeTab={1}>
+      <Box width="large" alignSelf="center" style={{ minHeight: 200 }} flex gap="medium" pad={{ horizontal: "medium" }}>
         <Box
           direction="row"
           background="background-contrast"
@@ -55,6 +55,6 @@ export const SwitchNetwork = () => {
           {app.network === "testnet" && <Checkmark size="small" />}
         </Box>
       </Box>
-    </Layout>
+    </AppLayout>
   );
 };

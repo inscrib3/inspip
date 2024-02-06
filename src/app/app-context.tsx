@@ -258,6 +258,24 @@ export interface AppProviderProps {
   children: React.ReactNode;
 }
 
+// Import the functions you need from the SDKs you need
+import { initializeApp, FirebaseApp } from "firebase/app";
+import { getAnalytics, Analytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBC77tDyyuddrsc_Jdm0BcsKNoFl5BXWOQ",
+  authDomain: "inspip-wallet.firebaseapp.com",
+  projectId: "inspip-wallet",
+  storageBucket: "inspip-wallet.appspot.com",
+  messagingSenderId: "734952055419",
+  appId: "1:734952055419:web:a5cdb017c0d7423c99f8de",
+  measurementId: "G-523R85SP1N"
+};
+
 export const AppProvider = (props: AppProviderProps) => {
   const [account, setAccount] = useState({});
   const [network, _setNetwork] = useState<string>('mainnet');
@@ -268,6 +286,15 @@ export const AppProvider = (props: AppProviderProps) => {
 
   const [utxos, setUtxos] = useState<Utxo[]>([]);
   const loading = useRef(false);
+  const [firebase, setFirebase] = useState<FirebaseApp | null>(null);
+  const [, setAnalytics] = useState<Analytics | null>(null);
+
+  useEffect(() => {
+    if (firebase) return;
+    const nextFirebase = initializeApp(firebaseConfig);
+    setAnalytics(getAnalytics(nextFirebase));
+    setFirebase(nextFirebase);
+  }, [firebase]);
 
   const fetchUtxos = useCallback(async (): Promise<Utxo[]> => {
     if (loading.current || currentAddress === '') return [];

@@ -45,16 +45,26 @@ export const App = () => {
   return (
     <Layout>
       <Box fill align="center" justify="center">
-        <Box align="center">
-          <Image src="/logo.svg" width={50} margin={{ bottom: "small" }} />
-          <Text margin={{ top: "small", bottom: "medium" }} textAlign="center">
+        <Box width="medium" alignSelf="center">
+          <Box direction="row" justify="center" align="center" gap="small">
+            <Image src="/logo.svg" width={44} margin={{ bottom: "small" }} />
+            <Text size="large" weight="bold" style={{ marginTop: -10 }}>
+              Inspip | Pipe Wallet
+            </Text>
+          </Box>
+          <Text margin={{ top: "small", bottom: "small" }} style={{ lineHeight: 1.5, letterSpacing: 0.2 }}>
             Create & Store your Pipe DMT and ART in the world's first Open
             Source Chrome wallet for Pipe!
           </Text>
-          <Box gap="medium">
+          <Box gap="small">
             <Button primary label="Create Wallet" onClick={createWallet} />
             <Button label="Restore Wallet" onClick={restoreWallet} />
           </Box>
+            {window.origin.includes('http') && (
+              <Box align="center" margin="small" onClick={() => window.open('https://chromewebstore.google.com/detail/inspip/hgbnkbbibgkjkbgbaicdajneaponhnge', '_blank')}>
+                <Image src="/chromestore.png" width={200} />
+              </Box>
+            )}
         </Box>
       </Box>
     </Layout>

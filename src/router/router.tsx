@@ -8,11 +8,16 @@ import { Settings} from "../screens/settings";
 import { ConfirmTransaction } from "../screens/confirm-transaction";
 import { ConnectWallet } from "../screens/connect-wallet";
 import { SwitchNetwork } from "../screens/switch-network";
+import { Explore } from "../screens/explore";
 
 export const router = createHashRouter([
   {
     path: RoutePath.Root,
     element: <App />,
+  },
+  {
+    path: RoutePath.Explore,
+    element: <Explore />,
   },
   {
     path: RoutePath.CreateWallet,

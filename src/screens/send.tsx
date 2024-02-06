@@ -1,6 +1,5 @@
-import { Header, Box, Button, Select, TextInput, Text, Spinner, Anchor } from "grommet";
-import * as Icons from "grommet-icons";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Box, Button, Select, TextInput, Text, Spinner, Anchor } from "grommet";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { bigIntToString, getNetwork, parseStringToBigInt, validateAddress } from "../bitcoin/helpers";
 import { SetFees } from "../components";
@@ -8,6 +7,7 @@ import { useSendSats, useSendTokens } from "../hooks";
 import { useApp } from "../app";
 import { useSafeBalances } from "../hooks/safe-balances.hook";
 import { RoutePath } from "../router";
+import { AppLayout } from "../components/app-layout";
 
 export const Send = () => {
   const location = useLocation();
@@ -16,7 +16,7 @@ export const Send = () => {
   const sendSats = useSendSats();
   const sendTokens = useSendTokens();
   const balances = useSafeBalances();
-  const [ticker, setTicker] = useState<string>('');
+  const [ticker, setTicker] = useState<string>(location?.state?.ticker || '');
   const [address, setAddress] = useState<string>(location?.state?.toAddress || '');
   const [amount, setAmount] = useState<string>(location?.state?.satoshi ? (parseInt(location?.state?.satoshi) / Math.pow(10, 8)).toString() : '');
   const [error, setError] = useState<string>("");
@@ -32,10 +32,6 @@ export const Send = () => {
       setTicker(tickers[0]);
     }
   }, [ticker, tickers]);
-
-  const goBack = () => {
-    navigate(-1);
-  };
 
   const send = async () => {
     setError("");
@@ -97,7 +93,7 @@ export const Send = () => {
       );
       setLoading(false);
       if ((tx?.vin?.length || 0) > 0 && (tx?.vout?.length || 0) > 0) {
-        navigate(RoutePath.ConfirmTransaction, { state: tx })
+        navigate(RoutePath.ConfirmTransaction, { state: {tx, fromWeb: location?.state?.satoshi ? true : false} })
       } else {
         throw new Error("Something went wrong, please try again");
       }
@@ -111,11 +107,8 @@ export const Send = () => {
   };
 
   return (
-    <Box height="full">
-      <Header pad="medium">
-        <Button icon={<Icons.LinkPrevious />} onClick={goBack} />
-      </Header>
-      <Box flex="grow" pad={{ horizontal: "large", vertical: "small" }}>
+    <AppLayout showBack>
+      <Box alignSelf="center" pad="small" width="medium" flex>
         {!!error && (<Text color="red" margin={{ bottom: "small" }}>{error}</Text>)}
         {ticker && balances.data[ticker.toLowerCase()] && (
           <Box>
@@ -165,6 +158,6 @@ export const Send = () => {
           disabled={loading}
         />
       </Box>
-    </Box>
+    </AppLayout>
   );
 };
