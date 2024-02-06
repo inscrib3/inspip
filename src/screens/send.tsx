@@ -93,7 +93,7 @@ export const Send = () => {
       );
       setLoading(false);
       if ((tx?.vin?.length || 0) > 0 && (tx?.vout?.length || 0) > 0) {
-        navigate(RoutePath.ConfirmTransaction, { state: tx })
+        navigate(RoutePath.ConfirmTransaction, { state: {tx, fromWeb: location?.state?.satoshi ? true : false} })
       } else {
         throw new Error("Something went wrong, please try again");
       }
