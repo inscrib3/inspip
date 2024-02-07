@@ -1,4 +1,8 @@
-[next] - 0.1.10
+[version] - 0.1.11
+
+- [x] Chrome extension size fix
+
+[version] - 0.1.10
 
 - [x] Protection for ordinals
 - [x] Transfer bitcoin refactor
