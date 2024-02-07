@@ -38,7 +38,7 @@ export function generateNewAddress(rootKey: any, network: any, index: number = 0
 
     let path: string;
     if(network === bitcoin.networks.testnet) {
-        path = `m/49'/1'/0'/0/${index}`;
+        path = `m/86'/0'/0'/0/${index}`;
     } else {
         path = `m/86'/0'/0'/0/${index}`;
     }

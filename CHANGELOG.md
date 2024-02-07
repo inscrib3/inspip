@@ -1,3 +1,10 @@
+[next] - 0.1.10
+
+- [x] Protection for ordinals
+- [x] Transfer bitcoin refactor
+- [x] Transfer pipe refactor
+- [x] Testnet improvements
+
 [version] - 0.1.9
 
 - [x] UX & UI improvements
