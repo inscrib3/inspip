@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useApp } from "../app";
 import { transferSats } from "../transfer/transfer-sats";
-import { getNetwork, parseStringToBigInt } from "../bitcoin/helpers";
+import { parseStringToBigInt } from "../bitcoin/helpers";
 
 export type SendSats = {
   dispatch: (address: string, amount: string, fee_rate: string) => Promise<{
