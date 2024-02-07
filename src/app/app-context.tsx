@@ -74,7 +74,7 @@ export type TxsStorage = {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const getUtxos = async (address: string) => {
+const getUtxos = async (address: string, network?: 'mainnet' | 'testnet') => {
   const savedUtxos = localStorage.getItem(`txs_${address}`);
 
   let txs: TxsStorage = {
@@ -93,14 +93,14 @@ const getUtxos = async (address: string) => {
 
     try {
       const res = await fetch(
-        `https://mempool.space/api/address/${address}/txs/chain/${txs.last_txid}`
+        `https://mempool.space/${network === 'testnet' ? 'testnet/' : ''}api/address/${address}/txs/chain/${txs.last_txid}`
       );
       nextTxs = (await res.json()) as Tx[];
       await sleep(2000);
     } catch (e) {
       await sleep(2000);
       const res = await fetch(
-        `https://mempool.space/api/address/${address}/txs/chain/${txs.last_txid}`
+        `https://mempool.space/${network === 'testnet' ? 'testnet/' : ''}api/address/${address}/txs/chain/${txs.last_txid}`
       );
       nextTxs = (await res.json()) as Tx[];
     }
@@ -179,11 +179,11 @@ const getUtxos = async (address: string) => {
   let unconfirmed: Tx[] = [];
 
   try {
-    const data = await fetch(`https://mempool.space/api/address/${address}/txs/mempool`);
+    const data = await fetch(`https://mempool.space/${network === 'testnet' ? 'testnet/' : ''}api/address/${address}/txs/mempool`);
     unconfirmed = (await data.json()) as Tx[];
   } catch (error) {
     await sleep(4000);
-    const data = await fetch(`https://mempool.space/api/address/${address}/txs/mempool`);
+    const data = await fetch(`https://mempool.space/${network === 'testnet' ? 'testnet/' : ''}api/address/${address}/txs/mempool`);
     unconfirmed = (await data.json()) as Tx[];
   }
 
@@ -261,6 +261,7 @@ export interface AppProviderProps {
 // Import the functions you need from the SDKs you need
 import { initializeApp, FirebaseApp } from "firebase/app";
 import { getAnalytics, Analytics } from "firebase/analytics";
+import { constants } from '../constants/constants';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -308,12 +309,12 @@ export const AppProvider = (props: AppProviderProps) => {
         const utxoRes = await fetch(`https://mempool.space/${network === 'testnet' ? 'testnet/' : ''}api/address/${currentAddress}/utxo`);
 
         if (!utxoRes.ok) {
-          satsUtxo = await getUtxos(currentAddress);
+          satsUtxo = await getUtxos(currentAddress, network as 'mainnet' | 'testnet');
         } else {
           satsUtxo = await utxoRes.json();
         }
       } catch (e) {
-        satsUtxo = await getUtxos(currentAddress);
+        satsUtxo = await getUtxos(currentAddress, network as 'mainnet' | 'testnet');
       }
 
       if (satsUtxo.length === 0) {
@@ -331,7 +332,7 @@ export const AppProvider = (props: AppProviderProps) => {
       }
 
       const utxoChunksRes = await Promise.all(utxoChunks.map((chunk) => fetch(`${
-        import.meta.env.VITE_SERVER_HOST || "https://indexer.inspip.com"
+        network === 'mainnet' ? constants.pipe_indexer.main : constants.pipe_indexer.testnet
       }/utxo/search?params=${chunk.join(',')}`)));
 
       const utxoChunksData = await Promise.all(utxoChunksRes.map((res) => res.json()));

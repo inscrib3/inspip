@@ -20,6 +20,7 @@ import { getBitcoinPrice } from "../utils/bitcoin-price";
 import { Transaction, load } from "../hooks/show-transactions.hook";
 import { colors } from "../theme";
 import { AppLayout } from "../components/app-layout";
+import { constants } from "../constants/constants";
 
 const TipContent = ({ message }: { message: string }) => (
   <Box direction="row" align="center" pad={{ right: "xsmall" }}>
@@ -47,7 +48,6 @@ const hexToUrl = (metadata: string, mimeType: string) => {
   const input = metadata.replace(/[^A-Fa-f0-9]/g, "");
 
   if (input.length % 2) {
-    console.log("cleaned hex string length is odd.");
     return;
   }
 
@@ -86,7 +86,7 @@ export const Balances = () => {
           const tickerParts = ticker.split(":");
           const token: IndexerToken = await (
             await fetch(
-              `${import.meta.env.VITE_SERVER_HOST || "https://indexer.inspip.com"}/token/get/${
+              `${app.network === 'mainnet' ? constants.pipe_indexer.main : constants.pipe_indexer.testnet}/token/get/${
                 tickerParts[0]
               }/${tickerParts[1]}`
             )
@@ -100,7 +100,7 @@ export const Balances = () => {
 
       setTokens(tokens);
     })();
-  }, [balances.data]);
+  }, [app.network, balances.data]);
 
   useEffect(() => {
     if (!app.currentAddress) {

@@ -1,6 +1,7 @@
 import { Buffer } from 'buffer';
 import { bitcoin } from './lib/bitcoin-lib';
 import { Address } from '@cmdcode/tapscript';
+import { cleanFloat } from '../utils/clean-float';
 
 export const toXOnly = (pubKey: Buffer) => (pubKey.length === 32 ? pubKey : pubKey.slice(1, 33));
 
@@ -8,6 +9,25 @@ export function getNetwork(network: string) {
     if(network === '' || network === 'mainnet') return bitcoin.networks.bitcoin;
     else if(network === 'testnet') return bitcoin.networks.testnet;
     else throw new Error('Invalid network');
+}
+
+export function stringFromBigInt(_amount: string, mantissaDecimalPoints: number) {
+  const amount = cleanFloat(_amount);
+  if (/[^0-9.]/.test(amount)) {
+    throw new Error("Invalid character in amount");
+  }
+
+  const [, decimalPart = ''] = amount.split('.');
+  const decimalPartLength = decimalPart.length;
+  if (decimalPartLength > mantissaDecimalPoints) {
+      throw new Error(`Amount exceeds ${mantissaDecimalPoints} decimals`);
+  }
+  const amountBigInt = BigInt(amount.replace('.', ''));
+  const mantissa = BigInt(10**mantissaDecimalPoints);
+  const decimals = BigInt(10**decimalPartLength);
+  const result = amountBigInt *  mantissa / decimals;
+
+  return result;
 }
 
 export function parseStringToBigInt(amount: string, mantissaDecimalPoints: number) {

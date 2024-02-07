@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useApp } from "../app";
-import { sendSats } from "../bitcoin/wallet";
-import { getNetwork, parseStringToBigInt } from "../bitcoin/helpers";
+import { transferSats } from "../transfer/transfer-sats";
+import { parseStringToBigInt } from "../bitcoin/helpers";
 
 export type SendSats = {
   dispatch: (address: string, amount: string, fee_rate: string) => Promise<{
@@ -40,23 +40,23 @@ export const useSendSats = (): SendSats => {
       if (loading) return;
       setLoading(true);
 
-      let utxos = await app.fetchUtxos();
-      utxos = utxos.filter((u) => !u.tick && !!u.status.confirmed);
+      try {
+        const res = await transferSats({
+          privateKey: app.account.account.privateKey as Uint8Array,
+          from: app.currentAddress,
+          to: address,
+          amount: parseStringToBigInt(amount, 8).toString(),
+          feerate: fee_rate,
+          network: app.network as "mainnet" | "testnet",
+        });
+  
+        setData(res);
 
-      const data = sendSats(
-        app.account,
-        app.currentAddress,
-        utxos,
-        address,
-        parseStringToBigInt(amount, 8),
-        BigInt(fee_rate),
-        getNetwork(app.network)
-      );
-      
-      setData(data);
-
-      setLoading(false);
-      return data;
+        return res;
+      } catch (e) {
+        setLoading(false);
+        throw e;
+      }
     },
     [app, loading]
   );

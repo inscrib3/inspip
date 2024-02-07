@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useApp } from "../app";
-import { sendTokens } from "../bitcoin/wallet";
-import { getNetwork } from "../bitcoin/helpers";
+import { transferPipe } from "../transfer/transfer-pipe";
+import { stringFromBigInt } from "../bitcoin/helpers";
 
 export type SendTokens = {
   dispatch: (address: string, ticker: string, id: string, amount: string, fee_rate: string) => Promise<{
@@ -52,17 +52,28 @@ export const useSendTokens = (): SendTokens => {
       if (loading) return;
       setLoading(true);
 
-      let utxos = await app.fetchUtxos();
-      utxos = utxos.filter((u) => !!u.status.confirmed);
-
       const deployment = await app.tokens.filter((token) => token.tick === ticker.toLowerCase() && token.id === parseInt(id))[0];
-      const network = getNetwork(app.network);
-      const data = await sendTokens(app.account, app.currentAddress, utxos, address, ticker, id, deployment.dec, amount, fee_rate, network)
 
-      setData(data);
+      try {
+        const res = await transferPipe({
+          privateKey: app.account.account.privateKey as Uint8Array,
+          from: app.currentAddress,
+          to: address,
+          amount: stringFromBigInt(amount, deployment.dec).toString(),
+          feerate: fee_rate,
+          network: app.network as "mainnet" | "testnet",
+          ticker,
+          id,
+          decimals: deployment.dec.toString(),
+        });
+  
+        setData(res);
 
-      setLoading(false);
-      return data;
+        return res;
+      } catch (e) {
+        setLoading(false);
+        throw e;
+      }
     },
     [app, loading]
   );
