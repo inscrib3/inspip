@@ -38,7 +38,7 @@ export const ConfirmTransaction = (): JSX.Element => {
         setError((e as Error).message);
     }
   };
-
+  console.log('wololo',location.state.tx)
   return (
     <Layout showBack>
       <Box height="full" style={{ overflow: "scroll" }}>

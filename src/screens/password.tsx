@@ -62,7 +62,11 @@ export const Password = () => {
     }
 
     setLoading(false);
-
+    if (app.signPsbt.psbt) {
+      console.log('arrivato')
+      navigate(RoutePath.DecodeAndSignPsbt);
+      return;
+    }
     navigate(RoutePath.Balances);
   }
 

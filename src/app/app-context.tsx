@@ -31,6 +31,8 @@ export const AppContext = createContext<{
   setTokens: (tokens: { tick: string, id: number, dec: number }[]) => void,
   utxos: Utxo[],
   fetchUtxos: () => Promise<Utxo[]>,
+  signPsbt: any,
+  setSignPsbt: any
 }>({
   account: {},
   loading: false,
@@ -47,6 +49,8 @@ export const AppContext = createContext<{
   setTokens: () => undefined,
   utxos: [],
   fetchUtxos: async () => [],
+  signPsbt: {},
+  setSignPsbt: () => undefined,
 });
 
 export type Tx = {
@@ -285,6 +289,7 @@ export const AppProvider = (props: AppProviderProps) => {
   const [feerate, setFeerate] = useState(0);
   const [tokens, setTokens] = useState<{ tick: string, id: number, dec: number }[]>([]);
 
+  const [signPsbt, setSignPsbt] = useState({})
   const [utxos, setUtxos] = useState<Utxo[]>([]);
   const loading = useRef(false);
   const [firebase, setFirebase] = useState<FirebaseApp | null>(null);
@@ -418,6 +423,8 @@ export const AppProvider = (props: AppProviderProps) => {
         setTokens,
         utxos,
         fetchUtxos,
+        signPsbt,
+        setSignPsbt,
       }}
     >
       {props.children}

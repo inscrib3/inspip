@@ -12,5 +12,6 @@ export enum RoutePath {
   ConnectWallet = "/connect-wallet",
   SendBTC = "/send-btc",
   Settings = "/settings",
-  SwitchNetwork = "/switch-network"
+  SwitchNetwork = "/switch-network",
+  DecodeAndSignPsbt = "/decode-and-sign-psbt",
 }
