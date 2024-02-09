@@ -28,6 +28,12 @@ export const App = () => {
         broadcast:searchParams.get("broadcast") === 'true' ? true : false,
       })
     }
+    if (searchParams.get("msg")) {
+      app.setSignMessage({
+        msg:searchParams.get("msg"),
+        type:searchParams.get("type"),
+      })
+    }
   },[app, searchParams])
 
   const createWallet = () => navigate(RoutePath.CreateWallet);

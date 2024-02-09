@@ -68,7 +68,25 @@
         }
       };
 
-      window.addEventListener("ReturnSendTokens", eventListener);
+      window.addEventListener("ReturnSignPsbt", eventListener);
+    });
+  };
+
+  window.inspip.signMessage = function (msg, type) {
+    const message = {msg,type};
+    const event = new CustomEvent("SignMessage", {detail: message});
+    window.dispatchEvent(event);
+
+    return new Promise((resolve) => {
+      const eventListener = (event) => {
+        if (event.type === "ReturnSignMessage") {
+          window.removeEventListener("ReturnSignMessage", eventListener);
+          const signature = event.detail.message;
+          resolve(signature);
+        }
+      };
+
+      window.addEventListener("ReturnSignMessage", eventListener);
     });
   };
 })();

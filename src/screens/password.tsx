@@ -67,6 +67,11 @@ export const Password = () => {
       navigate(RoutePath.DecodeAndSignPsbt);
       return;
     }
+    if (app.signMessage.msg) {
+      console.log('arrivato message in password')
+      navigate(RoutePath.SignMessage);
+      return;
+    }
     navigate(RoutePath.Balances);
   }
 

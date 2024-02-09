@@ -14,4 +14,5 @@ export enum RoutePath {
   Settings = "/settings",
   SwitchNetwork = "/switch-network",
   DecodeAndSignPsbt = "/decode-and-sign-psbt",
+  SignMessage = "/sign-message",
 }

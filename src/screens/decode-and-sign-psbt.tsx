@@ -14,7 +14,7 @@ export const DecodeAndSignPsbt = (): JSX.Element => {
     if(!psbtToSign) return;
     try {
       const inputs = psbtToSign.data.inputs;
-      const toSignIndexes = app.signPsbt.toSignInputs.map(el=>el.index);
+      const toSignIndexes = app.signPsbt.toSignInputs.map((el:any)=>el.index);
       const tweakedChildNode = app.account.account.tweak(
         bitcoin.crypto.taggedHash('TapTweak', app.account.internalPubkey),
       );

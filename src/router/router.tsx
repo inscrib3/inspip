@@ -10,6 +10,7 @@ import { ConnectWallet } from "../screens/connect-wallet";
 import { SwitchNetwork } from "../screens/switch-network";
 import { Explore } from "../screens/explore";
 import { DecodeAndSignPsbt } from "../screens/decode-and-sign-psbt";
+import { SignMessage } from "../screens/sign-message";
 
 export const router = createHashRouter([
   {
@@ -67,5 +68,9 @@ export const router = createHashRouter([
   {
     path: RoutePath.DecodeAndSignPsbt,
     element: <DecodeAndSignPsbt />,
+  },
+  {
+    path: RoutePath.SignMessage,
+    element: <SignMessage />,
   }
 ]);
