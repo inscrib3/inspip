@@ -33,7 +33,7 @@ export const useGetBalances = (): GetBalances => {
       0
     );
 
-    for (const utxo of utxos.filter((u) => !!u.tick)) {
+    for (const utxo of utxos.filter((u) => u.protocol === "pipe")) {
       try {
         if (typeof nextData[utxo.tick + ":" + utxo.id] === "undefined") {
           nextData[utxo.tick + ":" + utxo.id] = "0";

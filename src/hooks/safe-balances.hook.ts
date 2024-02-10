@@ -30,13 +30,13 @@ export const useSafeBalances = (): SafeBalances => {
 
     const sumOfSats = utxos.reduce(
       (acc: number, utxo) => {
-        if (utxo.tick || utxo.value < 600) return acc;
+        if (utxo.protocol) return acc;
         return acc + utxo.value;
       },
       0
     );
 
-    for (const utxo of utxos.filter((u) => !!u.tick)) {
+    for (const utxo of utxos.filter((u) => u.protocol === "pipe")) {
       try {
         if (typeof nextData[utxo.tick + ":" + utxo.id] === "undefined") {
           nextData[utxo.tick + ":" + utxo.id] = "0";
@@ -64,14 +64,6 @@ export const useSafeBalances = (): SafeBalances => {
     setLoading(false);
     return nextData;
   }, [app, loading]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      dispatch();
-    }, 1000);
-    const interval = setInterval(dispatch, 10000);
-    return () => clearInterval(interval);
-  }, []);
 
   return {
     dispatch,
