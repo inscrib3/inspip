@@ -63,7 +63,7 @@
       const eventListener = (event) => {
         if (event.type === "ReturnSignPsbt") {
           window.removeEventListener("ReturnSignPsbt", eventListener);
-          const signed = event.detail.message;
+          const signed = event.detail.message.split(';')[1];
           resolve(signed);
         }
       };
@@ -81,7 +81,7 @@
       const eventListener = (event) => {
         if (event.type === "ReturnSignMessage") {
           window.removeEventListener("ReturnSignMessage", eventListener);
-          const signature = event.detail.message;
+          const signature = event.detail.message.split(';')[1];
           resolve(signature);
         }
       };

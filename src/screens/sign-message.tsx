@@ -20,6 +20,8 @@ export const SignMessage = (): JSX.Element => {
       console.log(signature);
       const validity = Verifier.verifySignature(address, app.signMessage.msg, signature as string);
       console.log(validity);
+      chrome.runtime.sendMessage({ message: `ReturnSignMessage;${signature}`});
+      window.close();
     } catch (e) {
         console.log((e as Error));
     }

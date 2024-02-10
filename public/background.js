@@ -70,4 +70,18 @@ chrome.runtime.onMessage.addListener(async (request) => {
         chrome.tabs.sendMessage(tabs[0].id, { message: request.message });
     });
   }
+  if (request.message.includes('ReturnSignPsbt')) {
+    // eslint-disable-next-line no-undef
+    chrome.tabs.query({ active: true }, function(tabs) {
+        // eslint-disable-next-line no-undef
+        chrome.tabs.sendMessage(tabs[0].id, { message: request.message });
+    });
+  }
+  if (request.message.includes('ReturnSignMessage')) {
+    // eslint-disable-next-line no-undef
+    chrome.tabs.query({ active: true }, function(tabs) {
+        // eslint-disable-next-line no-undef
+        chrome.tabs.sendMessage(tabs[0].id, { message: request.message });
+    });
+  }
 });

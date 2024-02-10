@@ -25,7 +25,8 @@ export const DecodeAndSignPsbt = (): JSX.Element => {
         psbtToSign.finalizeInput(i);
       }
       const hex = psbtToSign.toHex();
-      return hex;//TODO returnSignPsbt
+      chrome.runtime.sendMessage({ message: `ReturnSignPsbt;${hex}`});
+      window.close();
     } catch (e) {
         console.log((e as Error));
     }
