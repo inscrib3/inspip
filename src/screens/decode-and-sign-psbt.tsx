@@ -1,58 +1,82 @@
-import { useNavigate } from "react-router-dom";
 import { Layout } from "../components";
 import { Box, Button, Footer, Text } from "grommet";
 import { useApp } from "../app";
 import { useEffect, useState } from "react";
-import * as bitcoin from 'bitcoinjs-lib';
+import * as bitcoin from "bitcoinjs-lib";
 
-export const DecodeAndSignPsbt = (): JSX.Element => {
+export const DecodeAndSignPsbt = () => {
   const app = useApp();
-  const navigate = useNavigate();
   const [psbtToSign, setPsbtToSign] = useState<bitcoin.Psbt>();
+  const [inputsDetails, setInputsDetails] = useState<any>([]);
 
   const onSign = async () => {
-    if(!psbtToSign) return;
+    if (!psbtToSign) return;
     try {
       const inputs = psbtToSign.data.inputs;
-      const toSignIndexes = app.signPsbt.toSignInputs.map((el:any)=>el.index);
-      const tweakedChildNode = app.account.account.tweak(
-        bitcoin.crypto.taggedHash('TapTweak', app.account.internalPubkey),
+      const toSignIndexes = app.signPsbt.toSignInputs.map(
+        (el: any) => el.index
       );
-      for (let i = 0;i < inputs.length;i++) {
-        if (!toSignIndexes.includes(i)) continue
+      const tweakedChildNode = app.account.account.tweak(
+        bitcoin.crypto.taggedHash("TapTweak", app.account.internalPubkey)
+      );
+      for (let i = 0; i < inputs.length; i++) {
+        if (!toSignIndexes.includes(i)) continue;
         psbtToSign.signInput(i, tweakedChildNode);
-        console.log('### sign OK. Psbt:', psbtToSign.toBase64())
         psbtToSign.finalizeInput(i);
       }
       const hex = psbtToSign.toHex();
-      chrome.runtime.sendMessage({ message: `ReturnSignPsbt;${hex}`});
+      chrome.runtime.sendMessage({ message: `ReturnSignPsbt;${hex}` });
       window.close();
     } catch (e) {
-        console.log((e as Error));
+      console.log(e as Error);
     }
   };
 
-  const goBack = () => {
-    navigate(-1);
+  const onClose = () => {
+    () => window.close();
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     if (app.signPsbt.account) {
-      const network = app.signPsbt.account.network === "testnet" ? bitcoin.networks.testnet : bitcoin.networks.bitcoin;
       try {
-      const newPsbt = bitcoin.Psbt.fromBase64(app.signPsbt.psbt, {network});
-      console.log('test NewPsbt result', newPsbt);
-      setPsbtToSign(newPsbt);
-      } catch (error){
-        console.log('signpsbt error: ',error)
+        const newPsbt = bitcoin.Psbt.fromBase64(app.signPsbt.psbt, {
+          network: app.signPsbt.account.startsWith("tb1")
+            ? bitcoin.networks.testnet
+            : bitcoin.networks.bitcoin,
+        });
+        for (const input of newPsbt.data.inputs) {
+          if (!input.witnessUtxo) return;
+          const address = bitcoin.address.fromOutputScript(
+            input.witnessUtxo.script || ""
+          );
+          const value = input.witnessUtxo.value;
+          setInputsDetails((prev: any) => [...prev, { address, value }]);
+          console.log("indirizzo input: ", address, " valore input: ", value);
+        }
+        setPsbtToSign(newPsbt);
+      } catch (error) {
+        console.log("signpsbt error: ", error);
       }
     }
-  },[app.signPsbt.account, app.signPsbt.psbt])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [app.signPsbt.account, app.signPsbt.psbt]);
 
   return (
     <Layout showBack>
       <Box height="full" style={{ overflow: "scroll" }}>
-        <Text>Ciaone</Text>
+        <Text>Inputs</Text>
+        {inputsDetails.map((el: any) => (
+          <>
+            <Box margin={{ top: "small" }} justify="between">
+              <Text>Address</Text>
+              <Text>{el.address}</Text>
+            </Box>
+            <Box margin={{ top: "small" }} justify="between">
+              <Text>Sats</Text>
+              <Text>{el.value.toString()}</Text>
+            </Box>
+          </>
+        ))}
       </Box>
       <Footer pad="small">
         <Box flex>
@@ -61,7 +85,7 @@ export const DecodeAndSignPsbt = (): JSX.Element => {
               secondary
               label="Reject"
               style={{ width: "100%" }}
-              onClick={goBack}
+              onClick={onClose}
             />
             <Button
               secondary

@@ -89,4 +89,22 @@
       window.addEventListener("ReturnSignMessage", eventListener);
     });
   };
+
+  window.inspip.verifyMessage = function (address, msg, signature) {
+    const message = {address, msg, signature};
+    const event = new CustomEvent("VerifyMessage", {detail: message});
+    window.dispatchEvent(event);
+
+    return new Promise((resolve) => {
+      const eventListener = (event) => {
+        if (event.type === "ReturnVerifyMessage") {
+          window.removeEventListener("ReturnVerifyMessage", eventListener);
+          const result = event.detail.message.split(';')[1] === "true" ? true : false;
+          resolve(result);
+        }
+      };
+
+      window.addEventListener("ReturnSignMessage", eventListener);
+    });
+  };
 })();

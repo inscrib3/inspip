@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useApp } from "../app";
 import { cleanFloat } from "../utils/clean-float";
 import { bigIntToString, parseStringToBigInt } from "../bitcoin/helpers";

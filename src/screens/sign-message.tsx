@@ -1,50 +1,49 @@
-import { useNavigate } from "react-router-dom";
 import { Layout } from "../components";
 import { Box, Button, Footer, Text } from "grommet";
 import { useApp } from "../app";
-import { useEffect } from "react";
-import { Signer, Verifier } from 'bip322-js';
-import * as bitcoin from 'bitcoinjs-lib';
+import { Signer, Verifier } from "bip322-js";
+import * as bitcoin from "bitcoinjs-lib";
 
 export const SignMessage = (): JSX.Element => {
   const app = useApp();
-  const navigate = useNavigate();
 
   const onSign = async () => {
     try {
-      console.log('SIGN MESSAGE');
       const privateKey = app.account.account.toWIF();
       const address = app.account.address;
-      console.log('PRIVATEKEY',privateKey,'address',app.account.address)
-      const signature = Signer.sign('cN6dXeJMWtzWj9Nw9f1aEXyahhh1LA2xHn4ecZvPAZBfN69F68k2', address, app.signMessage.msg, bitcoin.networks.testnet);
-      console.log(signature);
-      const validity = Verifier.verifySignature(address, app.signMessage.msg, signature as string);
+      const signature = Signer.sign(
+        privateKey,
+        address,
+        app.signMessage.msg,
+        address.startsWith("tb1") ? bitcoin.networks.testnet : bitcoin.networks.bitcoin,
+      );
+      const validity = Verifier.verifySignature(
+        address,
+        app.signMessage.msg,
+        signature as string
+      );
       console.log(validity);
-      chrome.runtime.sendMessage({ message: `ReturnSignMessage;${signature}`});
+      chrome.runtime.sendMessage({ message: `ReturnSignMessage;${signature}` });
       window.close();
     } catch (e) {
-        console.log((e as Error));
+      console.log(e as Error);
     }
   };
 
-  const goBack = () => {
-    navigate(-1);
+  const onClose = () => {
+    window.close();
   };
-
-  useEffect(()=>{
-    if (app.signMessage.msg) {
-      try {
-      console.log('SignMessageData',app.signMessage)
-      } catch (error){
-        console.log('signmessage error: ',error)
-      }
-    }
-  },[app.signMessage])
 
   return (
     <Layout showBack>
-      <Box height="full" style={{ overflow: "scroll" }}>
-        <Text>SIGN MESSAGE</Text>
+      <Box height="full" style={{ overflow: "scroll" }} align="center">
+        <Text>SIGNATURE REQUEST</Text>
+        <Text textAlign="center">
+          Only sign this message if you fully understand the content and trust
+          the requesting site.
+        </Text>
+        <Text>You are signing</Text>
+        <Text>{app.signMessage.msg}</Text>
       </Box>
       <Footer pad="small">
         <Box flex>
@@ -53,7 +52,7 @@ export const SignMessage = (): JSX.Element => {
               secondary
               label="Reject"
               style={{ width: "100%" }}
-              onClick={goBack}
+              onClick={onClose}
             />
             <Button
               secondary
