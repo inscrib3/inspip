@@ -104,7 +104,7 @@
         }
       };
 
-      window.addEventListener("ReturnSignMessage", eventListener);
+      window.addEventListener("ReturnVerifyMessage", eventListener);
     });
   };
 })();
