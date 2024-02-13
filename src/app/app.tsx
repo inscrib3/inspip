@@ -19,13 +19,11 @@ export const App = () => {
   };
 
   useEffect(()=>{
-    if (searchParams.get("psbt")) {
+    if (searchParams.get("action") === "SignPsbt") {
       app.setSignPsbt({
-        account:JSON.parse(searchParams.get("account") || ""),
         psbt:(searchParams.get("psbt") || "").replace(/\s/g,'+'),
         toSignInputs:(JSON.parse(searchParams.get("toSignInputs") || "")),
         autoFinalized:searchParams.get("autoFinalized") === 'true' ? true : false,
-        broadcast:searchParams.get("broadcast") === 'true' ? true : false,
       })
     }
     if (searchParams.get("action") === "SignMessage") {
@@ -34,9 +32,8 @@ export const App = () => {
         type:searchParams.get("type"),
       })
     }
-    if (searchParams.get("action") === "VerifyMessage") {
-      app.setVerifyMessage({
-        address:searchParams.get("address"),
+    if (searchParams.get("action") === "VerifySign") {
+      app.setVerifySign({
         msg:searchParams.get("msg"),
         signature:(searchParams.get("signature") || "").replace(/\s/g,'+'),
       })

@@ -25,7 +25,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
     // eslint-disable-next-line no-undef
     chrome.windows.create({
       type: 'popup',
-      url: `index.html#?action=SignPsbt&account=${params.account}&psbt=${params.psbt}&toSignInputs=${params.toSignInputs}&autoFinalized=${params.autoFinalized}&broadcast=${params.broadcast}`,
+      url: `index.html#?action=SignPsbt&psbt=${params.psbt}&toSignInputs=${params.toSignInputs}&autoFinalized=${params.autoFinalized}`,
       width: 400,
       height: 600,
     });
@@ -35,17 +35,17 @@ chrome.runtime.onMessage.addListener(async (request) => {
     // eslint-disable-next-line no-undef
     chrome.windows.create({
       type: 'popup',
-      url: `index.html#?action=SignMessage&msg=${params.msg}&type=${params.type}`,
+      url: `index.html#?action=SignMessage&msg=${params.msg}`,
       width: 400,
       height: 600,
     });
   }
-  if (request.message.action === 'VerifyMessage') {
+  if (request.message.action === 'VerifySign') {
     const params = request.message.params;
     // eslint-disable-next-line no-undef
     chrome.windows.create({
       type: 'popup',
-      url: `index.html#?action=VerifyMessage&address=${params.address}&msg=${params.msg}&signature=${params.signature}`,
+      url: `index.html#?action=VerifySign&msg=${params.msg}&signature=${params.signature}`,
       width: 400,
       height: 600,
     });
@@ -94,7 +94,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
         chrome.tabs.sendMessage(tabs[0].id, { message: request.message });
     });
   }
-  if (request.message.includes('ReturnVerifyMessage')) {
+  if (request.message.includes('ReturnVerifySign')) {
     // eslint-disable-next-line no-undef
     chrome.tabs.query({ active: true }, function(tabs) {
         // eslint-disable-next-line no-undef

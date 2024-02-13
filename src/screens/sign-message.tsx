@@ -11,12 +11,12 @@ export const SignMessage = (): JSX.Element => {
   const onSign = async () => {
     try {
       const privateKey = app.account.account.toWIF();
-      const address = app.account.address;
+      const address = app.currentAddress;
       const signature = Signer.sign(
         privateKey,
         address,
         app.signMessage.msg,
-        address.startsWith("tb1") ? bitcoin.networks.testnet : bitcoin.networks.bitcoin,
+        app.network === "testnet" ? bitcoin.networks.testnet : bitcoin.networks.bitcoin,
       );
       const validity = Verifier.verifySignature(
         address,

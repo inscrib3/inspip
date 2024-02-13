@@ -54,8 +54,8 @@
     });
   };
 
-  window.inspip.signPsbt = function (account, psbt, toSignInputs, autoFinalized, broadcast) {
-    const message = {account:JSON.stringify(account), psbt, toSignInputs:JSON.stringify(toSignInputs), autoFinalized:autoFinalized.toString(), broadcast:broadcast.toString()};
+  window.inspip.signPsbt = function (psbt, toSignInputs, autoFinalized) {
+    const message = {psbt, toSignInputs:JSON.stringify(toSignInputs), autoFinalized:autoFinalized.toString()};
     const event = new CustomEvent("SignPsbt", {detail: message});
     window.dispatchEvent(event);
 
@@ -72,8 +72,8 @@
     });
   };
 
-  window.inspip.signMessage = function (msg, type) {
-    const message = {msg,type};
+  window.inspip.signMessage = function (msg) {
+    const message = {msg};
     const event = new CustomEvent("SignMessage", {detail: message});
     window.dispatchEvent(event);
 
@@ -90,21 +90,21 @@
     });
   };
 
-  window.inspip.verifyMessage = function (address, msg, signature) {
-    const message = {address, msg, signature};
-    const event = new CustomEvent("VerifyMessage", {detail: message});
+  window.inspip.verifySign = function (msg, signature) {
+    const message = {msg, signature};
+    const event = new CustomEvent("VerifySign", {detail: message});
     window.dispatchEvent(event);
 
     return new Promise((resolve) => {
       const eventListener = (event) => {
-        if (event.type === "ReturnVerifyMessage") {
-          window.removeEventListener("ReturnVerifyMessage", eventListener);
+        if (event.type === "ReturnVerifySign") {
+          window.removeEventListener("ReturnVerifySign", eventListener);
           const result = event.detail.message.split(';')[1] === "true" ? true : false;
           resolve(result);
         }
       };
 
-      window.addEventListener("ReturnVerifyMessage", eventListener);
+      window.addEventListener("ReturnVerifySign", eventListener);
     });
   };
 })();

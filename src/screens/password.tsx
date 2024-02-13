@@ -70,8 +70,8 @@ export const Password = () => {
       navigate(RoutePath.SignMessage);
       return;
     }
-    if (app.verifyMessage.signature) {
-      navigate(RoutePath.VerifyMessage);
+    if (app.verifySign.signature) {
+      navigate(RoutePath.VerifySign);
       return;
     }
     navigate(RoutePath.Balances);

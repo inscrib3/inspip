@@ -5,18 +5,17 @@ import { Verifier } from "bip322-js";
 import { colors } from "../theme";
 import { useEffect } from "react";
 
-export const VerifyMessage = (): JSX.Element => {
+export const VerifySign = (): JSX.Element => {
   const app = useApp();
 
   const onVerify = async () => {
     try {
       const validity = Verifier.verifySignature(
-        app.verifyMessage.address,
-        app.verifyMessage.msg,
-        app.verifyMessage.signature as string
+        app.currentAddress,
+        app.verifySign.msg,
+        app.verifySign.signature as string
       );
-      console.log(validity);
-      chrome.runtime.sendMessage({ message: `ReturnVerifyMessage;${validity}` });
+      chrome.runtime.sendMessage({ message: `ReturnVerifySign;${validity}` });
       window.close();
     } catch (e) {
       console.log(e as Error);
@@ -28,7 +27,7 @@ export const VerifyMessage = (): JSX.Element => {
   };
 
   useEffect(()=>{
-    console.log(app.verifyMessage);
+    onVerify();
   },[])
 
   return (
@@ -36,10 +35,10 @@ export const VerifyMessage = (): JSX.Element => {
       <Box height="full" style={{ overflow: "scroll" }} align="center">
         <Text>VERIFY MESSAGE</Text>
         <Text textAlign="center">
-          Do you want to verify this message?
+          Verifying the signature for
         </Text>
         <Box background={colors.primary}>
-          <Text>{app.verifyMessage.msg}</Text>
+          <Text>{app.verifySign.msg}</Text>
         </Box>
       </Box>
       <Footer pad="small">
@@ -50,12 +49,6 @@ export const VerifyMessage = (): JSX.Element => {
               label="Reject"
               style={{ width: "100%" }}
               onClick={onClose}
-            />
-            <Button
-              secondary
-              label="Sign"
-              style={{ width: "100%" }}
-              onClick={onVerify}
             />
           </Box>
         </Box>

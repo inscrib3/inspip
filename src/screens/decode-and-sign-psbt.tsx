@@ -39,10 +39,10 @@ export const DecodeAndSignPsbt = () => {
   };
 
   useEffect(() => {
-    if (app.signPsbt.account) {
+    if (app.signPsbt.psbt) {
       try {
         const newPsbt = bitcoin.Psbt.fromBase64(app.signPsbt.psbt, {
-          network: app.signPsbt.account.startsWith("tb1")
+          network: app.network === "testnet"
             ? bitcoin.networks.testnet
             : bitcoin.networks.bitcoin,
         });
@@ -61,7 +61,7 @@ export const DecodeAndSignPsbt = () => {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [app.signPsbt.account, app.signPsbt.psbt]);
+  }, [app.signPsbt.psbt]);
 
   return (
     <Layout>

@@ -50,11 +50,11 @@ window.addEventListener('ConnectWallet', function (event) {
     function () {})
 })
 
-window.addEventListener('VerifyMessage', function (event) {
+window.addEventListener('VerifySign', function (event) {
   // eslint-disable-next-line no-undef
   chrome.runtime.sendMessage(
     {
-      message: {action:'VerifyMessage',params:event.detail},
+      message: {action:'VerifySign',params:event.detail},
     },
     function () {})
 })
@@ -123,8 +123,8 @@ chrome.runtime.onMessage.addListener(
 // eslint-disable-next-line no-undef
 chrome.runtime.onMessage.addListener(
   function(request) {
-    if(request.message.includes("ReturnVerifyMessage")){
-      const customEvent = new CustomEvent("ReturnVerifyMessage", {
+    if(request.message.includes("ReturnVerifySign")){
+      const customEvent = new CustomEvent("ReturnVerifySign", {
         detail: { message: request.message }
       });
       window.dispatchEvent(customEvent);
