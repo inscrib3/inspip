@@ -1,30 +1,22 @@
 import { Layout } from "../components";
 import { Box, Button, Footer, Text } from "grommet";
 import { useApp } from "../app";
-import { Signer, Verifier } from "bip322-js";
-import * as bitcoin from "bitcoinjs-lib";
+import { Verifier } from "bip322-js";
 import { colors } from "../theme";
+import { useEffect } from "react";
 
-export const SignMessage = (): JSX.Element => {
+export const VerifyMessage = (): JSX.Element => {
   const app = useApp();
 
-  const onSign = async () => {
+  const onVerify = async () => {
     try {
-      const privateKey = app.account.account.toWIF();
-      const address = app.account.address;
-      const signature = Signer.sign(
-        privateKey,
-        address,
-        app.signMessage.msg,
-        address.startsWith("tb1") ? bitcoin.networks.testnet : bitcoin.networks.bitcoin,
-      );
       const validity = Verifier.verifySignature(
-        address,
-        app.signMessage.msg,
-        signature as string
+        app.verifyMessage.address,
+        app.verifyMessage.msg,
+        app.verifyMessage.signature as string
       );
       console.log(validity);
-      chrome.runtime.sendMessage({ message: `ReturnSignMessage;${signature}` });
+      chrome.runtime.sendMessage({ message: `ReturnVerifyMessage;${validity}` });
       window.close();
     } catch (e) {
       console.log(e as Error);
@@ -35,17 +27,19 @@ export const SignMessage = (): JSX.Element => {
     window.close();
   };
 
+  useEffect(()=>{
+    console.log(app.verifyMessage);
+  },[])
+
   return (
     <Layout>
       <Box height="full" style={{ overflow: "scroll" }} align="center">
-        <Text>SIGNATURE REQUEST</Text>
+        <Text>VERIFY MESSAGE</Text>
         <Text textAlign="center">
-          Only sign this message if you fully understand the content and trust
-          the requesting site.
+          Do you want to verify this message?
         </Text>
-        <Text>You are signing</Text>
         <Box background={colors.primary}>
-          <Text>{app.signMessage.msg}</Text>
+          <Text>{app.verifyMessage.msg}</Text>
         </Box>
       </Box>
       <Footer pad="small">
@@ -61,7 +55,7 @@ export const SignMessage = (): JSX.Element => {
               secondary
               label="Sign"
               style={{ width: "100%" }}
-              onClick={onSign}
+              onClick={onVerify}
             />
           </Box>
         </Box>

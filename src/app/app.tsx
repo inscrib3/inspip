@@ -28,10 +28,17 @@ export const App = () => {
         broadcast:searchParams.get("broadcast") === 'true' ? true : false,
       })
     }
-    if (searchParams.get("msg")) {
+    if (searchParams.get("action") === "SignMessage") {
       app.setSignMessage({
         msg:searchParams.get("msg"),
         type:searchParams.get("type"),
+      })
+    }
+    if (searchParams.get("action") === "VerifyMessage") {
+      app.setVerifyMessage({
+        address:searchParams.get("address"),
+        msg:searchParams.get("msg"),
+        signature:(searchParams.get("signature") || "").replace(/\s/g,'+'),
       })
     }
   },[app, searchParams])

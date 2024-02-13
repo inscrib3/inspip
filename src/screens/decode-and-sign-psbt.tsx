@@ -1,6 +1,8 @@
 import { Layout } from "../components";
-import { Box, Button, Footer, Text } from "grommet";
+import { Accordion, AccordionPanel, Box, Button, Footer, Text } from "grommet";
 import { useApp } from "../app";
+import { Address } from "@cmdcode/tapscript";
+import { truncateInMiddle } from "../utils/truncate-in-middle";
 import { useEffect, useState } from "react";
 import * as bitcoin from "bitcoinjs-lib";
 
@@ -33,7 +35,7 @@ export const DecodeAndSignPsbt = () => {
   };
 
   const onClose = () => {
-    () => window.close();
+    window.close();
   };
 
   useEffect(() => {
@@ -46,12 +48,12 @@ export const DecodeAndSignPsbt = () => {
         });
         for (const input of newPsbt.data.inputs) {
           if (!input.witnessUtxo) return;
-          const address = bitcoin.address.fromOutputScript(
-            input.witnessUtxo.script || ""
-          );
+          const address = truncateInMiddle(
+            Address.fromScriptPubKey(input.witnessUtxo.script),
+            20
+          )
           const value = input.witnessUtxo.value;
           setInputsDetails((prev: any) => [...prev, { address, value }]);
-          console.log("indirizzo input: ", address, " valore input: ", value);
         }
         setPsbtToSign(newPsbt);
       } catch (error) {
@@ -62,21 +64,27 @@ export const DecodeAndSignPsbt = () => {
   }, [app.signPsbt.account, app.signPsbt.psbt]);
 
   return (
-    <Layout showBack>
+    <Layout>
       <Box height="full" style={{ overflow: "scroll" }}>
-        <Text>Inputs</Text>
-        {inputsDetails.map((el: any) => (
-          <>
-            <Box margin={{ top: "small" }} justify="between">
-              <Text>Address</Text>
-              <Text>{el.address}</Text>
+        <Accordion>
+          <AccordionPanel
+            label={<Text margin={{ vertical: "small" }}>Inputs</Text>}
+          >
+            <Box pad="small" background="background-contrast">
+              {inputsDetails.map((el: any) => (
+                <Box
+                  justify="between"
+                  margin={{ vertical: "small" }}
+                >
+                  <Text>
+                    {el.address}
+                  </Text>
+                  <Text weight="bold">{el.value} sats</Text>
+                </Box>
+              ))}
             </Box>
-            <Box margin={{ top: "small" }} justify="between">
-              <Text>Sats</Text>
-              <Text>{el.value.toString()}</Text>
-            </Box>
-          </>
-        ))}
+          </AccordionPanel>
+        </Accordion>
       </Box>
       <Footer pad="small">
         <Box flex>

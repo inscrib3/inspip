@@ -11,6 +11,7 @@ import { SwitchNetwork } from "../screens/switch-network";
 import { Explore } from "../screens/explore";
 import { DecodeAndSignPsbt } from "../screens/decode-and-sign-psbt";
 import { SignMessage } from "../screens/sign-message";
+import { VerifyMessage } from "../screens/verify-message";
 
 export const router = createHashRouter([
   {
@@ -72,5 +73,9 @@ export const router = createHashRouter([
   {
     path: RoutePath.SignMessage,
     element: <SignMessage />,
+  },
+  {
+    path: RoutePath.VerifyMessage,
+    element: <VerifyMessage />,
   }
 ]);

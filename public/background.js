@@ -40,6 +40,16 @@ chrome.runtime.onMessage.addListener(async (request) => {
       height: 600,
     });
   }
+  if (request.message.action === 'VerifyMessage') {
+    const params = request.message.params;
+    // eslint-disable-next-line no-undef
+    chrome.windows.create({
+      type: 'popup',
+      url: `index.html#?action=VerifyMessage&address=${params.address}&msg=${params.msg}&signature=${params.signature}`,
+      width: 400,
+      height: 600,
+    });
+  }
   if (request.message.action === 'ConnectWallet') {
     // eslint-disable-next-line no-undef
     chrome.windows.create({

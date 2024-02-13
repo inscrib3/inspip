@@ -35,7 +35,9 @@ export const AppContext = createContext<{
   signPsbt: any,
   setSignPsbt: any,
   signMessage: any,
-  setSignMessage: any
+  setSignMessage: any,
+  verifyMessage: any,
+  setVerifyMessage: any
 }>({
   account: {},
   loading: false,
@@ -56,6 +58,8 @@ export const AppContext = createContext<{
   setSignPsbt: () => undefined,
   signMessage: {},
   setSignMessage: () => undefined,
+  verifyMessage: {},
+  setVerifyMessage: () => undefined,
 });
 
 export type Tx = {
@@ -139,8 +143,9 @@ export const AppProvider = (props: AppProviderProps) => {
   const [feerate, setFeerate] = useState(0);
   const [tokens, setTokens] = useState<{ tick: string, id: number, dec: number }[]>([]);
 
-  const [signPsbt, setSignPsbt] = useState({})
-  const [signMessage, setSignMessage] = useState({})
+  const [signPsbt, setSignPsbt] = useState({});
+  const [signMessage, setSignMessage] = useState({});
+  const [verifyMessage, setVerifyMessage] = useState({});
   const [utxos, setUtxos] = useState<Utxo[]>([]);
   const loading = useRef(false);
   const [firebase, setFirebase] = useState<FirebaseApp | null>(null);
@@ -270,6 +275,8 @@ export const AppProvider = (props: AppProviderProps) => {
         setSignPsbt,
         signMessage,
         setSignMessage,
+        verifyMessage,
+        setVerifyMessage,
       }}
     >
       {props.children}

@@ -63,13 +63,15 @@ export const Password = () => {
 
     setLoading(false);
     if (app.signPsbt.psbt) {
-      console.log('arrivato')
       navigate(RoutePath.DecodeAndSignPsbt);
       return;
     }
     if (app.signMessage.msg) {
-      console.log('arrivato message in password')
       navigate(RoutePath.SignMessage);
+      return;
+    }
+    if (app.verifyMessage.signature) {
+      navigate(RoutePath.VerifyMessage);
       return;
     }
     navigate(RoutePath.Balances);
