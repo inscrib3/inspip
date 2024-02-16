@@ -27,14 +27,17 @@ export const DecodeAndSignPsbt = () => {
         psbtToSign.finalizeInput(i);
       }
       const hex = psbtToSign.toHex();
-      chrome.runtime.sendMessage({ message: `ReturnSignPsbt;${hex}` });
+      await chrome.runtime.sendMessage({ message: `ReturnSignPsbt;${hex}` });
       window.close();
     } catch (e) {
       console.log(e as Error);
+      await chrome.runtime.sendMessage({ message: `ReturnErrorOnSignPsbt` });
+      window.close();
     }
   };
 
-  const onClose = () => {
+  const onClose = async () => {
+    await chrome.runtime.sendMessage({ message: `ClientRejectSignPsbt` });
     window.close();
   };
 
@@ -57,7 +60,9 @@ export const DecodeAndSignPsbt = () => {
         }
         setPsbtToSign(newPsbt);
       } catch (error) {
-        console.log("signpsbt error: ", error);
+        console.log(error as Error);
+        chrome.runtime.sendMessage({ message: `ReturnErrorOnSignPsbt` });
+        window.close();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

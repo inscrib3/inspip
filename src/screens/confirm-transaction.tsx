@@ -27,10 +27,8 @@ export const ConfirmTransaction = (): JSX.Element => {
             save({txid, from: app.currentAddress, to: location.state.tx.to, amount: (parseInt(location.state.tx.sats_amount) / Math.pow(10, 8)).toString(), timestamp: Date.now(), confirmed: false });
         }
         if(location.state.fromWeb){
-          chrome.runtime.sendMessage({ message: `ReturnSendBitcoin;${txid}`});
-          setTimeout(()=>{
-            window.close();
-          },1000)
+          await chrome.runtime.sendMessage({ message: `ReturnSendBitcoin;${txid}`});
+          window.close();
         } else {
           navigate(-2);
         }
@@ -38,7 +36,7 @@ export const ConfirmTransaction = (): JSX.Element => {
         setError((e as Error).message);
     }
   };
-  console.log('wololo',location.state.tx)
+
   return (
     <Layout showBack>
       <Box height="full" style={{ overflow: "scroll" }}>

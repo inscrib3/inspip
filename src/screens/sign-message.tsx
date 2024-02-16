@@ -24,14 +24,17 @@ export const SignMessage = (): JSX.Element => {
         signature as string
       );
       console.log(validity);
-      chrome.runtime.sendMessage({ message: `ReturnSignMessage;${signature}` });
+      await chrome.runtime.sendMessage({ message: `ReturnSignMessage;${signature}` });
       window.close();
     } catch (e) {
       console.log(e as Error);
+      await chrome.runtime.sendMessage({ message: `ReturnErrorOnSignMessage` });
+      window.close();
     }
   };
 
-  const onClose = () => {
+  const onClose = async () => {
+    await chrome.runtime.sendMessage({ message: `ClientRejectSignMessage` });
     window.close();
   };
 

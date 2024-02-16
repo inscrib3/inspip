@@ -15,10 +15,12 @@ export const VerifySign = (): JSX.Element => {
         app.verifySign.msg,
         app.verifySign.signature as string
       );
-      chrome.runtime.sendMessage({ message: `ReturnVerifySign;${validity}` });
+      await chrome.runtime.sendMessage({ message: `ReturnVerifySign;${validity}` });
       window.close();
     } catch (e) {
       console.log(e as Error);
+      await chrome.runtime.sendMessage({ message: `ReturnErrorOnVerifySign` });
+      window.close();
     }
   };
 

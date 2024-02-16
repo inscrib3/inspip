@@ -75,6 +75,19 @@ chrome.runtime.onMessage.addListener(
 // eslint-disable-next-line no-undef
 chrome.runtime.onMessage.addListener(
   function(request) {
+    // Handle the message from background.js
+    if(request.message.includes("ClientRejectConnectWalletInfo")){
+      const customEvent = new CustomEvent("ClientRejectConnectWalletInfo", {
+        detail: { message: request.message }
+      });
+      window.dispatchEvent(customEvent);
+    }
+  }
+);
+
+// eslint-disable-next-line no-undef
+chrome.runtime.onMessage.addListener(
+  function(request) {
     if(request.message.includes("ReturnSendBitcoin")){
       const customEvent = new CustomEvent("ReturnSendBitcoin", {
         detail: { message: request.message }
@@ -111,6 +124,30 @@ chrome.runtime.onMessage.addListener(
 // eslint-disable-next-line no-undef
 chrome.runtime.onMessage.addListener(
   function(request) {
+    if(request.message.includes("ReturnErrorOnSignPsbt")){
+      const customEvent = new CustomEvent("ReturnErrorOnSignPsbt", {
+        detail: { message: request.message }
+      });
+      window.dispatchEvent(customEvent);
+    }
+  }
+);
+
+// eslint-disable-next-line no-undef
+chrome.runtime.onMessage.addListener(
+  function(request) {
+    if(request.message.includes("ClientRejectSignPsbt")){
+      const customEvent = new CustomEvent("ClientRejectSignPsbt", {
+        detail: { message: request.message }
+      });
+      window.dispatchEvent(customEvent);
+    }
+  }
+);
+
+// eslint-disable-next-line no-undef
+chrome.runtime.onMessage.addListener(
+  function(request) {
     if(request.message.includes("ReturnSignMessage")){
       const customEvent = new CustomEvent("ReturnSignMessage", {
         detail: { message: request.message }
@@ -123,8 +160,44 @@ chrome.runtime.onMessage.addListener(
 // eslint-disable-next-line no-undef
 chrome.runtime.onMessage.addListener(
   function(request) {
+    if(request.message.includes("ReturnErrorOnSignMessage")){
+      const customEvent = new CustomEvent("ReturnErrorOnSignMessage", {
+        detail: { message: request.message }
+      });
+      window.dispatchEvent(customEvent);
+    }
+  }
+);
+
+// eslint-disable-next-line no-undef
+chrome.runtime.onMessage.addListener(
+  function(request) {
+    if(request.message.includes("ClientRejectSignMessage")){
+      const customEvent = new CustomEvent("ClientRejectSignMessage", {
+        detail: { message: request.message }
+      });
+      window.dispatchEvent(customEvent);
+    }
+  }
+);
+
+// eslint-disable-next-line no-undef
+chrome.runtime.onMessage.addListener(
+  function(request) {
     if(request.message.includes("ReturnVerifySign")){
       const customEvent = new CustomEvent("ReturnVerifySign", {
+        detail: { message: request.message }
+      });
+      window.dispatchEvent(customEvent);
+    }
+  }
+);
+
+// eslint-disable-next-line no-undef
+chrome.runtime.onMessage.addListener(
+  function(request) {
+    if(request.message.includes("ReturnErrorOnVerifySign")){
+      const customEvent = new CustomEvent("ReturnErrorOnVerifySign", {
         detail: { message: request.message }
       });
       window.dispatchEvent(customEvent);
