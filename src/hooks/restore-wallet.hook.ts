@@ -22,13 +22,15 @@ export const useRestoreWallet = (): RestoreWallet => {
 
       setLoading(true);
 
-      let wallet;
+      const wallet = importWallet(mnemonic, getNetwork(app.network));
+
+      /*let wallet;
 
       if (bip39.validateMnemonic(mnemonic)) {
         wallet = importWallet(mnemonic, getNetwork(app.network));
       } else {
         wallet = importWalletFromWif(mnemonic, getNetwork(app.network));
-      }
+      }*/
 
       const address = generateNewAddress(wallet.rootKey, getNetwork(app.network), 0);
       saveWallet(wallet.mnemonic, app.network, address.address, [0], password);

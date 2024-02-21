@@ -38,7 +38,14 @@ export const Password = () => {
         throw new Error("Invalid password");
       }
 
-      if (bip39.validateMnemonic(wallet.mnemonic)) {
+      const nextAccount = importWallet(wallet.mnemonic, getNetwork(wallet.network), wallet.addressIndex);
+
+      app.setAccount(nextAccount);
+      app.setNetwork(wallet.network);
+      app.setCurrentAddress(nextAccount.address, wallet.addressIndex)
+      app.setAddresses(wallet.addresses);
+
+      /*if (bip39.validateMnemonic(wallet.mnemonic)) {
         const nextAccount = importWallet(wallet.mnemonic, getNetwork(wallet.network), wallet.addressIndex);
 
         app.setAccount(nextAccount);
@@ -52,7 +59,7 @@ export const Password = () => {
         app.setNetwork(wallet.network);
         app.setCurrentAddress(nextAccount.address, wallet.addressIndex)
         app.setAddresses(wallet.addresses);
-      }
+      }*/
     } catch(e) {
       setErrors({
         error: (e as Error).message,
