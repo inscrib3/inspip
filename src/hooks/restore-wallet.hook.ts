@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
-import { generateNewAddress, importWallet, importWalletFromWif } from "../bitcoin/wallet";
+import { generateNewAddress, importWallet } from "../bitcoin/wallet";
 import { saveWallet } from "../bitcoin/wallet-storage";
-import * as bip39 from 'bip39';
 import { useApp } from "../app";
 import { getNetwork } from "../bitcoin/helpers";
 
