@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useApp } from "../app";
 import { cleanFloat } from "../utils/clean-float";
 import { bigIntToString, parseStringToBigInt } from "../bitcoin/helpers";
+import { getUnspents } from "../transfer/get-unspents";
 
 export type SafeBalances = {
   dispatch: () => Promise<{ [key: string]: string } | undefined>;
@@ -24,19 +25,12 @@ export const useSafeBalances = (): SafeBalances => {
       [key: string]: string;
     } = {};
 
-    let utxos = await app.fetchUtxos();
+    let utxos = await app.lightFetchUtxos();
+    utxos = utxos.filter((u:any) => u.status.confirmed);
 
-    utxos = utxos.filter((u) => u.status.confirmed);
+    const sats = ((await getUnspents({network:app.network as "mainnet" | "testnet",cursor:null,address:app.currentAddress})).balance)/Math.pow(10,8);
 
-    const sumOfSats = utxos.reduce(
-      (acc: number, utxo) => {
-        if (utxo.protocol) return acc;
-        return acc + utxo.value;
-      },
-      0
-    );
-
-    for (const utxo of utxos.filter((u) => u.protocol === "pipe")) {
+    for (const utxo of utxos.filter((u:any) => u.protocol === "pipe")) {
       try {
         if (typeof nextData[utxo.tick + ":" + utxo.id] === "undefined") {
           nextData[utxo.tick + ":" + utxo.id] = "0";
@@ -58,7 +52,9 @@ export const useSafeBalances = (): SafeBalances => {
       }
     }
 
-    nextData["btc"] = cleanFloat(bigIntToString(BigInt(sumOfSats), 8));
+    //nextData["ordinals"] = utxos.filter((u:any) => u.protocol === "ordinals").length;
+
+    nextData["btc"] = sats.toString();
 
     setData(nextData);
     setLoading(false);

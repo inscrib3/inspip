@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useApp } from "../app";
 import { bigIntToString, parseStringToBigInt } from "../bitcoin/helpers";
 import { cleanFloat } from "../utils/clean-float";
+import { getUnspents } from "../transfer/get-unspents";
 
 export type GetBalances = {
   dispatch: () => Promise<{ [key: string]: string } | undefined>;
@@ -24,16 +25,11 @@ export const useGetBalances = (): GetBalances => {
       [key: string]: string;
     } = {};
 
-    const utxos = await app.fetchUtxos();
+    const utxos = await app.lightFetchUtxos();
 
-    const sumOfSats = utxos.reduce(
-      (acc: number, utxo) => {
-        return acc + utxo.value;
-      },
-      0
-    );
+    const sats = ((await getUnspents({network:app.network as "mainnet" | "testnet",cursor:null,address:app.currentAddress})).balance)/Math.pow(10,8);
 
-    for (const utxo of utxos.filter((u) => u.protocol === "pipe")) {
+    for (const utxo of utxos.filter((u:any) => u.protocol === "pipe")) {
       try {
         if (typeof nextData[utxo.tick + ":" + utxo.id] === "undefined") {
           nextData[utxo.tick + ":" + utxo.id] = "0";
@@ -55,7 +51,9 @@ export const useGetBalances = (): GetBalances => {
       }
     }
 
-    nextData["btc"] = cleanFloat(bigIntToString(BigInt(sumOfSats), 8));
+    //nextData["ordinals"] = utxos.filter((u:any) => u.protocol === "ordinals").length;
+
+    nextData["btc"] = sats.toString();
 
     setData(nextData);
     setLoading(false);

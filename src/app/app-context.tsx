@@ -32,6 +32,7 @@ export const AppContext = createContext<{
   setTokens: (tokens: { tick: string, id: number, dec: number }[]) => void,
   utxos: Utxo[],
   fetchUtxos: () => Promise<Utxo[]>,
+  lightFetchUtxos: () => Promise<any>,
   signPsbt: any,
   setSignPsbt: any,
   signMessage: any,
@@ -54,6 +55,7 @@ export const AppContext = createContext<{
   setTokens: () => undefined,
   utxos: [],
   fetchUtxos: async () => [],
+  lightFetchUtxos: async () => [],
   signPsbt: {},
   setSignPsbt: () => undefined,
   signMessage: {},
@@ -234,6 +236,44 @@ export const AppProvider = (props: AppProviderProps) => {
     return nextUtxos;
   }, [currentAddress, network]);
 
+  const lightFetchUtxos = useCallback(async (): Promise<any> => {
+    if (loading.current || currentAddress === '') return [];
+
+    loading.current = true;
+
+    const pipeUnspents = await selectAllPipeUnspents({
+      network: network as "mainnet" | "testnet",
+      address: currentAddress,
+    });
+
+    const pipeUnspentFormatted = pipeUnspents.map((pipeUnspent) => {
+      return {
+        protocol: "pipe",
+        tick: pipeUnspent.ticker,
+        id: pipeUnspent.id,
+        dec: pipeUnspent.decimals,
+        amt: pipeUnspent.amount,
+      };
+    });
+  
+    const ordinalsUnspents = await selectAllOrdinalsUnspents({
+      network: network as "mainnet" | "testnet",
+      address: currentAddress,
+    });
+
+    const ordinalsUnspentFormatted = ordinalsUnspents.map(() => {
+      return {
+        protocol: "ordinals",
+        status: {
+          confirmed: true,
+        },
+      };
+    });
+
+    loading.current = false;
+    return [...pipeUnspentFormatted,...ordinalsUnspentFormatted];
+  }, [currentAddress, network]);
+
   useEffect(() => {
     fetchUtxos();
   }, [fetchUtxos]);
@@ -271,6 +311,7 @@ export const AppProvider = (props: AppProviderProps) => {
         setTokens,
         utxos,
         fetchUtxos,
+        lightFetchUtxos,
         signPsbt,
         setSignPsbt,
         signMessage,
