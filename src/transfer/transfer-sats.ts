@@ -31,6 +31,9 @@ export const transferSats = async ({
     network,
     address: from,
   });
+  
+  const spentsStr = localStorage.getItem("currSpents") || "[]";
+  const spents = JSON.parse(spentsStr);
 
   const exclude = [
     ...pipeUnspents,
@@ -40,7 +43,8 @@ export const transferSats = async ({
         txId: output[0],
         vout: parseInt(output[1]),
       };
-    })
+    }),
+    ...spents,
   ];
 
   let selectUnspentsRes;

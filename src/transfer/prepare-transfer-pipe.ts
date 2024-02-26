@@ -70,6 +70,11 @@ export const prepareTransferPipe = ({
         scriptPubKey: addressToScriptPubKey(from, network),
       },
     });
+    
+    const currSpentsStr = localStorage.getItem("currSpents");
+    const currSpents = JSON.parse(currSpentsStr || "[]");
+    currSpents.push({txid: unspent.tx_hash,vout: unspent.tx_output_n});
+    localStorage.setItem("currSpents", JSON.stringify(currSpents));
 
     total += BigInt(unspent.value);
   }

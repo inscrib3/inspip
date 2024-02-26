@@ -61,6 +61,9 @@ export const transferPipe = async (params: TransferPipeParams) => {
     address: from,
   });
 
+  const spentsStr = localStorage.getItem("currSpents") || "[]";
+  const spents = JSON.parse(spentsStr);
+
   const exclude = [
     ...pipeUnspents,
     ...ordinalsUnspents.map((ordinals) => {
@@ -69,7 +72,8 @@ export const transferPipe = async (params: TransferPipeParams) => {
         txId: output[0],
         vout: parseInt(output[1]),
       };
-    })
+    }),
+    ...spents,
   ];
 
   let selectUnspentsRes;
