@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RoutePath } from "../router";
 import { useApp } from "../app";
-import { importWallet } from "../bitcoin/wallet";
+import { importWallet, importWalletFromWif } from "../bitcoin/wallet";
 import { loadWallet } from "../bitcoin/wallet-storage";
 import { ResetStorageModal } from "./modals/reset-storage";
 import { getPasswordFromSettings, savePasswordInSettings } from "../app/settings";
@@ -37,14 +37,8 @@ export const Password = () => {
         throw new Error("Invalid password");
       }
 
-      const nextAccount = importWallet(wallet.mnemonic, getNetwork(wallet.network), wallet.addressIndex);
-
-      app.setAccount(nextAccount);
-      app.setNetwork(wallet.network);
-      app.setCurrentAddress(nextAccount.address, wallet.addressIndex)
-      app.setAddresses(wallet.addresses);
-
-      /*if (bip39.validateMnemonic(wallet.mnemonic)) {
+      const formattedMnemonic = wallet.mnemonic?.split(' ').filter((el:any)=>el !== '');
+      if (formattedMnemonic) {
         const nextAccount = importWallet(wallet.mnemonic, getNetwork(wallet.network), wallet.addressIndex);
 
         app.setAccount(nextAccount);
@@ -58,7 +52,7 @@ export const Password = () => {
         app.setNetwork(wallet.network);
         app.setCurrentAddress(nextAccount.address, wallet.addressIndex)
         app.setAddresses(wallet.addresses);
-      }*/
+      }
     } catch(e) {
       setErrors({
         error: (e as Error).message,
