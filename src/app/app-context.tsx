@@ -30,9 +30,7 @@ export const AppContext = createContext<{
   setFeerate: (feerate: number) => void,
   tokens: { tick: string, id: number, dec: number }[],
   setTokens: (tokens: { tick: string, id: number, dec: number }[]) => void,
-  utxos: Utxo[],
-  fetchUtxos: () => Promise<Utxo[]>,
-  lightFetchUtxos: () => Promise<any>,
+  fetchUtxos: () => Promise<any>,
   signPsbt: any,
   setSignPsbt: any,
   signMessage: any,
@@ -53,9 +51,7 @@ export const AppContext = createContext<{
   setFeerate: () => undefined,
   tokens: [],
   setTokens: () => undefined,
-  utxos: [],
   fetchUtxos: async () => [],
-  lightFetchUtxos: async () => [],
   signPsbt: {},
   setSignPsbt: () => undefined,
   signMessage: {},
@@ -119,7 +115,6 @@ export interface AppProviderProps {
 // Import the functions you need from the SDKs you need
 import { initializeApp, FirebaseApp } from "firebase/app";
 import { getAnalytics, Analytics } from "firebase/analytics";
-import { selectAllUnspents } from '../transfer/select-all-unspents';
 import { selectAllOrdinalsUnspents } from '../transfer/select-all-ordinals-unspents';
 import { selectAllPipeUnspents } from '../transfer/select-all-pipe-unspents';
 // TODO: Add SDKs for Firebase products that you want to use
@@ -148,7 +143,6 @@ export const AppProvider = (props: AppProviderProps) => {
   const [signPsbt, setSignPsbt] = useState({});
   const [signMessage, setSignMessage] = useState({});
   const [verifySign, setVerifySign] = useState({});
-  const [utxos, setUtxos] = useState<Utxo[]>([]);
   const loading = useRef(false);
   const [firebase, setFirebase] = useState<FirebaseApp | null>(null);
   const [, setAnalytics] = useState<Analytics | null>(null);
@@ -160,83 +154,28 @@ export const AppProvider = (props: AppProviderProps) => {
     setFirebase(nextFirebase);
   }, [firebase]);
 
-  const fetchUtxos = useCallback(async (): Promise<Utxo[]> => {
-    if (loading.current || currentAddress === '') return [];
+  interface TickerData {
+    tick: string;
+    id: number;
+    dec: number;
+  }
 
-    loading.current = true;
+  const getUniqueTickers = (data: any) : TickerData[] =>{
+    const uniqueTickers = data.reduce((acc:any, curr:any) => {
+    const exists = acc.find((item:{
+      tick: string,
+      id: number,
+      dec: number,
+    }) => item.tick === curr.tick && item.id === curr.id && item.dec === curr.dec);
+    if (!exists) {
+      acc.push(curr);
+    }
+    return acc;
+  }, []);
+  return uniqueTickers;
+}
 
-    const pipeUnspents = await selectAllPipeUnspents({
-      network: network as "mainnet" | "testnet",
-      address: currentAddress,
-    });
-
-    const pipeUnspentKeys = pipeUnspents.map((unspent) => unspent.txId + ':' + unspent.vout);
-  
-    const ordinalsUnspents = await selectAllOrdinalsUnspents({
-      network: network as "mainnet" | "testnet",
-      address: currentAddress,
-    });
-
-    const ordinalsUnspentKeys = ordinalsUnspents.map((unspent) => unspent.output);
-
-    const unspents = await selectAllUnspents({
-      network: network as "mainnet" | "testnet",
-      address: currentAddress,
-    });
-
-
-    const nextUtxos: Utxo[] = unspents.map((unspent) => {
-      const pipeUnspentIndex = pipeUnspentKeys.indexOf(unspent.tx_hash + ':' + unspent.tx_output_n);
-
-      if (pipeUnspentIndex !== -1) {
-        const pipeUnspent = pipeUnspents[pipeUnspentIndex];
-        return {
-          protocol: "pipe",
-          txid: unspent.tx_hash,
-          status: {
-            confirmed: true,
-          },
-          vout: unspent.tx_output_n,
-          value: unspent.value,
-          tick: pipeUnspent.ticker,
-          id: pipeUnspent.id,
-          dec: pipeUnspent.decimals,
-          amt: pipeUnspent.amount,
-        } as Utxo;
-      }
-
-      const ordinalsUnspentIndex = ordinalsUnspentKeys.indexOf(unspent.tx_hash + ':' + unspent.tx_output_n);
-
-      if (ordinalsUnspentIndex !== -1) {
-        // const ordinalsUnspent = ordinalsUnspents[ordinalsUnspentIndex];
-        return {
-          protocol: "ordinals",
-          txid: unspent.tx_hash,
-          status: {
-            confirmed: true,
-          },
-          vout: unspent.tx_output_n,
-          value: unspent.value,
-        };
-      }
-
-      return {
-        txid: unspent.tx_hash,
-        status: {
-          confirmed: true,
-        },
-        vout: unspent.tx_output_n,
-        value: unspent.value,
-      };
-    });
-
-    setUtxos(nextUtxos);
-
-    loading.current = false;
-    return nextUtxos;
-  }, [currentAddress, network]);
-
-  const lightFetchUtxos = useCallback(async (): Promise<any> => {
+  const fetchUtxos = useCallback(async (): Promise<any> => {
     if (loading.current || currentAddress === '') return [];
 
     loading.current = true;
@@ -253,8 +192,14 @@ export const AppProvider = (props: AppProviderProps) => {
         id: pipeUnspent.id,
         dec: pipeUnspent.decimals,
         amt: pipeUnspent.amount,
+        status: {
+          confirmed: true,
+        },
       };
     });
+
+    const uniqueTickers: TickerData[] = getUniqueTickers(pipeUnspentFormatted);
+    setTokens(uniqueTickers);
   
     const ordinalsUnspents = await selectAllOrdinalsUnspents({
       network: network as "mainnet" | "testnet",
@@ -273,10 +218,6 @@ export const AppProvider = (props: AppProviderProps) => {
     loading.current = false;
     return [...pipeUnspentFormatted,...ordinalsUnspentFormatted];
   }, [currentAddress, network]);
-
-  useEffect(() => {
-    fetchUtxos();
-  }, [fetchUtxos]);
 
   const setAddresses = (addresses: number[]) => {
     _setAddresses(addresses);
@@ -309,9 +250,7 @@ export const AppProvider = (props: AppProviderProps) => {
         setFeerate,
         tokens,
         setTokens,
-        utxos,
         fetchUtxos,
-        lightFetchUtxos,
         signPsbt,
         setSignPsbt,
         signMessage,

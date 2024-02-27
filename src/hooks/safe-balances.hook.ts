@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useApp } from "../app";
 import { cleanFloat } from "../utils/clean-float";
 import { bigIntToString, parseStringToBigInt } from "../bitcoin/helpers";
@@ -25,7 +25,7 @@ export const useSafeBalances = (): SafeBalances => {
       [key: string]: string;
     } = {};
 
-    let utxos = await app.lightFetchUtxos();
+    let utxos = await app.fetchUtxos();
     utxos = utxos.filter((u:any) => u.status.confirmed);
 
     const sats = ((await getUnspents({network:app.network as "mainnet" | "testnet",cursor:null,address:app.currentAddress})).balance)/Math.pow(10,8);
@@ -60,6 +60,10 @@ export const useSafeBalances = (): SafeBalances => {
     setLoading(false);
     return nextData;
   }, [app, loading]);
+
+  useEffect(() => {
+    dispatch();
+  }, []);
 
   return {
     dispatch,

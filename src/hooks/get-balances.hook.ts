@@ -25,7 +25,7 @@ export const useGetBalances = (): GetBalances => {
       [key: string]: string;
     } = {};
 
-    const utxos = await app.lightFetchUtxos();
+    const utxos = await app.fetchUtxos();
 
     const sats = ((await getUnspents({network:app.network as "mainnet" | "testnet",cursor:null,address:app.currentAddress})).balance)/Math.pow(10,8);
 
