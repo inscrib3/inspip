@@ -38,6 +38,9 @@ export const transferPipe = async (params: TransferPipeParams) => {
 
   const selectedPipeUnspents: PipeUnspent[] = [];
 
+  const currSpentsStr = localStorage.getItem("currSpents");
+  const currSpents = JSON.parse(currSpentsStr || "[]");
+
   for (const pipeUnspent of pipeUnspents) {
     if (selectedPipeAmount >= amount) {
       break;
@@ -45,6 +48,11 @@ export const transferPipe = async (params: TransferPipeParams) => {
 
     if (pipeUnspent.ticker.toLowerCase() !== ticker || pipeUnspent.id.toString() !== id) {
       continue;
+    }
+    // TODO If there is a transaction among the looped transactions that matches 'currSpents' stored in local storage, continue (i.e., don't consider it)
+    if(currSpents.length > 0){
+      const match = currSpents.find((el:any)=>(el.txid === pipeUnspent.txId && el.vout === pipeUnspent.vout));
+      if(match) continue;
     }
 
     selectedPipeUnspents.push(pipeUnspent);
@@ -61,9 +69,6 @@ export const transferPipe = async (params: TransferPipeParams) => {
     address: from,
   });
 
-  const spentsStr = localStorage.getItem("currSpents") || "[]";
-  const spents = JSON.parse(spentsStr);
-
   const exclude = [
     ...pipeUnspents,
     ...ordinalsUnspents.map((ordinals) => {
@@ -73,7 +78,6 @@ export const transferPipe = async (params: TransferPipeParams) => {
         vout: parseInt(output[1]),
       };
     }),
-    ...spents,
   ];
 
   let selectUnspentsRes;
