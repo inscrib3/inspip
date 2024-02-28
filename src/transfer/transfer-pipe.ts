@@ -49,7 +49,6 @@ export const transferPipe = async (params: TransferPipeParams) => {
     if (pipeUnspent.ticker.toLowerCase() !== ticker || pipeUnspent.id.toString() !== id) {
       continue;
     }
-    // TODO If there is a transaction among the looped transactions that matches 'currSpents' stored in local storage, continue (i.e., don't consider it)
     if(currSpents.length > 0){
       const match = currSpents.find((el:any)=>(el.txid === pipeUnspent.txId && el.vout === pipeUnspent.vout));
       if(match) continue;

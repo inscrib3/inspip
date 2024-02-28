@@ -21,7 +21,6 @@ export const ConfirmTransaction = (): JSX.Element => {
   const onSend = async () => {
     try {
         const txid = await sendTransaction(location.state.tx.hex, app.network);
-        // TODO push 'location.state.tx.vin' into local storage 'currSpents'
         const currSpentsStr = localStorage.getItem("currSpents");
         const currSpents = JSON.parse(currSpentsStr || "[]");
         const nextCurrSpents = [...currSpents,...location.state.tx.vin];

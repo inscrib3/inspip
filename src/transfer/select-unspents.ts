@@ -21,7 +21,6 @@ export const selectUnspents = async ({
   let total = 0n;
   let cursor = null;
   let sleep = 1000;
-  // TODO Merge 'params.exclude' with 'currSpents' and exclude
   const currSpentsStr = localStorage.getItem("currSpents");
   const currSpents = JSON.parse(currSpentsStr || "[]");
   let exclude = params?.exclude || [];
