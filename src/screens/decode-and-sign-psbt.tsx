@@ -85,10 +85,7 @@ export const DecodeAndSignPsbt = () => {
 
         for (const input of newPsbt.data.inputs) {
           if (!input.witnessUtxo) return;
-          const address = truncateInMiddle(
-            Address.fromScriptPubKey(input.witnessUtxo.script),
-            20
-          )
+          const address = Address.fromScriptPubKey(input.witnessUtxo.script);
           const value = input.witnessUtxo.value;
           inputs.push({ address, value });
         }
@@ -151,7 +148,7 @@ export const DecodeAndSignPsbt = () => {
                   margin={{ vertical: "small" }}
                 >
                   <Text>
-                    {el.address}
+                    {el.address && truncateInMiddle(el.address, 20)}
                   </Text>
                   <Text weight="bold">{el.value} sats</Text>
                 </Box>
@@ -168,7 +165,7 @@ export const DecodeAndSignPsbt = () => {
                   margin={{ vertical: "small" }}
                 >
                   <Text>
-                    {el.address}
+                    {el.address && truncateInMiddle(el.address, 20)}
                   </Text>
                   <Text weight="bold">{el.value} sats</Text>
                 </Box>
