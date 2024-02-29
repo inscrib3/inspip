@@ -9,7 +9,8 @@ import * as bitcoin from "bitcoinjs-lib";
 export const DecodeAndSignPsbt = () => {
   const app = useApp();
   const [psbtToSign, setPsbtToSign] = useState<bitcoin.Psbt>();
-  const [inputsDetails, setInputsDetails] = useState<any>([]);
+  const [inputsDetails, setInputsDetails] = useState<any[]>([]);
+  const [outputDetails, setOutputDetails] = useState<any[]>([]);
 
   const onSign = async () => {
     if (!psbtToSign) return;
@@ -23,15 +24,18 @@ export const DecodeAndSignPsbt = () => {
       );
       for (let i = 0; i < inputs.length; i++) {
         if (!toSignIndexes.includes(i)) continue;
-        psbtToSign.signInput(i, tweakedChildNode);
-        psbtToSign.finalizeInput(i);
+        psbtToSign.signInput(i, tweakedChildNode, app.signPsbt.toSignInputs[toSignIndexes.indexOf(i)].sighashTypes);
+        if (app.signPsbt.autoFinalized) {
+          psbtToSign.finalizeInput(i);
+        }
       }
+
       const hex = psbtToSign.toHex();
       await chrome.runtime.sendMessage({ message: `ReturnSignPsbt;${hex}` });
       window.close();
     } catch (e) {
       console.log(e as Error);
-      await chrome.runtime.sendMessage({ message: `ReturnErrorOnSignPsbt` });
+      await chrome.runtime.sendMessage({ message: `ReturnErrorOnSignPsbt;${(e as Error).message}` });
       window.close();
     }
   };
@@ -43,12 +47,41 @@ export const DecodeAndSignPsbt = () => {
 
   useEffect(() => {
     if (app.signPsbt.psbt) {
+      let validPsbt = false;
+      let newPsbt: bitcoin.Psbt | undefined;
+      
       try {
-        const newPsbt = bitcoin.Psbt.fromBase64(app.signPsbt.psbt, {
-          network: app.network === "testnet"
-            ? bitcoin.networks.testnet
-            : bitcoin.networks.bitcoin,
-        });
+        try {
+          newPsbt = bitcoin.Psbt.fromBase64(app.signPsbt.psbt, {
+            network: app.network === "testnet"
+              ? bitcoin.networks.testnet
+              : bitcoin.networks.bitcoin,
+          });
+          validPsbt = true;
+        } catch {
+          try {
+            newPsbt = bitcoin.Psbt.fromHex(app.signPsbt.psbt, {
+              network: app.network === "testnet"
+                ? bitcoin.networks.testnet
+                : bitcoin.networks.bitcoin,
+            });
+            validPsbt = true;
+          } catch {
+            try {
+              newPsbt = bitcoin.Psbt.fromBuffer(app.signPsbt.psbt, {
+                network: app.network === "testnet"
+                  ? bitcoin.networks.testnet
+                  : bitcoin.networks.bitcoin,
+              });
+              validPsbt = true;
+            } catch {/* empty */}
+          }
+        }
+
+        if (!validPsbt || !newPsbt) throw new Error("Invalid Psbt");
+
+        const inputs = [];
+
         for (const input of newPsbt.data.inputs) {
           if (!input.witnessUtxo) return;
           const address = truncateInMiddle(
@@ -56,8 +89,16 @@ export const DecodeAndSignPsbt = () => {
             20
           )
           const value = input.witnessUtxo.value;
-          setInputsDetails((prev: any) => [...prev, { address, value }]);
+          inputs.push({ address, value });
         }
+
+        const outputs: any[] = [];
+
+        for (const output of newPsbt.txOutputs) {
+          outputs.push({ address: output.address, value: output.value });
+        }
+        setInputsDetails(inputs);
+        setOutputDetails(outputs);
         setPsbtToSign(newPsbt);
       } catch (error) {
         console.log(error as Error);
@@ -77,6 +118,23 @@ export const DecodeAndSignPsbt = () => {
           >
             <Box pad="small" background="background-contrast">
               {inputsDetails.map((el: any) => (
+                <Box
+                  justify="between"
+                  margin={{ vertical: "small" }}
+                >
+                  <Text>
+                    {el.address}
+                  </Text>
+                  <Text weight="bold">{el.value} sats</Text>
+                </Box>
+              ))}
+            </Box>
+          </AccordionPanel>
+          <AccordionPanel
+            label={<Text margin={{ vertical: "small" }}>Outputs</Text>}
+          >
+            <Box pad="small" background="background-contrast">
+              {outputDetails.map((el: any) => (
                 <Box
                   justify="between"
                   margin={{ vertical: "small" }}

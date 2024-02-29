@@ -73,7 +73,8 @@
         }
         if (event.type === "ReturnErrorOnSignPsbt") {
           window.removeEventListener("ReturnErrorOnSignPsbt", eventListener);
-          reject(new Error("Error on SignPsbt event occurred."));
+          const error = event.detail.message.split(';')[1];
+          reject(new Error(error));
         }
         if (event.type === "ClientRejectSignPsbt") {
           window.removeEventListener("ClientRejectSignPsbt", eventListener);

@@ -23,7 +23,6 @@ export const SignMessage = (): JSX.Element => {
         app.signMessage.msg,
         signature as string
       );
-      console.log(validity);
       await chrome.runtime.sendMessage({ message: `ReturnSignMessage;${signature}` });
       window.close();
     } catch (e) {

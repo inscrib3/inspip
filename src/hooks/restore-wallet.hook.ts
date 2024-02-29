@@ -10,6 +10,7 @@ export type RestoreWallet = {
   data?: { network: string; rootKey: any; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; };
 };
 
+
 export const useRestoreWallet = (): RestoreWallet => {
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<{ network: string; rootKey: any; mnemonic: string; account: any; internalPubkey: any; address: string; output: any; } | undefined>();
