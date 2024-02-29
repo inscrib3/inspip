@@ -11,6 +11,7 @@ export const DecodeAndSignPsbt = () => {
   const [psbtToSign, setPsbtToSign] = useState<bitcoin.Psbt>();
   const [inputsDetails, setInputsDetails] = useState<any[]>([]);
   const [outputDetails, setOutputDetails] = useState<any[]>([]);
+  const [total, setTotal] = useState<number>(0);
 
   const onSign = async () => {
     if (!psbtToSign) return;
@@ -97,8 +98,18 @@ export const DecodeAndSignPsbt = () => {
         for (const output of newPsbt.txOutputs) {
           outputs.push({ address: output.address, value: output.value });
         }
+        const getTotal = (arr: any) =>
+        arr
+          .filter((el: any) => el?.address === app.currentAddress)
+          .reduce((acc: number, el: any) => acc + el.value, 0);
+
+        const myInputsTotal = getTotal(inputs);
+        const myOutputsTotal = getTotal(outputs);
+        const total = myOutputsTotal - myInputsTotal;
+
         setInputsDetails(inputs);
         setOutputDetails(outputs);
+        setTotal(total);
         setPsbtToSign(newPsbt);
       } catch (error) {
         console.log(error as Error);
@@ -113,6 +124,23 @@ export const DecodeAndSignPsbt = () => {
     <Layout>
       <Box height="full" style={{ overflow: "scroll" }}>
         <Accordion>
+          <Box
+            pad={{ vertical: "medium", horizontal: "small" }}
+            justify="center"
+            align="center"
+            flex
+          >
+          <Text weight="bold">Sign Transaction</Text>
+          </Box>
+          <Box
+            pad={{ vertical: "medium", horizontal: "small" }}
+            background="background-contrast"
+            justify="center"
+            align="center"
+            flex
+          >
+            <Text weight="bold">{total} sats</Text>
+          </Box>
           <AccordionPanel
             label={<Text margin={{ vertical: "small" }}>Inputs</Text>}
           >

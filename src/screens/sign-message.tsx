@@ -1,7 +1,7 @@
 import { Layout } from "../components";
 import { Box, Button, Footer, Text } from "grommet";
 import { useApp } from "../app";
-import { Signer, Verifier } from "bip322-js";
+import { Signer } from "bip322-js";
 import * as bitcoin from "bitcoinjs-lib";
 import { colors } from "../theme";
 
@@ -17,11 +17,6 @@ export const SignMessage = (): JSX.Element => {
         address,
         app.signMessage.msg,
         app.network === "testnet" ? bitcoin.networks.testnet : bitcoin.networks.bitcoin,
-      );
-      const validity = Verifier.verifySignature(
-        address,
-        app.signMessage.msg,
-        signature as string
       );
       await chrome.runtime.sendMessage({ message: `ReturnSignMessage;${signature}` });
       window.close();
