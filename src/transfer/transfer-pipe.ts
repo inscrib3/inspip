@@ -49,8 +49,9 @@ export const transferPipe = async (params: TransferPipeParams) => {
     if (pipeUnspent.ticker.toLowerCase() !== ticker || pipeUnspent.id.toString() !== id) {
       continue;
     }
+
     if(currSpents.length > 0){
-      const match = currSpents.find((el:any)=>(el.txid === pipeUnspent.txId && el.vout === pipeUnspent.vout));
+      const match = currSpents.find((el: { txId: string; vout: number; })=>(el.txId === pipeUnspent.txId && el.vout === pipeUnspent.vout));
       if(match) continue;
     }
 

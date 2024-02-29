@@ -23,7 +23,7 @@ export const ConfirmTransaction = (): JSX.Element => {
         const txid = await sendTransaction(location.state.tx.hex, app.network);
         const currSpentsStr = localStorage.getItem("currSpents");
         const currSpents = JSON.parse(currSpentsStr || "[]");
-        const nextCurrSpents = [...currSpents,...location.state.tx.vin];
+        const nextCurrSpents = [...currSpents,...location.state.tx.vin.map((vin: { txid: string, vout: number }) => ({txId: vin.txid, vout: vin.vout}))];
         localStorage.setItem("currSpents", JSON.stringify(nextCurrSpents));
 
         if (location.state.tx.ticker && location.state.tx.ticker !== '') {

@@ -37,8 +37,9 @@ export const Password = () => {
         throw new Error("Invalid password");
       }
 
-      const formattedMnemonic = wallet.mnemonic?.split(' ').filter((el:any)=>el !== '');
-      if (formattedMnemonic) {
+      const formattedMnemonic = wallet.mnemonic?.split(' ').filter((el: string)=>el !== '');
+
+      if (formattedMnemonic.length === 12) {
         const nextAccount = importWallet(wallet.mnemonic, getNetwork(wallet.network), wallet.addressIndex);
 
         app.setAccount(nextAccount);

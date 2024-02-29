@@ -24,19 +24,20 @@ export const useRestoreWallet = (): RestoreWallet => {
       let wallet;
       const formattedMnemonic = mnemonic?.split(' ').filter((el:any)=>el !== '');
 
-      if (formattedMnemonic.length === 12) {
-        wallet = importWallet(mnemonic, getNetwork(app.network));
+      const isMnemo = formattedMnemonic.length === 12;
+
+      if (isMnemo) {
+        wallet = importWallet(formattedMnemonic.join(' '), getNetwork(app.network));
       } else {
         wallet = importWalletFromWif(mnemonic, getNetwork(app.network));
       }
 
-      const address = generateNewAddress(wallet.rootKey, getNetwork(app.network), 0);
-      saveWallet(wallet.mnemonic, app.network, address.address, [0], password);
+      saveWallet(wallet.mnemonic, app.network, wallet.address, [0], password);
       setData({...wallet, network: app.network});
   
-      app.setAccount(importWallet(wallet.mnemonic, getNetwork(app.network), 0));
+      app.setAccount(wallet);
       app.setNetwork(app.network);
-      app.setCurrentAddress(address.address, 0)
+      app.setCurrentAddress(wallet.address, 0)
       app.setAddresses([0]);
 
       setLoading(false);
