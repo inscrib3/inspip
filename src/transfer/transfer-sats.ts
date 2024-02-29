@@ -40,7 +40,7 @@ export const transferSats = async ({
         txId: output[0],
         vout: parseInt(output[1]),
       };
-    })
+    }),
   ];
 
   let selectUnspentsRes;

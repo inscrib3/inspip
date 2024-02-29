@@ -70,7 +70,6 @@ export const prepareTransferPipe = ({
         scriptPubKey: addressToScriptPubKey(from, network),
       },
     });
-
     total += BigInt(unspent.value);
   }
 

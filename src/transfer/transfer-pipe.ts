@@ -38,6 +38,9 @@ export const transferPipe = async (params: TransferPipeParams) => {
 
   const selectedPipeUnspents: PipeUnspent[] = [];
 
+  const currSpentsStr = localStorage.getItem("currSpents");
+  const currSpents = JSON.parse(currSpentsStr || "[]");
+
   for (const pipeUnspent of pipeUnspents) {
     if (selectedPipeAmount >= amount) {
       break;
@@ -45,6 +48,11 @@ export const transferPipe = async (params: TransferPipeParams) => {
 
     if (pipeUnspent.ticker.toLowerCase() !== ticker || pipeUnspent.id.toString() !== id) {
       continue;
+    }
+
+    if(currSpents.length > 0){
+      const match = currSpents.find((el: { txId: string; vout: number; })=>(el.txId === pipeUnspent.txId && el.vout === pipeUnspent.vout));
+      if(match) continue;
     }
 
     selectedPipeUnspents.push(pipeUnspent);
@@ -69,7 +77,7 @@ export const transferPipe = async (params: TransferPipeParams) => {
         txId: output[0],
         vout: parseInt(output[1]),
       };
-    })
+    }),
   ];
 
   let selectUnspentsRes;

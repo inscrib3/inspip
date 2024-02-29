@@ -3,7 +3,11 @@ import { Box, Button, RangeInput, ResponsiveContext, TextInput } from "grommet";
 import { useApp } from "../app";
 import { FeesResponse, getFees } from "../bitcoin/node";
 
-export const SetFees = (): JSX.Element => {
+interface SetFeesProps {
+  initialFee?:number
+}
+
+export const SetFees:React.FC<SetFeesProps> = ({initialFee}): JSX.Element => {
   const app = useApp();
 
   const [fees, setFees] = useState<FeesResponse>({
@@ -36,6 +40,12 @@ export const SetFees = (): JSX.Element => {
         economyFee: Math.floor(fees.economyFee * 1.5),
         minimumFee: Math.floor(fees.minimumFee * 1.5),
       });
+      if(initialFee){
+        setSelectedFee('custom');
+        app.setFeerate(initialFee);
+        setCustomFee(initialFee);
+        return;
+      }
       setCustomFee(Math.floor(fees.fastestFee * 1.5));
       if (selectedFee === "custom") return;
       app.setFeerate(Math.floor(fees[selectedFee] * 1.5));

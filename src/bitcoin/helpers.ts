@@ -57,8 +57,10 @@ export function bigIntToString(valueBigInt: bigint, decimalPlaces: number) {
     return `${wholePart}.${paddedDecimalPart}`;
 }
 
-export function addressToScriptPubKey(address: string, network: any) {
+export function addressToScriptPubKey(address: string, _network: "mainnet" | "testnet") {
     let _toAddress, _script;
+    
+    const network = _network === "testnet" ? bitcoin.networks.testnet : bitcoin.networks.bitcoin;
 
     if (address.startsWith('tb1q') || address.startsWith('bc1q')) {
         _toAddress = bitcoin.address.fromBech32(address);

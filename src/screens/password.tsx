@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RoutePath } from "../router";
 import { useApp } from "../app";
-import * as bip39 from "bip39";
 import { importWallet, importWalletFromWif } from "../bitcoin/wallet";
 import { loadWallet } from "../bitcoin/wallet-storage";
 import { ResetStorageModal } from "./modals/reset-storage";
@@ -38,7 +37,9 @@ export const Password = () => {
         throw new Error("Invalid password");
       }
 
-      if (bip39.validateMnemonic(wallet.mnemonic)) {
+      const formattedMnemonic = wallet.mnemonic?.split(' ').filter((el: string)=>el !== '');
+
+      if (formattedMnemonic.length === 12) {
         const nextAccount = importWallet(wallet.mnemonic, getNetwork(wallet.network), wallet.addressIndex);
 
         app.setAccount(nextAccount);
@@ -62,7 +63,18 @@ export const Password = () => {
     }
 
     setLoading(false);
-
+    if (app.signPsbt.psbt) {
+      navigate(RoutePath.DecodeAndSignPsbt);
+      return;
+    }
+    if (app.signMessage.msg) {
+      navigate(RoutePath.SignMessage);
+      return;
+    }
+    if (app.verifySign.signature) {
+      navigate(RoutePath.VerifySign);
+      return;
+    }
     navigate(RoutePath.Balances);
   }
 

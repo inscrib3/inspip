@@ -1,3 +1,8 @@
+[version] - 0.1.12
+
+- [x] Wif fix
+- [x] Injection improvements
+
 [version] - 0.1.11
 
 - [x] Chrome extension size fix

@@ -62,7 +62,7 @@ export function generateNewAddress(rootKey: any, network: any, index: number = 0
         output = payments.output;
     }
 
-    return { rootKey, account: account ?? rootKey, internalPubkey, address, output, publickey: account.publicKey.toString('hex') }
+    return { rootKey, account: account ?? rootKey, internalPubkey, address, output, publickey: account ? account.publicKey.toString('hex') : rootKey.publicKey.toString('hex')}
 }
 
 export const sendTokens = (

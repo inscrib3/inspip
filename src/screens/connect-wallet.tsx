@@ -6,13 +6,12 @@ import { useApp } from "../app";
 export const ConnectWallet = (): JSX.Element => {
   const app = useApp();
   const navigate = useNavigate();
-  const returnConnectInfo = () => {
-    chrome.runtime.sendMessage({ message: `ReturnConnectWalletInfo;${app.currentAddress};${app.account.publickey}`});
-    setTimeout(()=>{
-      window.close();
-    },1000)
+  const returnConnectInfo = async () => {
+    await chrome.runtime.sendMessage({ message: `ReturnConnectWalletInfo;${app.currentAddress};${app.account.publickey}`});
+    window.close();
   };
-  const goBack = () => {
+  const goBack = async () => {
+    await chrome.runtime.sendMessage({ message: 'ClientRejectConnectWalletInfo'});
     navigate(-1);
   };
   return (

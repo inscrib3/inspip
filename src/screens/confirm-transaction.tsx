@@ -21,16 +21,19 @@ export const ConfirmTransaction = (): JSX.Element => {
   const onSend = async () => {
     try {
         const txid = await sendTransaction(location.state.tx.hex, app.network);
+        const currSpentsStr = localStorage.getItem("currSpents");
+        const currSpents = JSON.parse(currSpentsStr || "[]");
+        const nextCurrSpents = [...currSpents,...location.state.tx.vin.map((vin: { txid: string, vout: number }) => ({txId: vin.txid, vout: vin.vout}))];
+        localStorage.setItem("currSpents", JSON.stringify(nextCurrSpents));
+
         if (location.state.tx.ticker && location.state.tx.ticker !== '') {
             save({txid, from: app.currentAddress, to: location.state.tx.to, amount: location.state.tx.amount, token: `${location.state.tx.ticker.toUpperCase()}:${location.state.tx.id}`, timestamp: Date.now(), confirmed: false });
         } else {
             save({txid, from: app.currentAddress, to: location.state.tx.to, amount: (parseInt(location.state.tx.sats_amount) / Math.pow(10, 8)).toString(), timestamp: Date.now(), confirmed: false });
         }
         if(location.state.fromWeb){
-          chrome.runtime.sendMessage({ message: `ReturnSendBitcoin;${txid}`});
-          setTimeout(()=>{
-            window.close();
-          },1000)
+          await chrome.runtime.sendMessage({ message: `ReturnSendBitcoin;${txid}`});
+          window.close();
         } else {
           navigate(-2);
         }

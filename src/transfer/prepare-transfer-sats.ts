@@ -43,7 +43,6 @@ export const prepareTransferSats = ({
         scriptPubKey: addressToScriptPubKey(from, network),
       },
     });
-
     total += BigInt(unspent.value);
   }
 

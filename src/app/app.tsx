@@ -4,15 +4,41 @@ import { RoutePath } from "../router";
 import { useEffect } from "react";
 import { Layout } from "../components";
 import { useSearchParams } from "react-router-dom";
+import { useApp } from ".";
 
 export const App = () => {
   const navigate = useNavigate();
+  const app = useApp();
   const [searchParams] = useSearchParams();
   const params = {
+    ticker: searchParams.get("ticker"),
+    id: searchParams.get("id"),
     toAddress: searchParams.get("toAddress"),
-    satoshi: searchParams.get("satoshi"),
+    satoshi: searchParams.get("satoshi") || searchParams.get("amount"),
     feerate: searchParams.get("feerate"),
   };
+
+  useEffect(()=>{
+    if (searchParams.get("action") === "SignPsbt") {
+      app.setSignPsbt({
+        psbt:(searchParams.get("psbt") || "").replace(/\s/g,'+'),
+        toSignInputs:(JSON.parse(searchParams.get("toSignInputs") || "")),
+        autoFinalized:searchParams.get("autoFinalized") === 'true' ? true : false,
+      })
+    }
+    if (searchParams.get("action") === "SignMessage") {
+      app.setSignMessage({
+        msg:searchParams.get("msg"),
+        type:searchParams.get("type"),
+      })
+    }
+    if (searchParams.get("action") === "VerifySign") {
+      app.setVerifySign({
+        msg:searchParams.get("msg"),
+        signature:(searchParams.get("signature") || "").replace(/\s/g,'+'),
+      })
+    }
+  },[app, searchParams])
 
   const createWallet = () => navigate(RoutePath.CreateWallet);
   const restoreWallet = () => navigate(RoutePath.RestoreWallet);

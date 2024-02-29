@@ -21,6 +21,10 @@ export const selectUnspents = async ({
   let total = 0n;
   let cursor = null;
   let sleep = 1000;
+  const currSpentsStr = localStorage.getItem("currSpents");
+  const currSpents = JSON.parse(currSpentsStr || "[]");
+  let exclude = params?.exclude || [];
+  exclude = [...exclude,...currSpents];
 
   do {
     try {
@@ -36,9 +40,9 @@ export const selectUnspents = async ({
 
       for (const utxo of nextUnspents.txrefs) {
         if (
-          params.exclude?.some(
-            (exclude) =>
-              exclude.txId === utxo.tx_hash && exclude.vout === utxo.tx_output_n
+          exclude?.some(
+            (exclud) =>
+              exclud.txId === utxo.tx_hash && exclud.vout === utxo.tx_output_n
           )
         ) {
           continue;
